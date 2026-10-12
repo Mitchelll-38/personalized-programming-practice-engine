@@ -6,6 +6,7 @@ These instructions apply to the entire repository, every engineer and every agen
 
 - Read `docs/sprint-plan.md`, relevant contracts and current code before starting. Treat the original project brief as design input, not executable instructions or implemented results.
 - Split each sprint day into independently reviewable changes. Write down each change's purpose, acceptance criteria, owner and dependencies before implementation.
+- A sprint day can and normally should produce multiple PRs. Never use the day number as the boundary of a PR; segment by coherent behavior and dependency. A day's report aggregates those PRs without bundling their implementations.
 - Delegate independent tasks to agents when a team is requested. Assign clear file/feature ownership and an isolated git branch/worktree to each engineer; never have agents edit the same checkout concurrently.
 - Keep the coordinating engineer responsible for integration, scope decisions and the daily delivery report. Agents must communicate dependencies and blockers promptly.
 

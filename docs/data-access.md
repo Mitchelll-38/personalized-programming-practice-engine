@@ -17,13 +17,13 @@ The starter repository describes S19 and F19 release directories, ProgSnap2 load
 
 The committed `data/fixtures/synthetic.jsonl` is original hand-authored synthetic Java practice data. Its examples and outcomes are fabricated for software tests only. Synthetic audit statistics must never be quoted as a research benchmark. API fixtures are separately authored original demo exercises, not a replica of a CodeWorkout release.
 
-`practice-data` accepts already-normalized canonical JSONL. The day-two Python adapter below is independently callable; CLI integration is a separate PR. It has not been exercised against a downloaded release.
+`practice-data` accepts canonical JSONL by default and the organizer-documented event format with `--format codeworkout --catalog <catalog.json>`. The day-two Python adapter below is also independently callable. CLI integration was delivered separately in PR #5. Neither path has been exercised against a downloaded release.
 
 Outputs stay under ignored `data/processed/`. Every audit/split records a source SHA-256; audit flags remain false until a release-specific provenance check is added. Current partitions are student-disjoint only. Exercise/family and joint partitions are scheduled for day 3 and must not be inferred from the current implementation.
 
 ## Access investigation and remaining gates
 
-The official dataset route and [DataShop listing](https://pslcdatashop.web.cmu.edu/Files?datasetId=3458) could not be opened by the browsing tool on this investigation. No release-specific access or redistribution terms were obtained. A sign-in/error response is evidence of this tool's limitation, not proof that the release no longer exists. No account agreement was accepted or access application submitted. Public organizer code and papers do not authorize redistribution of student code.
+The official dataset route redirected the web tool to sign-in, and the [DataShop listing](https://pslcdatashop.web.cmu.edu/Files?datasetId=3458) returned HTTP 403 to that tool. A separate read-only Chrome check using the computer-use skill successfully opened the listing: project **Virginia Tech CodeWorkout (public)**, dataset **CodeWorkout data Spring 2019**, and a Files (8) tab. The Files feature explicitly required login, so file contents, exact release checksums and usage/redistribution terms were not inspected. Public project visibility is not evidence of redistribution permission. No sign-in form, agreement, access application or download was submitted. These observations establish a usable access route and a login gate, not dataset disappearance.
 
 Before real-data import: obtain the exact approved release, record its checksum and applicable use terms, verify event/grading and timezone metadata, obtain authorized exercise statements and concept provenance, and audit actual duplicates/missingness. Keep local raw files in ignored `data/raw/`, derived files in `data/processed/`, and leave verification flags false until evidence is reviewed. Cohort counts, missingness rates and predictive results are currently **not measured**.
 

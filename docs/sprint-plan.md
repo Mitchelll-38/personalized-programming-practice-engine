@@ -58,6 +58,8 @@ Defer causal transformer, generated/clustering concepts, encoder fine-tuning, se
 
 ## Day 1 review checklist
 
+Execution progress: [day-two report](../reports/day-2.md) records the segmented PR rollout and the still-unmet real-data access/metadata acceptance gates. Engineering completion must not be interpreted as signed-off empirical data provenance.
+
 - [x] Public GitHub repo initialized and first contract pushed before implementation.
 - [x] Separate implementation lanes dispatched to backend and frontend agents.
 - [x] Canonical data schema, causal prefixes, first-attempt filtering and deterministic student split implemented.
