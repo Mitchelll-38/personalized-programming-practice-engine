@@ -63,6 +63,8 @@ npm run build
 
 CI runs the Python tests, synthetic data CLI, and frontend TypeScript/production build. Python dependencies are pinned in `requirements-dev.lock`; frontend dependencies in `web/package-lock.json`. `pyproject.toml` declares compatible installation ranges.
 
+Baseline research dependencies are pinned in `requirements-research.lock`, included by the development lockfile so the complete test suite is reproducible. A runtime-only `pip install .` keeps the demo API lightweight; `pip install '.[research]'` enables NumPy/scikit-learn separately. New research subpackages are discovered automatically during packaging.
+
 API docs: **http://127.0.0.1:8000/docs**. Endpoints: `/health`, `/exercises`, `/models/current`, `/students/demo/history`, `/students/demo/profile`, `/students/demo/recommendations`, `POST /predict`, and `POST /attempts`.
 
 ## Research direction
