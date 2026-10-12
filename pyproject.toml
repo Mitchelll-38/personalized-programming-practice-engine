@@ -11,13 +11,18 @@ dependencies = ["fastapi>=0.115,<0.137", "pydantic>=2.10,<3", "uvicorn>=0.34,<0.
 
 [project.optional-dependencies]
 dev = ["pytest>=8.3,<10", "httpx>=0.28,<0.29"]
+research = ["scikit-learn>=1.6,<2", "numpy>=2.0,<3"]
 
 [project.scripts]
 practice-data = "practice_engine.data.cli:main"
 
 [tool.setuptools]
 package-dir = {"practice_engine" = "src/practice_engine", "api" = "api"}
-packages = ["practice_engine", "practice_engine.data", "api"]
+
+[tool.setuptools.packages.find]
+where = ["src", "."]
+include = ["practice_engine*", "api"]
+namespaces = false
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
