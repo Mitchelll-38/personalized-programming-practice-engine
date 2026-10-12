@@ -16,3 +16,6 @@ artifacts/
 coverage/
 playwright-report/
 test-results/
+.data/
+*.tsbuildinfo
+build/
