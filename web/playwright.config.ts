@@ -16,7 +16,7 @@ export default defineConfig({
       reuseExistingServer: false,
     },
     {
-      command: "npm run dev -- --port 5174 --strictPort",
+      command: "node node_modules/vite/bin/vite.js --host 127.0.0.1 --port 5174 --strictPort",
       url: "http://127.0.0.1:5174",
       env: { PRACTICE_API_URL: "http://127.0.0.1:8001" },
       reuseExistingServer: false,
