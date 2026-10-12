@@ -15,3 +15,9 @@ Saving uses a same-directory temporary file and atomic replacement so an
 interrupted write does not leave a partially serialized active artifact. Keep
 artifacts in ignored `artifacts/`; saving a research model does not make it the
 active demo API model. API selection is a separate reviewed integration.
+
+Historical logistic and shared BKT models use a separate portable-baseline JSON
+envelope with the same provenance, payload hashing, live-mutation rejection and
+atomic writer. `load_baseline_artifact` dispatches only known envelope versions;
+model/feature versions must match the fixed internal registry. Inference imports
+no optional training library. Rate artifacts remain backward compatible.

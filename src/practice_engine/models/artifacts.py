@@ -60,17 +60,21 @@ def save_rate_artifact(path: Path, model: RateBaseline, provenance: ArtifactProv
     payload = model.to_dict()
     artifact = RateArtifact(variant=variant, provenance=provenance, model_payload=payload,
                             model_sha256=payload_hash(payload))
+    _write_json_atomically(path, artifact.model_dump_json(indent=2) + "\n")
+    return artifact
+
+
+def _write_json_atomically(path: Path, serialized: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = None
     try:
         with NamedTemporaryFile(mode="w", encoding="utf-8", dir=path.parent, delete=False) as stream:
             temporary = Path(stream.name)
-            stream.write(artifact.model_dump_json(indent=2) + "\n")
+            stream.write(serialized)
         os.replace(temporary, path)
     finally:
         if temporary is not None:
             temporary.unlink(missing_ok=True)
-    return artifact
 
 
 def load_rate_artifact(path: Path) -> RateArtifact:
