@@ -8,6 +8,8 @@ Programming knowledge-tracing research with an inspectable Java practice replay 
 
 [Day-two delivery and individual PRs](reports/day-2.md) · [Browser replay smoke test](docs/browser-smoke.md)
 
+[Chronological progress record](docs/progress.md) tracks implementation, decisions and review findings as work advances. Offline research now includes exercise-family holdouts, rate/logistic/BKT models, portable artifacts and an ID-only DKT forward pass. The active demo remains synthetic; real-data training/evaluation is not yet claimed.
+
 Engineering workflow: [AGENTS.md](AGENTS.md) requires small, focused PRs, isolated agent worktrees, independent review and passing CI before rollout. All changes, including documentation and tests, follow this workflow.
 
 ## Run locally
