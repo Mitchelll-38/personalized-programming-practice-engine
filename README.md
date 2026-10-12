@@ -36,10 +36,12 @@ The Vite development server proxies `/api` to port 8000. A production static bui
 ## Research data pipeline
 
 ```powershell
-.\.venv\Scripts\python.exe -m practice_engine.data.cli data/fixtures/synthetic.jsonl --output data/processed/day1 --seed 38
+.\.venv\Scripts\python.exe -m practice_engine.data.cli data/fixtures/synthetic.jsonl --output data/processed/day1 --seed 38 --synthetic --dataset-version synthetic-v1
 ```
 
 Writes `audit.json`, `split.json`, and partitioned `train.jsonl`, `validation.jsonl`, `test.jsonl`. Each prediction example contains only earlier first attempts and the candidate's text/concepts; its label is stored separately. Retry events and ambiguous sequence positions cannot silently become extra primary targets. Seeded student grouping is independent of outcomes, and manifests include a source hash.
+
+`manifest.json` records dataset, schema, feature and split versions plus content hashes of all five outputs. `--synthetic` is an explicit source declaration; absent it, provenance stays unverified. No trained model or verified redistribution terms are inferred. `practice_engine.data.manifest.verify_manifest(Path(...))` checks bundle integrity before reuse.
 
 This CLI reads **canonical JSONL**, not raw CodeWorkout event logs. A release-specific importer, verified grading semantics, exercise-family splits, and trained models are scheduled for later sprint days. Raw student code and generated research artifacts remain excluded from the public repo until release-specific terms are verified.
 
