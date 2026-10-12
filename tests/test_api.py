@@ -30,7 +30,11 @@ def test_replay_persists_and_retry_does_not_inflate_profile(client):
     assert response.status_code == 201
     assert response.json()["attempt_number"] == 3
     assert response.json()["sequence_index"] == 4
-    assert client.get("/students/demo/profile").json() == before
+    after = client.get("/students/demo/profile").json()
+    assert after["concepts"] == before["concepts"]
+    assert after["first_attempts"] == before["first_attempts"] == 3
+    assert after["total_interactions"] == before["total_interactions"] + 1 == 5
+    assert after["retries"] == before["retries"] + 1 == 2
     with TestClient(app) as another_client:
         assert another_client.get("/students/demo/history").json()[-1] == response.json()
 
@@ -84,3 +88,32 @@ def test_simultaneous_attempts_receive_unique_numbers(client):
     assert all(response.status_code == 201 for response in responses)
     assert sorted(response.json()["attempt_number"] for response in responses) == [1, 2, 3, 4]
     assert sorted(response.json()["sequence_index"] for response in responses) == [4, 5, 6, 7]
+
+
+@pytest.mark.parametrize("history", [[], [{"problem_id": "java-sum", "sequence_index": 0, "correct": True, "attempt_number": 2}]])
+def test_no_first_attempt_history_is_explicit_neutral_prior(client, monkeypatch, history):
+    monkeypatch.setattr("api.main.storage.history", lambda: history)
+    profile = client.get("/students/demo/profile").json()
+    assert profile["total_interactions"] == len(history)
+    assert profile["first_attempts"] == 0
+    assert profile["retries"] == len(history)
+    assert all(row["evidence_status"] == "no-history" and row["supporting_problem_ids"] == [] and row["estimated_performance"] == 0.5 for row in profile["concepts"])
+
+
+def test_concept_support_is_distinct_first_attempts_not_retries(client):
+    before = client.get("/students/demo/profile").json()
+    concepts = {row["concept_id"]: row for row in before["concepts"]}
+    assert concepts["strings"]["evidence_status"] == "no-history"
+    assert concepts["conditionals"]["evidence_status"] == "limited-history"
+    client.post("/attempts", json={"student_id": "demo", "problem_id": "java-reverse", "correct": False})
+    after = client.get("/students/demo/profile").json()
+    strings = next(row for row in after["concepts"] if row["concept_id"] == "strings")
+    assert strings["supporting_problem_ids"] == ["java-reverse"]
+    assert strings["supporting_attempts"] == 1
+    assert strings["evidence_status"] == "limited-history"
+    assert after["first_attempts"] == before["first_attempts"] + 1
+    assert after["retries"] == before["retries"]
+    client.post("/attempts", json={"student_id": "demo", "problem_id": "java-count", "correct": True})
+    conditionals = next(row for row in client.get("/students/demo/profile").json()["concepts"] if row["concept_id"] == "conditionals")
+    assert conditionals["evidence_status"] == "observed-first-attempt"
+    assert conditionals["supporting_problem_ids"] == ["java-even", "java-max", "java-count"]

@@ -13,3 +13,13 @@ API responses:
 - POST /attempts body {student_id: "demo", problem_id, correct: boolean}; response canonical stored interaction. Demo manual replay outcome only; server assigns sequence/attempt number. SQLite persistence, configurable PRACTICE_DB_PATH.
 
 Seed original Java exercise descriptions and demo interactions directly in API package; no external data. Learner can inspect exercises and record a simulated correct/incorrect outcome; frontend must prominently explain that outcomes are simulated and predictions are uncalibrated demo estimates. API authors own demo heuristics and API tests; data engineer owns canonical research schemas/prefix/split logic. Their modules need not depend on one another on day 1.
+
+Day 2 additive profile diagnostics: `total_interactions` counts all stored outcomes,
+`first_attempts` counts distinct exercises with an observed attempt numbered 1,
+and `retries` counts interactions numbered above 1. Each concept additionally
+includes `supporting_problem_ids` (distinct first-attempt exercises in sequence order)
+and `evidence_status`: `no-history` for zero support, `limited-history` for one or
+two exercises, `observed-first-attempt` for three or more. These labels describe
+evidence volume, not statistical confidence or proven mastery. Zero support uses
+the unchanged 0.5 neutral prior and must be displayed as having no personal evidence.
+All evidence and outcomes remain synthetic; retries never alter concept estimates.

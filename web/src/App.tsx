@@ -84,7 +84,7 @@ export default function App() {
           Practice Engine
         </a>
         <span className="workspace-label">
-          Research workspace <span className="divider">/</span> Day 01
+          Research workspace <span className="divider">/</span> Demo
         </span>
       </header>
       <main id="main">
@@ -152,9 +152,10 @@ export default function App() {
               <div>
                 <span className="eyebrow">RECORDED INTERACTIONS</span>
                 <strong>
-                  {snapshot.history.length.toString().padStart(2, "0")}
+                  {snapshot.profile.total_interactions.toString().padStart(2, "0")}
                 </strong>
-                <p>{correctCount} simulated correct outcomes</p>
+                <p>{correctCount} simulated correct outcomes across all interactions</p>
+                <p>{snapshot.profile.first_attempts} distinct first attempts · {snapshot.profile.retries} retries excluded from estimates</p>
               </div>
               <div>
                 <span className="eyebrow">CONCEPTS IN PROFILE</span>
@@ -320,7 +321,8 @@ export default function App() {
                 </div>
                 <p className="section-note">
                   Estimated performance from synthetic history. These values are
-                  not calibrated mastery scores.
+                  not calibrated mastery scores. Labels describe evidence volume,
+                  not confidence; limited history means one or two first attempts.
                 </p>
                 <div className="concept-list">
                   {snapshot.profile.concepts.length ? (
@@ -337,11 +339,23 @@ export default function App() {
                           aria-label={`${label(concept.concept_id)} estimated performance`}
                         />
                         <p>
-                          {concept.supporting_attempts} supporting{" "}
-                          {concept.supporting_attempts === 1
-                            ? "attempt"
-                            : "attempts"}
+                          {concept.evidence_status === "no-history"
+                            ? "No history · 50% neutral prior; no personal evidence."
+                            : `${concept.evidence_status === "limited-history" ? "Limited history" : "Observed first attempts"} · ${concept.supporting_attempts} distinct supporting exercises`}
                         </p>
+                        {concept.supporting_problem_ids.length > 0 && (
+                          <details className="concept-evidence">
+                            <summary>Inspect supporting first attempts</summary>
+                            <ul>
+                              {concept.supporting_problem_ids.map((id) => (
+                                <li key={id}>
+                                  {snapshot.exercises.find((item) => item.problem_id === id)?.title ?? id}
+                                  {" · "}{snapshot.history.find((item) => item.problem_id === id && item.attempt_number === 1)?.correct ? "Simulated correct" : "Simulated incorrect"}
+                                </li>
+                              ))}
+                            </ul>
+                          </details>
+                        )}
                       </div>
                     ))
                   ) : (
