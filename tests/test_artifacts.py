@@ -35,6 +35,7 @@ def test_rate_artifact_roundtrip_parity(tmp_path, variant):
     lambda data: data.update(artifact_version="future"),
     lambda data: data.update(extra="untrusted"),
     lambda data: data.update(calibrated=True),
+    lambda data: data.update(calibrated=0),
     lambda data: data.update(model_sha256="0" * 64),
     lambda data: data["provenance"].update(fit_partition="test"),
     lambda data: data["provenance"].update(source_kind="verified"),
@@ -48,3 +49,24 @@ def test_corrupt_or_misdeclared_artifact_rejected(tmp_path, change):
     path.write_text(json.dumps(data))
     with pytest.raises(ValueError):
         load_rate_artifact(path)
+
+
+def test_live_payload_mutation_cannot_change_predictions_under_old_hash(tmp_path):
+    path = tmp_path / "model.json"
+    loaded = save_rate_artifact(path, RateBaseline.fit(examples()), provenance())
+    loaded.model_payload["alpha"] = 2.0
+    with pytest.raises(ValueError, match="hash mismatch"):
+        loaded.predict(examples())
+
+
+def test_failed_atomic_replace_preserves_previous_artifact_and_cleans_temp(tmp_path, monkeypatch):
+    path = tmp_path / "model.json"
+    save_rate_artifact(path, RateBaseline.fit(examples()), provenance())
+    before = path.read_bytes()
+    def fail_replace(*_):
+        raise OSError("simulated replace failure")
+    monkeypatch.setattr("practice_engine.models.artifacts.os.replace", fail_replace)
+    with pytest.raises(OSError, match="replace failure"):
+        save_rate_artifact(path, RateBaseline.fit(examples(), alpha=2.0), provenance())
+    assert path.read_bytes() == before
+    assert list(tmp_path.iterdir()) == [path]

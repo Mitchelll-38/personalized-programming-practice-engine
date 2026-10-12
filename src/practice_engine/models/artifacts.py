@@ -7,7 +7,7 @@ from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, model_validator
 
 from .rates import RateBaseline
 
@@ -18,7 +18,7 @@ def payload_hash(payload: dict) -> str:
 
 
 class ArtifactProvenance(BaseModel):
-    model_config = ConfigDict(extra="forbid", frozen=True)
+    model_config = ConfigDict(extra="forbid", frozen=True, strict=True)
 
     dataset_version: str = Field(min_length=1, pattern=r"\S")
     source_kind: Literal["synthetic", "unverified"]
@@ -29,25 +29,29 @@ class ArtifactProvenance(BaseModel):
 
 
 class RateArtifact(BaseModel):
-    model_config = ConfigDict(extra="forbid", frozen=True)
+    model_config = ConfigDict(extra="forbid", frozen=True, strict=True)
 
     artifact_version: Literal["rate-artifact-v1"] = "rate-artifact-v1"
     model_version: Literal["rate-baseline-v1"] = "rate-baseline-v1"
     feature_version: Literal["training-target-counts-v1"] = "training-target-counts-v1"
     variant: Literal["global", "problem"]
-    calibrated: Literal[False] = False
+    calibrated: StrictBool = False
     provenance: ArtifactProvenance
     model_payload: dict[str, Any]
     model_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
 
     @model_validator(mode="after")
     def valid_model(self):
+        if self.calibrated:
+            raise ValueError("Rate artifacts are uncalibrated")
         RateBaseline.from_dict(self.model_payload)
         if payload_hash(self.model_payload) != self.model_sha256:
             raise ValueError("Model payload hash mismatch")
         return self
 
     def predict(self, examples):
+        # Frozen Pydantic envelopes do not deep-freeze nested dictionaries.
+        self.valid_model()
         return RateBaseline.from_dict(self.model_payload).predict(examples, per_problem=self.variant == "problem")
 
 
