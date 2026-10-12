@@ -97,3 +97,11 @@ def test_duplicate_code_state_and_missing_schema(release):
     (release / "MainTable.csv").write_text("SubjectID\nsynthetic-a\n")
     with pytest.raises(ValueError, match="missing columns"):
         load(release)
+
+
+def test_duplicate_header_cannot_silently_overwrite_grade(release):
+    path = release / "MainTable.csv"
+    content = path.read_text()
+    path.write_text(content.replace("Score,CodeStateID,Attempt", "Score,CodeStateID,Score", 1))
+    with pytest.raises(ValueError, match="duplicate column names"):
+        load(release)

@@ -23,6 +23,8 @@ class ImportResult:
 def _table(path: Path, required: set[str]) -> list[dict[str, str]]:
     with path.open(encoding="utf-8-sig", newline="") as stream:
         reader = csv.DictReader(stream)
+        if len(reader.fieldnames or []) != len(set(reader.fieldnames or [])):
+            raise ValueError(f"{path.name}: duplicate column names")
         if not required.issubset(reader.fieldnames or []):
             raise ValueError(f"{path.name}: missing columns {sorted(required - set(reader.fieldnames or []))}")
         rows = list(reader)
