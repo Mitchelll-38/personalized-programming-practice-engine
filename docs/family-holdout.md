@@ -34,11 +34,15 @@ Persist a family bundle with an independently audited JSON object mapping
 problem IDs to family IDs:
 
 ```powershell
-practice-data data/fixtures/synthetic.jsonl --split-protocol family --family-map local-families.json --synthetic --dataset-version synthetic-v1 --output data/processed/families
+practice-data canonical-interactions.jsonl --split-protocol family --family-map local-families.json --synthetic --dataset-version synthetic-v1 --output data/processed/families
 ```
 
 `--split-protocol student` remains the default. `--family-map` is required only
-in family mode; duplicate JSON keys, invalid entries, missing observed problems
+in family mode. The example requires independently prepared synthetic canonical
+interactions covering at least three observed families and a matching map; the
+small committed day-one fixture has too few exercises for this protocol. Use
+`--synthetic` only when the input is synthetic.
+Duplicate JSON keys, invalid entries, missing observed problems
 and fewer than three observed families fail before output files are written.
 The raw mapping SHA-256 is recorded in both audit and split metadata, alongside
 the input hash. The manifest declares `family-holdout-v1` and covers the same five
