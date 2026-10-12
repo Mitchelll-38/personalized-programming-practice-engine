@@ -6,6 +6,8 @@ Programming knowledge-tracing research with an inspectable Java practice replay 
 
 [Two-week plan for three engineers](docs/sprint-plan.md) · [Day-one integration contract](docs/day-1-contract.md) · [Data access status](docs/data-access.md) · [Day-one delivery report](reports/day-1.md)
 
+Engineering workflow: [AGENTS.md](AGENTS.md) requires small, focused PRs, isolated agent worktrees, independent review and passing CI before rollout. All changes, including documentation and tests, follow this workflow.
+
 ## Run locally
 
 Python 3.12+ and Node.js 22+ are required. Commands below are for PowerShell in the repository root.

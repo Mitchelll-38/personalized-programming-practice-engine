@@ -14,6 +14,8 @@ Build a reproducible Java knowledge-tracing MVP with an inspectable replay appli
 
 Day 1 is executed by the root agent (A), `api_engineer` (B), and `frontend_engineer` (C). Shared API contract freezes before parallel implementation; each owns separate files. Subsequent team workflow: 15-minute daily standup, small reviewed PRs, cross-owner review, and a daily runnable integration demo. Reserve approximately one hour per person daily for review/integration; day 10 is a release buffer. Fix leakage or broken integration before adding model complexity.
 
+The user's required workflow is codified in [AGENTS.md](../AGENTS.md): isolated worktrees, one coherent change per small PR, independent agent review, final-head CI, and ordered squash merges. This applies to features, fixes, tests, documentation and CI. Daily delivery reports must link the individual PRs; a sprint day is not a single bundled PR.
+
 ## Backlog and day-by-day delivery
 
 Each row is roughly one day's work per engineer. Acceptance criteria are a gate for the integrated team, not simply a list of files.
