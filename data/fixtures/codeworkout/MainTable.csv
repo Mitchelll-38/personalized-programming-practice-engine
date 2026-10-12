@@ -1,0 +1,9 @@
+EventID,SubjectID,AssignmentID,ProblemID,ServerTimestamp,EventType,Score,CodeStateID,Attempt
+e4,synthetic-a,1,2,2026-01-01T12:02:00Z,Run.Program,1,c2,99
+e1,synthetic-a,1,1,2026-01-01T12:00:00Z,Compile.Error,,,99
+e2,synthetic-a,1,1,2026-01-01T12:00:01Z,Run.Program,0.5,c1,99
+e3,synthetic-a,1,1,2026-01-01T12:01:00Z,Run.Program,1,c2,99
+e5,synthetic-a,1,2,2026-01-01T12:02:00Z,Test.Result,1,,99
+e6,synthetic-b,1,1,2026-01-01T12:00:00Z,Run.Program,0,,99
+e7,synthetic-c,1,1,2026-01-01T12:00:00Z,Run.Program,1,,99
+e8,synthetic-a,2,1,2026-01-01T12:03:00Z,Run.Program,0,,99

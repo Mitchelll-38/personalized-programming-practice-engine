@@ -1,0 +1,5 @@
+[
+  {"problem_id":"1:1","problem_text":"Synthetic: return one.","concept_ids":["return"]},
+  {"problem_id":"1:2","problem_text":"Synthetic: return the sum of two arguments.","concept_ids":["arithmetic"]},
+  {"problem_id":"2:1","problem_text":"Synthetic: return zero.","concept_ids":["return"]}
+]
