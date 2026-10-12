@@ -43,7 +43,13 @@ Writes `audit.json`, `split.json`, and partitioned `train.jsonl`, `validation.js
 
 `manifest.json` records dataset, schema, feature and split versions plus content hashes of all five outputs. `--synthetic` is an explicit source declaration; absent it, provenance stays unverified. No trained model or verified redistribution terms are inferred. `practice_engine.data.manifest.verify_manifest(Path(...))` checks bundle integrity before reuse.
 
-This CLI reads **canonical JSONL**, not raw CodeWorkout event logs. A release-specific importer, verified grading semantics, exercise-family splits, and trained models are scheduled for later sprint days. Raw student code and generated research artifacts remain excluded from the public repo until release-specific terms are verified.
+The default input is **canonical JSONL**. For the organizer-documented CodeWorkout format, use the separately supplied statement/concept catalog:
+
+```powershell
+.\.venv\Scripts\python.exe -m practice_engine.data.cli data/fixtures/codeworkout --format codeworkout --catalog data/fixtures/codeworkout/catalog.json --output data/processed/codeworkout-smoke --synthetic --dataset-version codeworkout-synthetic-v1
+```
+
+The adapter rejects missing grading/catalog fields, ambiguous timestamps and duplicate event/header keys. `audit.json` records event exclusions, label semantics and original table/catalog hashes; the processing manifest hashes the derived artifacts. This adapter is validated on original synthetic fixtures only. **Real release access, usage terms, grading semantics and catalog provenance remain unverified**; complete those gates before importing real data. No real student data is committed. Exercise-family splits and trained models remain later work.
 
 ## Verify
 
