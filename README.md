@@ -2,9 +2,11 @@
 
 Programming knowledge-tracing research with an inspectable Java practice replay dashboard.
 
-**Day 1 implemented:** canonical first-attempt data pipeline, causal history examples, student-disjoint split manifests, FastAPI + SQLite, and a React/TypeScript demo. All committed data and demo outcomes are **synthetic**. The current predictor is an untrained, uncalibrated heuristic; no empirical ML results or learning gains are claimed.
+**Days 1–2 engineering implemented:** canonical causal data pipeline, strict CodeWorkout format adapter, audited CLI and versioned manifests, FastAPI + SQLite, and a React/TypeScript replay with supporting-history diagnostics. All committed data and demo outcomes are **synthetic**. The current predictor is an untrained, uncalibrated heuristic; no empirical ML results or learning gains are claimed. Day-two real-data acceptance remains blocked on verified access, terms and metadata.
 
 [Two-week plan for three engineers](docs/sprint-plan.md) · [Day-one integration contract](docs/day-1-contract.md) · [Data access status](docs/data-access.md) · [Day-one delivery report](reports/day-1.md)
+
+[Day-two delivery and individual PRs](reports/day-2.md) · [Browser replay smoke test](docs/browser-smoke.md)
 
 Engineering workflow: [AGENTS.md](AGENTS.md) requires small, focused PRs, isolated agent worktrees, independent review and passing CI before rollout. All changes, including documentation and tests, follow this workflow.
 
