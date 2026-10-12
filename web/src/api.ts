@@ -15,10 +15,15 @@ export type Interaction = {
 export type Profile = {
   student_id: string;
   is_demo: boolean;
+  total_interactions: number;
+  first_attempts: number;
+  retries: number;
   concepts: {
     concept_id: string;
     estimated_performance: number;
     supporting_attempts: number;
+    supporting_problem_ids: string[];
+    evidence_status: "no-history" | "limited-history" | "observed-first-attempt";
   }[];
 };
 export type Recommendation = {

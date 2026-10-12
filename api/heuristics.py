@@ -20,7 +20,14 @@ def concept_profile(history: list[dict]) -> list[dict]:
     concepts = []
     for concept in CONCEPT_IDS:
         evidence = [row for row in primary if concept in BY_ID[row["problem_id"]]["concept_ids"]]
-        concepts.append({"concept_id": concept, "estimated_performance": (1 + sum(row["correct"] for row in evidence)) / (2 + len(evidence)), "supporting_attempts": len(evidence)})
+        concepts.append({
+            "concept_id": concept,
+            "estimated_performance": (1 + sum(row["correct"] for row in evidence)) / (2 + len(evidence)),
+            "supporting_attempts": len(evidence),
+            "supporting_problem_ids": [row["problem_id"] for row in evidence],
+            # Evidence-volume labels, not calibrated confidence levels.
+            "evidence_status": "no-history" if not evidence else "limited-history" if len(evidence) < 3 else "observed-first-attempt",
+        })
     return concepts
 
 

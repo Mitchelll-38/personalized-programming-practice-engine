@@ -6,7 +6,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, model_validator
 
 from api.catalog import BY_ID, EXERCISES
-from api.heuristics import concept_profile, estimate, recommend
+from api.heuristics import concept_profile, estimate, first_attempts, recommend
 from api import storage
 
 app = FastAPI(title="Programming Practice Engine — synthetic demo", description="Local synthetic replay only. No Java execution, trained model, or calibrated probabilities.")
@@ -77,7 +77,14 @@ def history():
 
 @app.get("/students/demo/profile")
 def profile():
-    return {"student_id": "demo", "is_demo": True, "concepts": concept_profile(storage.history())}
+    observed = storage.history()
+    return {
+        "student_id": "demo", "is_demo": True,
+        "total_interactions": len(observed),
+        "first_attempts": len(first_attempts(observed)),
+        "retries": sum(row["attempt_number"] > 1 for row in observed),
+        "concepts": concept_profile(observed),
+    }
 
 
 @app.get("/students/demo/recommendations")
