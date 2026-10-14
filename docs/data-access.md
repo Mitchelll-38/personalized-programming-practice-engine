@@ -25,9 +25,9 @@ Synthetic outputs stay under ignored `data/processed/`. Every audit/split record
 
 The official dataset route redirected the web tool to sign-in, and the [DataShop listing](https://pslcdatashop.web.cmu.edu/Files?datasetId=3458) returned HTTP 403 to that tool. A separate read-only Chrome check using the computer-use skill successfully opened the listing: project **Virginia Tech CodeWorkout (public)**, dataset **CodeWorkout data Spring 2019**, and a Files (8) tab. The Files feature explicitly required login, so file contents, exact release checksums and usage/redistribution terms were not inspected. Public project visibility is not evidence of redistribution permission. No sign-in form, agreement, access application or download was submitted. These observations establish a usable access route and a login gate, not dataset disappearance.
 
-## October 13 authenticated download investigation
+## Authenticated download investigation (recorded October 13)
 
-The user manually created a DataShop account. An authenticated browser session
+The user manually created a DataShop account. In a prior authenticated browser session,
 then exposed the Spring 2019 full release: `S19_All_Release_2_10_22.zip`, displayed
 as 7.6 MB, version 1.0, uploaded by Thomas Price on February 10, 2022. Its listing
 describes the full training/test release with labels. This is listing evidence,
