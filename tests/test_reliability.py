@@ -1,6 +1,7 @@
 """Hand-computed calibration diagnostics on original synthetic observations."""
 
 import json
+import math
 
 import pytest
 
@@ -41,6 +42,16 @@ def test_equal_student_weighting_does_not_overweight_long_history():
     assert sum(b["weight_mass"] for b in student["bins"]) == 1
     assert student == reliability_summary(list(reversed(examples)), [.9] * 4,
                                          n_bins=1, weighting="student")
+
+
+@pytest.mark.parametrize("n_bins,index", [(100, 29), (100, 58), (90, 63)])
+def test_nonbinary_edges_and_immediately_smaller_scores(n_bins, index):
+    edge = index / n_bins
+    report = reliability_summary([example(True), example(False)],
+                                 [edge, math.nextafter(edge, 0)], n_bins=n_bins)
+    assert report["bins"][index]["n_examples"] == 1
+    assert report["bins"][index]["mean_probability"] == edge
+    assert report["bins"][index - 1]["n_examples"] == 1
 
 
 def test_bin_mass_and_student_weights_across_bins():

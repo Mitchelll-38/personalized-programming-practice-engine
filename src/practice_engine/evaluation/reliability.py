@@ -1,6 +1,7 @@
 """Descriptive calibration diagnostics; no fitting or confidence intervals."""
 
 from collections import Counter
+from bisect import bisect_right
 import math
 
 from practice_engine.data.schema import PredictionExample
@@ -24,11 +25,12 @@ def reliability_summary(examples: list[PredictionExample], probabilities: list[f
         raise ValueError("weighting must be interaction or student")
 
     student_counts = Counter(e.student_id for e in examples)
+    internal_edges = [i / n_bins for i in range(1, n_bins)]
     bins: list[list[tuple[PredictionExample, float, float]]] = [[] for _ in range(n_bins)]
     for example, probability in zip(examples, probabilities):
         weight = (1 / len(examples) if weighting == "interaction" else
                   1 / (len(student_counts) * student_counts[example.student_id]))
-        bins[min(n_bins - 1, int(probability * n_bins))].append((example, probability, weight))
+        bins[bisect_right(internal_edges, probability)].append((example, probability, weight))
     summaries = []
     for index, rows in enumerate(bins):
         mass = math.fsum(w for _, _, w in rows)
