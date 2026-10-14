@@ -57,12 +57,13 @@ days; the empirical dataset gate is tracked separately.
 
 PR #20 merged at 01:39 UTC October 14, which is October 13 in the client's
 America/Toronto timezone. All final-head Python, web, browser replay and neural
-checks passed. Training integration for family bundles remains separate work.
+checks passed. At the PR #20 merge, training integration for family bundles was
+still separate work; PR #25 subsequently added family-aware rate runs.
 
 ## Current access and implementation gates
 
 The user created a DataShop account after a required sign-in handoff. The account
-session now exposes the official Spring 2019 full release listing
+session exposed the official Spring 2019 full release listing
 `S19_All_Release_2_10_22.zip` (v1.0, posted February 10, 2022). Posted service
 [terms](https://pslcdatashop.web.cmu.edu/Terms) restrict use to research and forbid
 redistribution of downloaded data. Raw student data/code must remain private.
