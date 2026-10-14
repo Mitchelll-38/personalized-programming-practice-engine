@@ -31,4 +31,6 @@ bundles from the [family CLI](family-holdout.md), require exact disjoint
 family/problem groups and map-hash agreement, and reject any history response
 outside training families. Only train and validation examples are parsed;
 test bytes are checked for integrity without consuming labels. Student histories
-remain student-specific causal prefixes. Hashes do not certify usage rights.
+remain student-specific causal prefixes. Train/validation target sequence positions
+must be unique per student, including across the two partitions. Hashes do not
+certify usage rights.

@@ -67,6 +67,7 @@ def load_training_bundle(directory: Path) -> TrainingBundle:
                 or not isinstance(audit, dict) or audit.get("family_map_sha256") != digest):
             raise ValueError("Family map provenance differs from processing audit")
     examples = {}
+    seen_positions = set()
     for name in ("train", "validation"):
         rows = [PredictionExample.model_validate_json(line) for line in
                 (directory / f"{name}.jsonl").read_text(encoding="utf-8").splitlines() if line.strip()]
@@ -74,9 +75,11 @@ def load_training_bundle(directory: Path) -> TrainingBundle:
             raise ValueError(f"Invalid or empty {name} {'family' if family else 'student'} partition")
         positions = [(row.student_id, row.target_sequence_index) for row in rows]
         targets = [(row.student_id, row.candidate.problem_id) for row in rows]
-        if (len(set(positions)) != len(positions) or len(set(targets)) != len(targets)
+        if (len(set(positions)) != len(positions) or seen_positions.intersection(positions)
+                or len(set(targets)) != len(targets)
                 or any(row.target_sequence_index < 0 for row in rows)):
             raise ValueError("Duplicate or invalid target sequence positions")
+        seen_positions.update(positions)
         historical_features(rows)
         if family and any(h.problem_id not in groups["train"] for row in rows for h in row.history):
             raise ValueError("Family histories must contain only training exercises")

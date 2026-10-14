@@ -122,3 +122,18 @@ def test_family_map_consistency_fail_closed(bundle):
         {split["problem_ids"]["train"][0]: "not-declared"}))
     with pytest.raises(ValueError, match="family mapping"):
         load_training_bundle(bundle)
+
+
+def test_family_cross_partition_position_collision_fails(bundle):
+    split = json.loads((bundle / "split.json").read_text())
+    if "problem_ids" not in split:
+        pytest.skip("family-only boundary")
+    validation = json.loads((bundle / "validation.jsonl").read_text().splitlines()[0])
+    def collide(rows):
+        # Both rows individually have valid empty causal prefixes; the position
+        # still cannot represent two distinct exercises for one learner.
+        rows[0]["target_sequence_index"] = validation["target_sequence_index"]
+        rows[0]["history"] = []
+    mutate(bundle, "train.jsonl", collide)
+    with pytest.raises(ValueError, match="Duplicate"):
+        load_training_bundle(bundle)
