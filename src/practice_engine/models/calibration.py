@@ -50,7 +50,8 @@ class TemperatureScaler:
         def objective(temperature):
             scaled = [z / temperature for z in logits]
             signed = [-z if e.label else z for e, z in zip(examples, scaled)]
-            return math.fsum(max(z, 0) + math.log1p(math.exp(-abs(z))) for z in signed) / len(examples)
+            return math.fsum((max(z, 0) + math.log1p(math.exp(-abs(z)))) / len(examples)
+                             for z in signed)
         # Prefer identity on a tie, then the smaller temperature; grid order is irrelevant.
         best = min(grid, key=lambda t: (objective(t), abs(math.log(t)), t))
         if not math.isfinite(objective(best)):

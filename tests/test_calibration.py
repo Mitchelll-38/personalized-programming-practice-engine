@@ -75,3 +75,9 @@ def test_subnormal_temperature_has_stable_limits_and_rejects_infinite_fit_loss()
     assert TemperatureScaler(tiny).predict([.1, .5, .9]) == [0, .5, 1]
     with pytest.raises(ValueError, match="finite fitting objective"):
         TemperatureScaler.fit_validation([example(True), example(False)], [.1, .9], temperatures=(tiny,))
+
+
+def test_large_finite_loss_does_not_overflow_before_valid_grid_candidate():
+    model = TemperatureScaler.fit_validation([example(True), example(False)], [0, 1],
+                                             temperatures=(1e-307, 1))
+    assert model.temperature == 1
