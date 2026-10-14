@@ -45,6 +45,16 @@ days; the empirical dataset gate is tracked separately.
 | [#19](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/19) | Causal ID-only DKT batching/forward; 170 final-head tests, including all 15 neural tests |
 | [#21](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/21) | Logistic/BKT portable artifact envelopes, live integrity checks and rate compatibility |
 
+## October 13, 2026 — family processing integration
+
+| Merged PR | Progress / decision |
+|---|---|
+| [#20](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/20) | Processing CLI now persists audited family holdouts; independent review passed, and the coordinator corrected a documentation example that lacked three observed families |
+
+PR #20 merged at 01:39 UTC October 14, which is October 13 in the client's
+America/Toronto timezone. All final-head Python, web, browser replay and neural
+checks passed. Training integration for family bundles remains separate work.
+
 ## Current access and implementation gates
 
 The user created a DataShop account after a required sign-in handoff. The account
