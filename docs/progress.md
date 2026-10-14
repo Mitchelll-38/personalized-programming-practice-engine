@@ -86,9 +86,10 @@ or release receipt yet.
 | Merged PR | Progress / decision |
 |---|---|
 | [#27](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/27) | Portable validation-fitted scalar grid temperature scaling; review fixed finite-loss summation overflow, with an extreme-value regression and 26 focused tests |
+| [#26](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/26) | Strict CPU tensor-only DKT checkpoints, unknown-candidate training-rate fallback and live tensor fingerprint; review caught mutable loaded weights, fixed and independently rechecked with 36 focused tests |
 
-Checkpoint PR #26 awaits final-head CI after independent review, not a
-completed research deliverable. Checkpoint review found mutable loaded neural
+Checkpoint PR #26 merged after final-head CI passed; its trainer and empirical
+research deliverables remain separate. Checkpoint review found mutable loaded neural
 weights could change predictions while retaining saved metadata; a live-state
 fingerprint guard and regression passed 36 focused tests and independent review.
 Calibration review found
