@@ -50,6 +50,10 @@ days; the empirical dataset gate is tracked separately.
 | Merged PR | Progress / decision |
 |---|---|
 | [#20](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/20) | Processing CLI now persists audited family holdouts; independent review passed, and the coordinator corrected a documentation example that lacked three observed families |
+| [#22](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/22) | Substantive PR documentation and ongoing chronological records required throughout the project; independent review checked actual merge order and dates |
+| [#23](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/23) | Authenticated release/terms observations and three failed empty transfers recorded; review clarified prior-session observations versus recording date |
+| [#24](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/24) | Fixed-width reliability/ECE diagnostics with equal-student weights; independent review caught nonbinary floating-edge assignment, fixed using declared boundaries with regression tests |
+| [#25](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/25) | Shared synthetic bundle validator supports student/family rate runs; review reproduced cross-partition learner sequence collisions, fixed without reading test examples |
 
 PR #20 merged at 01:39 UTC October 14, which is October 13 in the client's
 America/Toronto timezone. All final-head Python, web, browser replay and neural
@@ -69,7 +73,31 @@ Release acquisition, checksums, contents, catalog availability and actual gradin
 audit remain unresolved until a valid archive is obtained. No empirical metrics
 or trained real-data model is claimed. See [access log](data-access.md).
 
-Work proceeds on checkpoint/training integration, family-aware workflows and
+## October 14, 2026 — continuing work and review
+
+The user requested another browser-controlled download attempt instead of a manual
+file download. Browser control is available again, but the current Chrome session
+is signed out of DataShop. The login page is prepared for user authentication;
+the computer-use guidance prohibits automating authentication dialogs. Download
+and setup remain assigned to the coordinator after sign-in, with no usable archive
+or release receipt yet.
+
+| Merged PR | Progress / decision |
+|---|---|
+| [#27](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/27) | Portable validation-fitted scalar grid temperature scaling; review fixed finite-loss summation overflow, with an extreme-value regression and 26 focused tests |
+
+Checkpoint PR #26 awaits final-head CI after independent review, not a
+completed research deliverable. Checkpoint review found mutable loaded neural
+weights could change predictions while retaining saved metadata; a live-state
+fingerprint guard and regression passed 36 focused tests and independent review.
+Calibration review found
+overflow while summing finite extreme losses before averaging; the corrected
+implementation averages terms before summation and passes an independent review
+with 26 focused tests. PR #27 merged after final-head CI passed; run/artifact/API
+calibration integration remains a separate PR. Synthetic calibration smoke checks
+are not empirical calibration evidence.
+
+Work proceeds on checkpoint/training integration, baseline workflows and
 product improvements in additional focused PRs. Append their merged outcomes and
 meaningful review findings here as they happen; do not equate forward-pass tests
 or synthetic training smoke results with completed research evaluation.
