@@ -9,6 +9,8 @@ These instructions apply to the entire repository, every engineer and every agen
 - A sprint day can and normally should produce multiple PRs. Never use the day number as the boundary of a PR; segment by coherent behavior and dependency. A day's report aggregates those PRs without bundling their implementations.
 - Continue into the next planned work unit after completing a day; day boundaries are not stopping points. Keep implementing independent authorized work when dataset or compute gates block empirical experiments, and report those gates accurately.
 - Delegate independent tasks to agents when a team is requested. Assign clear file/feature ownership and an isolated git branch/worktree to each engineer; never have agents edit the same checkout concurrently.
+- Keep every project worktree inside the main project directory, under ignored `.worktrees/`. Never create project folders directly in the parent OneDrive directory. Use `git worktree move` to relocate existing checkouts so Git's references remain valid; preserve branches and uncommitted work. Resolve the shared Python environment from the main project root rather than relying on former sibling paths.
+- Keep private project data inside ignored `.data/private/data/` when local storage is needed. Exclude raw and derived row-level student data from public Git; folder containment does not change the release verification or publication gates.
 - Keep the coordinating engineer responsible for integration, scope decisions and the daily delivery report. Agents must communicate dependencies and blockers promptly.
 
 ## Branches and small PRs
