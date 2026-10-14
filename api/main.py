@@ -8,8 +8,10 @@ from pydantic import BaseModel, ConfigDict, Field, StrictBool, model_validator
 from api.catalog import BY_ID, EXERCISES
 from api.heuristics import concept_profile, estimate, first_attempts, recommend
 from api import storage
+from api.research import router as research_router
 
-app = FastAPI(title="Programming Practice Engine — synthetic demo", description="Local synthetic replay only. No Java execution, trained model, or calibrated probabilities.")
+app = FastAPI(title="Programming Practice Engine — synthetic demo", description="Local synthetic replay with an optional stateless synthetic research baseline. No Java execution or calibrated probabilities.")
+app.include_router(research_router)
 
 
 class StrictRequest(BaseModel):
