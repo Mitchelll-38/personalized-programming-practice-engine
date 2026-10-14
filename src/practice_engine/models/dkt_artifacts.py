@@ -1,5 +1,6 @@
 """CPU DKT checkpoints with strict metadata, tensor-only loads and UNK fallback."""
 
+import ctypes
 from dataclasses import dataclass
 from hashlib import sha256
 from io import BytesIO
@@ -67,13 +68,27 @@ def _restore(metadata: DKTMetadata, state: dict) -> DKT:
     return model.eval()
 
 
+def _state_fingerprint(model: DKT) -> str:
+    digest = sha256()
+    for name, tensor in sorted(model.state_dict().items()):
+        tensor = tensor.detach().cpu().contiguous()
+        digest.update(f"{name}|{tensor.dtype}|{tuple(tensor.shape)}".encode())
+        # A transient byte view avoids NumPy and a second serialized checkpoint.
+        buffer = (ctypes.c_ubyte * (tensor.numel() * tensor.element_size())).from_address(tensor.data_ptr())
+        digest.update(memoryview(buffer))
+    return digest.hexdigest()
+
+
 @dataclass(frozen=True)
 class DKTCheckpoint:
     metadata: DKTMetadata
     _model: DKT
+    _state_sha256: str
 
     def predict(self, examples) -> list[float]:
         self.metadata.valid_contents()  # Frozen envelopes do not deep-freeze maps.
+        if _state_fingerprint(self._model) != self._state_sha256:
+            raise ValueError("Loaded checkpoint weights changed")
         if not examples:
             return []
         batch = make_batch(examples, ExerciseVocabulary.from_dict(self.metadata.vocabulary))
@@ -127,4 +142,5 @@ def load_dkt_checkpoint(directory: Path) -> DKTCheckpoint:
     if sha256(serialized).hexdigest() != metadata.weights_sha256:
         raise ValueError("Weights hash mismatch")
     state = torch.load(BytesIO(serialized), map_location="cpu", weights_only=True)
-    return DKTCheckpoint(metadata, _restore(metadata, state))
+    model = _restore(metadata, state)
+    return DKTCheckpoint(metadata, model, _state_fingerprint(model))

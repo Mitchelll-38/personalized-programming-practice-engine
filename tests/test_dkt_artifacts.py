@@ -130,3 +130,18 @@ def test_existing_destination_untouched_and_failed_publish_cleans_staging(saved,
     with pytest.raises(OSError, match="interrupted"):
         save_dkt_checkpoint(target, model, vocabulary, provenance, **kwargs)
     assert not target.exists() and not list(path.parent.glob(".interrupted*"))
+
+
+def test_live_weights_mutation_rejected_and_existing_publisher_lock_preserved(saved):
+    path, model, vocabulary, provenance, row, kwargs = saved
+    loaded = load_dkt_checkpoint(path)
+    with torch.no_grad():
+        loaded._model.head.bias.add_(1)
+    with pytest.raises(ValueError, match="weights changed"):
+        loaded.predict([row])
+    target = path.with_name("locked")
+    lock = target.with_name(".locked.publish-lock")
+    lock.mkdir()
+    with pytest.raises(FileExistsError):
+        save_dkt_checkpoint(target, model, vocabulary, provenance, **kwargs)
+    assert lock.is_dir() and not target.exists()
