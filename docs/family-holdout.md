@@ -47,5 +47,6 @@ and fewer than three observed families fail before output files are written.
 The raw mapping SHA-256 is recorded in both audit and split metadata, alongside
 the input hash. The manifest declares `family-holdout-v1` and covers the same five
 processing artifacts. Mapping IDs are not inferred from outcome labels.
-The current rate-training CLI deliberately rejects family bundles; family-aware
-training is a separate integration. Synthetic output is not a research result.
+The [rate-training CLI](rate-training.md) validates family groups and histories
+through the shared training-bundle boundary before fitting. Synthetic output is
+not a research result.
