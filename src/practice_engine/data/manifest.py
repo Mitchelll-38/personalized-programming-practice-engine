@@ -18,7 +18,7 @@ class ProcessingManifest(BaseModel):
     source_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
     schema_version: Literal["canonical-v1"] = "canonical-v1"
     feature_version: Literal["causal-first-attempt-v1"] = "causal-first-attempt-v1"
-    split_version: Literal["student-split-v1"] = "student-split-v1"
+    split_version: Literal["student-split-v1", "family-holdout-v1"] = "student-split-v1"
     seed: int
     trained_model_version: None = None
     # These cannot be set true by arbitrary CLI arguments.
