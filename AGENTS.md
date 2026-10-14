@@ -23,6 +23,8 @@ These instructions apply to the entire repository, every engineer and every agen
 ## Review and rollout
 
 - Every PR needs a concrete problem/behavior description, scope, validation evidence, material limitations and dependency notes. Use `.github/pull_request_template.md`.
+- Document every PR in a substantive, current PR description or an appropriate Markdown file (both are welcome). A title or placeholder checklist is not documentation. Explain what changed, why, validation and remaining limits; update the record when scope changes.
+- Maintain documentation throughout implementation. The coordinator appends merged changes, review findings, decisions and blockers to `docs/progress.md`; feature owners maintain their relevant Markdown contracts. Keep chronological records rather than reconstructing project history only at the end.
 - Obtain an independent review from another engineer/agent. Review correctness, data leakage, user-visible behavior, error handling and scope. Address findings and rerun affected checks. Record the reviewer and findings in the PR; agent review is not a human GitHub approval.
 - Require relevant local checks and GitHub CI to pass on the final PR head before merging. The coordinator verifies the actual diff and review evidence, then squash-merges within the user's authorized scope.
 - Resolve conflicts in the feature branch and repeat affected verification. Never bypass checks, force-push `main`, or mix another engineer's changes into a PR.
