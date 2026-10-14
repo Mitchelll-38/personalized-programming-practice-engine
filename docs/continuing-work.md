@@ -2,7 +2,7 @@
 
 The user requests continuous progress across planned days. Complete and review small changes, integrate them, then advance to the next dependency-ready task. Day numbers organize reporting, not stopping points. Existing real-data access/terms and catalog verification gates remain open; synthetic smoke runs must never be presented as research evidence.
 
-## Next segmented changes
+## Foundation changes (initial execution plan)
 
 | Owner | PR-sized change | Acceptance | Dependency |
 |---|---|---|---|
@@ -14,6 +14,30 @@ The user requests continuous progress across planned days. Complete and review s
 | Coordinator | Reproducible training/evaluation command and run manifests | Verify preprocessing hashes; tune/evaluate validation only by default; keep test untouched; record configs/seeds | Models, metrics, artifacts |
 
 Other product, BKT, neural, calibration and release tasks follow in their own reviewed PRs once these foundations are integrated. Do not bundle multiple rows into a day-sized PR.
+
+## October 14 execution snapshot and next segments
+
+The foundations above are integrated. Logistic/BKT and CPU DKT run commands now
+exercise synthetic train/validation bundles; the research API serves reviewed
+synthetic JSON baselines opt-in. These software milestones do not complete the
+real-data or learning-effectiveness gates. Exact merged changes and review fixes
+are tracked in [progress.md](progress.md).
+
+| Owner | Next PR-sized change | Acceptance | Dependency / gate |
+|---|---|---|---|
+| Model engineer | Frozen embedding-cache boundary | Exact content/config hashes, finite vectors, strict integrity, private atomic persistence; original synthetic vectors only | Active independent cache implementation; actual encoder follows separately |
+| Product/platform engineer | Optional fitted-baseline inspector | Label-free next-distinct-exercise query, cancellation, clear synthetic/uncalibrated metadata, independent failures | Research API #32; active separate frontend work |
+| Coordinator | Calibrated baseline artifact envelope | Bind scalar payload to exact base model and split; validation fitting record; strict live integrity and reload parity | Temperature #27 and portable artifacts; no automatic API activation |
+| Model engineer | Frozen CodeBERT extraction adapter | Verified repository revision/license, explicit tokenization/truncation/pooling and reusable private cache | Cache boundary; optional dependencies and weights verified before use |
+| Model engineer | Content-aware causal LSTM | Candidate statement/concepts and only prior responses; sequence masks; train-only learned vocabularies | Verified encoder/cache contract and DKT training foundation |
+| Coordinator | Calibration run command | Fixed-model validation predictions only, fitting hashes/config, honest before/after diagnostic record, test untouched | Calibrated envelope and baseline run commands |
+| Product/platform engineer | Recommendation event records | Log candidates, predictions/model/policy versions and selected exercise separately from later outcome | Explicit policy contract and SQLite migration; no learning-effect claim |
+| Coordinator / data lead | Valid release receipt and actual audit | Valid private archive/checksum, terms/catalog/grading/time metadata reviewed before import | Official downloads currently zero-byte or timed out; no raw data in git |
+
+Later locked-test comparisons, ablations, uncertainty analysis and real-data
+reports remain gated on verified data/content and model selection. Do not replace
+these deliverables with synthetic metrics. Continue dependency-ready software
+work and reviewed small PRs while recording the unresolved gate.
 
 ## Research interfaces for the next PRs
 

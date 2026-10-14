@@ -77,18 +77,25 @@ or trained real-data model is claimed. See [access log](data-access.md).
 ## October 14, 2026 — continuing work and review
 
 The user requested another browser-controlled download attempt instead of a manual
-file download. Browser control is available again, but the current Chrome session
-is signed out of DataShop. The login page is prepared for user authentication;
+file download. Browser control became available again, initially with DataShop
+signed out. The user completed authentication after the required handoff;
 the computer-use guidance prohibits automating authentication dialogs. Download
-and setup remain assigned to the coordinator after sign-in, with no usable archive
-or release receipt yet.
+then proceeded through the official S19 link, but the returned archive stayed
+zero bytes and failed ZIP validation. The official format PDF also returned an
+empty file. A media-download API retry timed out after 45 seconds. No usable
+archive or release receipt exists; the transfer failure cause is unknown.
 
 | Merged PR | Progress / decision |
 |---|---|
 | [#27](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/27) | Portable validation-fitted scalar grid temperature scaling; review fixed finite-loss summation overflow, with an extreme-value regression and 26 focused tests |
 | [#26](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/26) | Strict CPU tensor-only DKT checkpoints, unknown-candidate training-rate fallback and live tensor fingerprint; review caught mutable loaded weights, fixed and independently rechecked with 36 focused tests |
+| [#28](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/28) | Ongoing ledger updated; independent review corrected stale session and family-training statements |
+| [#29](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/29) | Logistic/BKT synthetic training commands publish portable models, validation metrics and reproducible run metadata; 20 independent focused tests |
+| [#30](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/30) | Label-free baseline inference adapter rejects candidate responses and revalidates causal history; 14 independent focused tests and optional-import check |
+| [#31](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/31) | Deterministic CPU DKT training with validation patience and selected checkpoint parity; 50 independent focused tests, train-only vocabulary and explicit unseen-ID population fallback |
+| [#32](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/32) | Opt-in synthetic baseline research API; browser CI caught missing editable engine install, repaired before rollout; 27 independent API/demo tests |
 
-Checkpoint PR #26 merged after final-head CI passed; its trainer and empirical
+Checkpoint PR #26 and trainer PR #31 merged after final-head CI passed; empirical
 research deliverables remain separate. Checkpoint review found mutable loaded neural
 weights could change predictions while retaining saved metadata; a live-state
 fingerprint guard and regression passed 36 focused tests and independent review.

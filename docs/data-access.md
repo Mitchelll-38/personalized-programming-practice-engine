@@ -64,6 +64,22 @@ exercise statements and concept provenance, and audit actual duplicates/missingn
 Leave verification flags false until evidence is reviewed. Cohort counts,
 missingness rates and predictive results remain **not measured**.
 
+## October 14 browser retry
+
+The user requested browser-controlled acquisition and completed sign-in in the
+new Chrome session. The authenticated file listing again exposed the official
+full S19 release and its description. An ordinary click returned a local ZIP path,
+but the file remained zero bytes and failed ZIP validation. The official
+`ProgSnap2-v6-31Jul2019.pdf` download also returned a zero-byte file. A retry of the
+S19 link with the browser media-download API timed out after 45 seconds; no warning
+or agreement tab appeared. These observations indicate a broader unresolved
+transfer issue, not verified corruption of the server's archive.
+
+No real release has been acquired or extracted, and setup remains incomplete.
+The user has not been asked again to download manually. Independent software work
+continues on synthetic data while the official access route remains under
+investigation. The empty files are not dataset receipts or research evidence.
+
 ## Narrow format adapter and label definition
 
 The [organizer preprocessing notebook](https://github.com/YangAzure/CSEDMDataChallenge/blob/main/preprocess.ipynb) identifies scored submissions as `Run.Program`, treats score 1 as correct, and discards the supplied `Attempt` column as incorrectly calculated. The challenge's eventual-success/struggle labels differ from this project's first-scored-attempt task; no challenge benchmark comparison is claimed.
