@@ -110,3 +110,19 @@ Work proceeds on checkpoint/training integration, baseline workflows and
 product improvements in additional focused PRs. Append their merged outcomes and
 meaningful review findings here as they happen; do not equate forward-pass tests
 or synthetic training smoke results with completed research evaluation.
+
+## October 14, 2026 — folder organization and pause
+
+The user paused feature work and required project folders inside
+`Personalized Programming Practice Engine`. All 23 sibling Git worktrees were
+moved into ignored `.worktrees/` using `git worktree move`; the main checkout
+remains at the project root. Branches, HEADs, Git status and hashes of changed or
+untracked files were preserved, including unfinished embedding-cache and research
+inspector work. No project worktree remains directly under the parent OneDrive
+directory.
+
+The local private storage folder was moved into ignored `.data/private/`; it
+contains only an empty failed archive, not a usable release. A local move receipt
+is retained under ignored `artifacts/`. Future worktree/storage locations are
+documented in `AGENTS.md`. Feature development and agent implementation remain
+paused until the user requests continuation.

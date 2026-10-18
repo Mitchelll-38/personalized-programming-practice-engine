@@ -52,9 +52,11 @@ official full-release download manually and provide its local path if successful
 engineering continues independently. The source of the empty transfers is not
 established. Do not infer that the server release itself is empty.
 
-Real raw and derived data should live outside the OneDrive-synced public source
-workspace, under `%LOCALAPPDATA%/ProgrammingPracticeEngine/data/`, with raw and
-processed subdirectories. Only non-sensitive aggregate audit/provenance records
+The user requires project folders to stay inside the project. Private raw and
+derived data live under ignored `.data/private/data/`, with raw and processed
+subdirectories. The existing local storage folder was moved there without changing
+its contents; it contains only a failed empty archive, not an acquired dataset.
+Only non-sensitive aggregate audit/provenance records
 may be proposed for publication after review. Do not commit downloaded archives,
 student submissions, identifiers or derived row-level records.
 
