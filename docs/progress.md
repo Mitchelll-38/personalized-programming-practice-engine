@@ -176,9 +176,12 @@ were independently reviewed and merged after their final-head CI passed:
   preserving label-free inputs and unchanged replay behavior. Model engineer
   independently approved the final head after 52 focused API/serving checks.
 
-Recommendation snapshot storage remains under review in #41. Review found that
-valid JSON could carry a different record identity than its database row; the
-coordinator added row/payload binding and regressions before requesting rereview.
+[#41 snapshot storage](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/41)
+merged after corrected-head CI and independent rereview. Review found that valid
+JSON could carry a different record identity than its database row; row/payload
+ID and timestamp binding plus regressions resolved it. The model engineer reran
+37 storage/API tests and approved the corrected head. Storage alone does not yet
+record API generation; that integration is a separate focused change.
 The product engineer owns a separate calibrated-inspector PR; the model engineer
 owns a frozen CodeBERT extraction PR. Neither is recorded as merged here.
 
