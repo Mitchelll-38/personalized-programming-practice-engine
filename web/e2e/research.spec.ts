@@ -107,3 +107,24 @@ test("selection and hiding cancel pending results and previously attempted candi
   await expect(pane).toContainText("requires a new exercise");
   expect(pending).toHaveLength(2);
 });
+
+for (const [name, change] of [
+  ["missing calibration flag", { calibrated: undefined }],
+  ["missing research-results flag", { research_results: undefined }],
+  ["missing synthetic flag", { is_synthetic: undefined }],
+  ["string synthetic flag", { is_synthetic: "yes" }],
+  ["string calibration flag", { calibrated: "false" }],
+  ["string research-results flag", { research_results: "false" }],
+] as const) {
+  test(`rejects ${name} instead of claiming synthetic uncalibrated output`, async ({ page }) => {
+    const pane = await workspace(page);
+    await page.route("**/api/research/predict", (route) => json(route, {
+      ...prediction("java-count"), model: { ...model, ...change },
+    }));
+    await pane.getByRole("button", { name: "Inspect fitted baseline", exact: true }).click();
+    await expect(pane.getByRole("alert")).toContainText("Unexpected research response");
+    await expect(pane).not.toContainText("73%");
+    await expect(pane).not.toContainText("Synthetic fitted estimate");
+    await expect(page.getByRole("button", { name: "Simulate correct", exact: true })).toBeEnabled();
+  });
+}

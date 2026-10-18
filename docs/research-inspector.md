@@ -21,8 +21,10 @@ the panel explains this while keeping simulated demo retries available.
 
 Selection/history changes reset opt-in and abort pending requests. Hiding the panel
 or refreshing/saving the replay also aborts work and hides previous probabilities.
-Responses are checked against the requested candidate and synthetic/uncalibrated
-declarations. The prediction response supplies the displayed model metadata, so a
+Responses are checked against the requested candidate and require literal boolean
+declarations: `is_synthetic=true`, `calibrated=false`, `research_results=false`,
+with `source_kind=synthetic`. Missing flags and string booleans fail inspection.
+The prediction response supplies the displayed model metadata, so a
 model replaced between metadata and prediction requests is identified correctly.
 No configured research artifact produces a quiet empty state; other failures have
 a separate **Retry inspection** action and do not break replay snapshot loading.

@@ -38,7 +38,7 @@ export default function ResearchInspector({ snapshot, candidate, busy }: { snaps
         if (controller.signal.aborted) return;
         if (!result) { setState({ status: "unconfigured" }); return; }
         const score = result.predictions[0];
-        if (!result.model.is_synthetic || result.model.source_kind !== "synthetic" || result.model.calibrated || result.model.research_results ||
+        if (result.model.is_synthetic !== true || result.model.source_kind !== "synthetic" || result.model.calibrated !== false || result.model.research_results !== false ||
             result.predictions.length !== 1 || score.problem_id !== candidate.problem_id ||
             !Number.isFinite(score.predicted_correctness) || score.predicted_correctness < 0 || score.predicted_correctness > 1)
           throw new Error("Unexpected research response. Retry inspection.");
