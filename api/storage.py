@@ -1,6 +1,7 @@
 """SQLite persistence for one synthetic replay learner."""
 
 import os
+import re
 from contextlib import contextmanager
 from pathlib import Path
 import sqlite3
@@ -41,12 +42,52 @@ def history() -> list[dict]:
         return [canonical(row) for row in db.execute("SELECT * FROM interactions WHERE student_id = 'demo' ORDER BY sequence_index")]
 
 
-def record(problem_id: str, correct: bool) -> dict:
+class ChoiceConflictError(ValueError):
+    """A recorded choice already has a different simulated outcome."""
+
+
+def _choice_attempt(db, choice_id, problem_id, correct):
+    if choice_id is None:
+        return None
+    if not db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='recommendation_choices'").fetchone():
+        raise LookupError("recommendation_choice_not_found")
+    choice = db.execute("SELECT problem_id FROM recommendation_choices WHERE choice_id = ?", (choice_id,)).fetchone()
+    if choice is None:
+        raise LookupError("recommendation_choice_not_found")
+    if choice["problem_id"] != problem_id:
+        raise ValueError("choice_problem_mismatch")
+    db.execute("CREATE TABLE IF NOT EXISTS recommendation_choice_attempts ("
+               "choice_id TEXT PRIMARY KEY REFERENCES recommendation_choices(choice_id), "
+               "student_id TEXT NOT NULL, sequence_index INTEGER NOT NULL, "
+               "UNIQUE(student_id, sequence_index), "
+               "FOREIGN KEY(student_id, sequence_index) REFERENCES interactions(student_id, sequence_index))")
+    linked = db.execute("SELECT student_id, sequence_index FROM recommendation_choice_attempts WHERE choice_id = ?",
+                        (choice_id,)).fetchone()
+    if linked is None:
+        return None
+    row = db.execute("SELECT * FROM interactions WHERE student_id = ? AND sequence_index = ?",
+                     (linked["student_id"], linked["sequence_index"])).fetchone()
+    if row is None or row["problem_id"] != problem_id or row["student_id"] != "demo":
+        raise ValueError("invalid_choice_attempt_link")
+    if bool(row["correct"]) != correct:
+        raise ChoiceConflictError("choice_outcome_conflict")
+    return canonical(row)
+
+
+def record(problem_id: str, correct: bool, *, choice_id: str | None = None) -> dict:
+    if choice_id is not None and (not isinstance(choice_id, str) or not re.fullmatch(r"[a-f0-9]{32}", choice_id)):
+        raise ValueError("Invalid choice ID")
     initialize()
     with connect() as db:
-        # The transaction covers numbering and insertion, including simultaneous requests.
+        # Context validation, numbering, interaction and link share one transaction.
+        db.execute("PRAGMA foreign_keys = ON")
         db.execute("BEGIN IMMEDIATE")
+        existing = _choice_attempt(db, choice_id, problem_id, correct)
+        if existing is not None:
+            return existing
         sequence = db.execute("SELECT COALESCE(MAX(sequence_index), -1) + 1 FROM interactions WHERE student_id = 'demo'").fetchone()[0]
         attempt = db.execute("SELECT COALESCE(MAX(attempt_number), 0) + 1 FROM interactions WHERE student_id = 'demo' AND problem_id = ?", (problem_id,)).fetchone()[0]
         db.execute("INSERT INTO interactions VALUES ('demo', ?, ?, ?, ?)", (problem_id, sequence, int(correct), attempt))
+        if choice_id is not None:
+            db.execute("INSERT INTO recommendation_choice_attempts VALUES (?, 'demo', ?)", (choice_id, sequence))
     return {"student_id": "demo", "problem_id": problem_id, "sequence_index": sequence, "correct": correct, "attempt_number": attempt}
