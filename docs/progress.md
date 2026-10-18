@@ -328,3 +328,80 @@ while restoring caller settings on success/failure. The owner ran 111 related
 checks and repeated the private three-epoch actual-vector synthetic smoke with
 exact parity. Publication is atomic into a new directory; test rows stay unread.
 No real-data result, calibration or model-serving activation follows from this.
+
+### October 17: local rollout and loaded content inference
+
+- [#63 local containers](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/63)
+  merged after two independent recipe reviews and all final-head checks. Actual
+  builds and isolated HTTP checks verified the frontend/API proxy, explicit
+  choice, linked outcome/exact retry, API restart persistence and Swagger schema.
+  Review added raw-data/database build-context exclusions and corrected Swagger's
+  proxy root path. Runtime images exclude private state and optional ML packages.
+- [#66 label-free content adapter](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/66)
+  merged after coordinator review, 91 independent related checks and all
+  final-head CI. Already-loaded checkpoints derive vocabulary/encoder identity
+  from metadata and consume exact supplied cached entries. Queries are detached
+  and revalidated; ordered finite scores require live integrity even for empty
+  batches. There is no file/network loading, encoder initialization or API
+  activation. A private actual-vector synthetic smoke matched direct inference.
+- [#62 policy disclosure](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/62)
+  merged after coordinator review and final-head CI. Fifteen independent guarded
+  metadata cases passed; a separate real-backend browser check matched displayed
+  configuration/hash to the generated response. The owner ran all 56 browser
+  cases. Configured challenge bands remain hypotheses without measured benefit.
+- [#65 container CI](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/65)
+  merged after independent product/model review and final-head checks. Real Linux
+  builds checked proxy/schema, choice without grading, exact linked retry and
+  conflict rejection, then removed/recreated containers and verified persisted
+  history and the original retry receipt. Initial CI exposed root-owned parent
+  directories preventing the host receipt write; precreating directories as the
+  host fixes the cause. An independent isolated Linux UID1000 experiment
+  reproduced both failure and fix. Final container jobs passed in 31/34 seconds.
+
+Separate docs PR #64 records the prior model/policy progression; this entry keeps
+the later rollout chronological. The integrated Python suite at `0331822` passed 644 tests with three expected
+protocol skips in 157.48 seconds. Later documentation-only #67 does not change
+that tested implementation.
+Next segments are the bounded loaded-content profiler and a scoped contrast fix,
+each with a separate owner/PR. Real release verification, selected-model locked
+tests, independent calibration evidence and learning outcomes remain unmet.
+
+[#67 synthetic walkthrough](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/67)
+merged after coordinator source/final-delta review and all final-head CI. The
+product engineer verified three clean-seed live replay/choice/linkage cases and
+the real v2 policy disclosure case; guide links and contained Compose configuration
+also passed. Setup preserves an existing demo using a separate private bind
+directory/project/port. Inspection, explicit choice, simulated outcomes and
+duplicate-request receipts are explained as separate behaviors. No model or
+real-data completion is claimed. A subsequent product audit found low contrast
+in several small evidence/status/history labels; a focused fix is underway.
+
+
+A later DataShop browser recheck still lists the login page. Binding that observed
+tab again failed after10 seconds during browser focus setup; no authentication or
+download was performed. The previously requested manual sign-in and working
+browser connection remain external dependencies. No usable release was acquired.
+
+[#68 offline content profiling](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/68)
+merged after coordinator review, 98 independent related checks and all final-head
+CI. Bounded label-free queries and exact offline entries bind checkpoint/query/cache
+identities. Load, parse, cache and warmup costs are separate from aggregate
+loaded-adapter timings; feature building and live integrity stay inside samples.
+Caller CPU settings/RNG are restored on failure/success. The private two-query
+actual-vector smoke is software evidence, not representative compute or model quality.
+
+[#70 text contrast](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/70)
+merged after coordinator source/mobile visual review, an independent real-DOM
+contrast check and all final-head CI. Nine color declarations now meet the
+normal-text threshold on actual initial/hover/selected/mobile surfaces; original
+failures were reproduced. Layout/actions are preserved. This targeted correction
+does not assert complete accessibility conformance.
+
+The three-engineer review found no further concrete product release defect.
+Remaining planned acceptance requires verified real data/catalog and its causal
+audit, locked partitions, fair comparative validation/ablations/compute records,
+validation-only selection/calibration, untouched-test/grouped-error reporting and
+clean-machine reproduction of that actual research. Selected-model activation,
+concept probes and result views depend on that evidence. Learning effectiveness
+still requires a prospective study. Current synthetic-only software and toy timing
+smokes do not close these gates; no new features were invented to obscure them.

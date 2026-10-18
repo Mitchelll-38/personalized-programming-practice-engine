@@ -58,14 +58,15 @@ has distinct owners and review boundaries:
 
 | Owner | Segment | Acceptance | Dependency |
 |---|---|---|---|
-| Coordinator | Local container recipe | Runtime-only API, built web/proxy, private persistent database, loopback-only port, actual retry/restart checks | Existing replay; separate container CI follows |
-| Product engineer | Optional policy inspection | Known v2/demo config only, exact record/hash, honest learning caveat, quiet invalid-metadata fallback | Merged policy backend #61; separate UI #62 |
-| Model engineer | Synthetic content-run publication | Verified train/validation bundle/cache, aggregate metrics, exact checkpoint replay, atomic new output, test rows unread | Merged checkpoint #55, cache #58 and optimizer #59; PR #60 |
-| Coordinator/data lead | Real release receipt/audit | Nonempty valid archive, actual usage/catalog/grading/time verification | DataShop sign-in and working browser download |
+| Coordinator/data lead | Verified real release receipt and audit | Nonempty permitted archive, hash/terms, actual catalog/grading/order review and locked import counts | DataShop sign-in and working browser download |
+| Model engineer | Fair comparative validation and selection | Fixed real splits/seeds/budgets, baselines/DKT/content and feasible ablations; validation-only selection/calibration | Verified real data/catalog; actual compute budget |
+| Product engineer | Selected-model results/probes and final rehearsal | Evidence-based model/result presentation, fixed concept probes, final reproduction guide | Actual comparisons/calibration and selected serving contract |
 
 
 Choice-to-attempt backend/UI (#56/#57), strict checkpoints (#55), cache preparation
-(#58), optimizer (#59) and configurable policy backend (#61) are merged. Content
-serving adapters and container CI follow their foundations in further small PRs.
+(#58), optimizer/run (#59/#60), configured policy/backend UI (#61/#62), local
+containers/CI (#63/#65), loaded-content adapter/profile (#66/#68), walkthrough
+(#67) and focused secondary-text contrast (#70) are merged. The next table
+segments are gated empirical work, not reasons to manufacture additional features.
 No locked-test run, real-data comparison or learning-effect report is
 completed by this software-only progression.
