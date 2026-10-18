@@ -37,9 +37,9 @@ statement/concept catalog, first-scored-run grading interpretation and timestamp
 must be verified before real import/training. There are no measured real-data
 metrics, untouched-test report or learning-effectiveness claims.
 
-Next deliverables are separate choice backend/UI PRs and content batching/forward
-PRs. Later training/checkpoint, locked-test comparison, packaging and release work
-retain their own acceptance gates. A green synthetic test suite does not complete
+Next deliverables are separate choice/outcome linkage and content checkpoint/training
+PRs. Locked-test comparison, packaging and release work retain their own acceptance
+gates. A green synthetic test suite does not complete
 those gates. Hosted deployment remains a separate milestone.
 
 
