@@ -10,8 +10,8 @@ empirical research. Earlier reports retain their original execution evidence.
 | 4: BKT/evaluation | BKT (#16), probability/equal-student metrics (#13), portable inference/run integration (#21, #29, #30, #32) | Real-data comparison and latency measurements |
 | 5: DKT | CPU environment, causal batching/forward, strict checkpoints and bounded trainer (#18, #19, #26, #31) | Real-data training, validation selection and measured run budget |
 | 6: content inputs | Exact cache (#35), optional environment (#39), frozen local CodeBERT extraction (#45) | Verified real problem statements/concepts and content coverage |
-| 7: content model/product | Causal content batching/forward (#49, #53); generated ranking context (#41, #44) | Content checkpoints/training comparison; explicit choice UI awaits final CI |
-| 8: calibration/policy | Reliability diagnostics/scalar (#24, #27), bound envelopes/run/API (#37, #38, #40), inspector (#36, #43), explicit choice backend (#46) | Independent calibration evidence, choice/attempt linkage and policy effectiveness |
+| 7: content model/product | Causal content batching/forward (#49, #53); generated ranking context (#41, #44) | Content checkpoints/training comparison and linked outcomes |
+| 8: calibration/policy | Reliability diagnostics/scalar (#24, #27), bound envelopes/run/API (#37, #38, #40), inspector (#36, #43), explicit choice backend/UI (#46, #48) | Independent calibration evidence, choice/attempt linkage and policy effectiveness |
 
 PR numbers refer to the [public repository PR history](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pulls?q=is%3Apr+is%3Amerged).
 Detailed review findings, test evidence and direct feature links are maintained in

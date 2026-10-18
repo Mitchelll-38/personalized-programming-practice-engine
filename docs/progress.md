@@ -259,8 +259,11 @@ aggregates work-unit acceptance without claiming blocked experiments are complet
 The integrated suite at encoder merge `25ae62b` passed 459 tests with three
 expected protocol skips. Later focused changes have their own final-head checks
 above; this historical total is not presented as the latest suite count.
-The product choice UI #48 has passed independent mocked and real-backend browser
-checks, with final-head CI still pending at this entry. Content checkpoint work
+[The product choice UI #48](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/48)
+merged after final-head CI and coordinator review: seven independent mocked choice
+cases and both live choice/replay scenarios passed; the author ran all 32 browser
+scenarios and the build. The real endpoint acknowledged the exact displayed
+snapshot/problem while history/profile/attempts remained unchanged. Content checkpoint work
 is a separate model-engineer segment. Optional choice-to-attempt linkage is a
 separate coordinator/product contract, preserving grading as its own event.
 

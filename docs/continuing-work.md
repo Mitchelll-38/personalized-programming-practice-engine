@@ -59,7 +59,7 @@ has distinct owners and review boundaries:
 | Owner | Segment | Acceptance | Dependency |
 |---|---|---|---|
 | Coordinator | Optional choice-to-attempt linkage | Same-context binding in one transaction; duplicate-safe receipt; unlinked replay preserved | Merged choice backend #46 |
-| Product engineer | Explicit choice button (#48) | No default/browse logging; context-safe acknowledgement/error; replay independent | Independent browser review complete, final CI pending |
+| Product engineer | Optional choice/outcome UI linkage | Acknowledged same-context choice only; pending/unlinked replay preserved; explicit retry without duplicate attempts | Merged choice UI #48; linkage backend before merge |
 | Model engineer | Content checkpoint | Architecture/vocab/encoder identity; safe CPU load; parity/live integrity | Merged batch #49 and forward #53 |
 | Coordinator/data lead | Real release receipt/audit | Nonempty valid archive, actual usage/catalog/grading/time verification | DataShop sign-in and working browser download |
 
