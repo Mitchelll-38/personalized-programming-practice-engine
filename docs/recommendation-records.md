@@ -29,3 +29,17 @@ This PR adds storage only. No API route starts logging or exposes the records ye
 ranking, manual outcomes, frontend behavior and existing persistence stay unchanged.
 Tests use original synthetic candidates and private temporary databases. Keep real
 row-level data and databases out of public Git.
+
+
+## API generation integration plan
+
+Owner: coordinator. Dependency: snapshot storage PR #41. Purpose: bind each
+recommendation response to the exact generated candidate ranking and observed
+history position, without inferring a learner saw or selected it. Acceptance:
+read history once, rank once, persist those exact ordered scores with current
+model/policy/dataset versions, return its server snapshot ID and history position,
+and preserve previous ranking/replay behavior. Each request creates a distinct
+generation record. Persistence failure must fail the request rather than return
+an unrecorded snapshot identity. Choice/outcome linkage and UI events are separate
+PRs. GET now records generation as a local demo audit side effect; it is not an
+exposure counter and automatic retries can create additional records.

@@ -69,7 +69,9 @@ def test_invalid_history_and_nested_target_fields_rejected(client):
 
 def test_ranking_is_stable_and_new_evidence_updates_profile(client):
     first = client.get("/students/demo/recommendations").json()
-    assert first == client.get("/students/demo/recommendations").json()
+    second = client.get("/students/demo/recommendations").json()
+    assert first["recommendations"] == second["recommendations"]
+    assert first["snapshot_id"] != second["snapshot_id"]
     rows = first["recommendations"]
     assert rows == sorted(rows, key=lambda row: (-row["score"], row["problem_id"]))
     assert all(0 <= row["predicted_correctness"] <= 1 and row["reasons"] for row in rows)
@@ -117,3 +119,48 @@ def test_concept_support_is_distinct_first_attempts_not_retries(client):
     conditionals = next(row for row in client.get("/students/demo/profile").json()["concepts"] if row["concept_id"] == "conditionals")
     assert conditionals["evidence_status"] == "observed-first-attempt"
     assert conditionals["supporting_problem_ids"] == ["java-even", "java-max", "java-count"]
+
+
+def test_generated_snapshot_binds_exact_ranking_history_and_versions(client):
+    from api.recommendation_records import get_snapshot
+    initial_history = client.get("/students/demo/history").json()
+    response = client.get("/students/demo/recommendations")
+    assert response.status_code == 200
+    body = response.json()
+    saved = get_snapshot(body["snapshot_id"])
+    assert saved.snapshot.history_sequence_index == body["history_sequence_index"] == 3
+    assert saved.snapshot.model_id == "demo-history-v1"
+    assert saved.snapshot.policy_version == body["policy_version"]
+    assert saved.snapshot.dataset_version == "synthetic-v1"
+    assert saved.snapshot.calibrated is False
+    assert [row.model_dump() for row in saved.snapshot.candidates] == [
+        {key: row[key] for key in ("problem_id", "predicted_correctness", "score")}
+        for row in body["recommendations"]]
+    client.post("/attempts", json={"student_id": "demo", "problem_id": "java-reverse", "correct": False})
+    later = client.get("/students/demo/recommendations").json()
+    assert later["history_sequence_index"] == 4
+    assert get_snapshot(body["snapshot_id"]) == saved
+    assert initial_history == client.get("/students/demo/history").json()[:-1]
+
+
+def test_generation_reads_one_history_snapshot_and_handles_empty_history(client, monkeypatch):
+    calls = []
+    def observed():
+        calls.append(True)
+        return []
+    monkeypatch.setattr("api.main.storage.history", observed)
+    body = client.get("/students/demo/recommendations").json()
+    assert len(calls) == 1 and body["history_sequence_index"] == -1
+    assert all(row["predicted_correctness"] == .5 for row in body["recommendations"])
+
+
+def test_snapshot_write_failure_does_not_return_unrecorded_generation(client, monkeypatch):
+    import sqlite3
+    def fail(_):
+        raise sqlite3.OperationalError("synthetic write failure")
+    monkeypatch.setattr("api.main.record_snapshot", fail)
+    with TestClient(app, raise_server_exceptions=False) as safe_client:
+        response = safe_client.get("/students/demo/recommendations")
+    assert response.status_code == 500
+    assert "snapshot_id" not in response.text
+    assert "synthetic write failure" not in response.text
