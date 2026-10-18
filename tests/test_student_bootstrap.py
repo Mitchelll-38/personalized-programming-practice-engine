@@ -91,7 +91,9 @@ def test_both_probability_vectors_are_validated(p, q):
         paired_student_bootstrap([example("A")], p, q)
 
 
-@pytest.mark.parametrize("rows", [[], [{}], [example(" ")]])
+@pytest.mark.parametrize("rows", [[], [{}], [example(" ")],
+    [example("A").model_copy(update={"student_id": None})],
+    [example("A").model_copy(update={"student_id": 42})]])
 def test_invalid_examples_fail_without_echoing_identifiers(rows):
     with pytest.raises(ValueError, match="prediction examples"):
         paired_student_bootstrap(rows, [.5], [.5])

@@ -29,7 +29,7 @@ def paired_student_bootstrap(examples, candidate_probabilities, reference_probab
         raise ValueError("seed must be an integer between 0 and 2**32-1")
     if not isinstance(examples, (list, tuple)) or not examples or any(
             type(row) is not PredictionExample or type(row.label) is not bool
-            or not row.student_id.strip() for row in examples):
+            or type(row.student_id) is not str or not row.student_id.strip() for row in examples):
         raise ValueError("Nonempty prediction examples with student IDs are required")
     reports = [evaluate(examples, values) for values in
                (candidate_probabilities, reference_probabilities)]
