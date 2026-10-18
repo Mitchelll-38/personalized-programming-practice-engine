@@ -88,3 +88,8 @@ The [catalog/chronology audit](catalog-chronology-audit.md) records source evide
 and remaining uncertainty. Real-source manifests, canonical histories and training
 remain disabled. Data access no longer blocks structural/catalog setup; chronology
 and source/provenance acceptance still block real model runs.
+
+The prospective [comparative-study protocol](comparative-study.md) specifies
+validation ranking, seed/failure policy and locked-test reporting before real
+metrics exist. Its resource amendment and real-source evaluator remain pending;
+it does not enable real training or replace any acceptance gate.
