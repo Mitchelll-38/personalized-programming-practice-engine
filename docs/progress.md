@@ -405,3 +405,23 @@ clean-machine reproduction of that actual research. Selected-model activation,
 concept probes and result views depend on that evidence. Learning effectiveness
 still requires a prospective study. Current synthetic-only software and toy timing
 smokes do not close these gates; no new features were invented to obscure them.
+
+
+### October 18: official release acquired, import gates remain
+
+The user restored DataShop authentication and the browser connection worked.
+The official S19 full release (file27181, posted February10,2022) downloaded as a
+nonempty7,927,271-byte ZIP and passed full CRC verification. SHA256:
+`c0c21654766c05da4f1beb691ca152181e3b08679855dc70ea7cea01a500cec1`.
+The verified archive, safe extraction and member-hash receipt stay inside ignored
+project-private storage; no new acquired archive remains in Downloads. Current
+project terms point to DataShop's noncommercial-research/non-redistribution rules.
+
+Independent data/model engineers reviewed source gates and private structural
+compatibility. Naive timestamps, mixed timezone representations, scored timestamp
+ties and restricted Order disagreements require source-backed chronology review;
+checks cannot be bypassed to make an importer run. Current source provenance,
+training and serving gates remain unchanged. No real canonical data or model run
+was created. Catalog/source research and a separate bounded archive-inspection
+utility are independent next segments; exact current evidence is maintained in
+[release-acquisition.md](release-acquisition.md).

@@ -8,8 +8,9 @@ Offline software supports rate/logistic/BKT models, CPU ID-only DKT training,
 validation-only temperature scaling and frozen CodeBERT extraction. All committed
 data and demo outcomes are **synthetic**. The active replay uses an untrained,
 uncalibrated heuristic; an optional inspector queries fitted synthetic research
-baselines separately. No real-data metrics or learning gains are claimed. Verified
-release access, usage terms and statement/concept metadata remain open gates.
+baselines separately. No real-data metrics or learning gains are claimed. The official full S19 archive is now privately acquired and checksum-verified;
+[release acquisition](docs/release-acquisition.md) records terms and remaining
+catalog, grading, ordering and real-source provenance gates.
 
 [Two-week plan for three engineers](docs/sprint-plan.md) · [Day-one integration contract](docs/day-1-contract.md) · [Data access status](docs/data-access.md) · [Day-one delivery report](reports/day-1.md)
 
@@ -62,7 +63,7 @@ The default input is **canonical JSONL**. For the organizer-documented CodeWorko
 .\.venv\Scripts\python.exe -m practice_engine.data.cli data/fixtures/codeworkout --format codeworkout --catalog data/fixtures/codeworkout/catalog.json --output data/processed/codeworkout-smoke --synthetic --dataset-version codeworkout-synthetic-v1
 ```
 
-The adapter rejects missing grading/catalog fields, ambiguous timestamps and duplicate event/header keys. `audit.json` records event exclusions, label semantics and original table/catalog hashes; the processing manifest hashes the derived artifacts. This adapter is validated on original synthetic fixtures only. **Real release access, usage terms, grading semantics and catalog provenance remain unverified**; complete those gates before importing real data. No real student data is committed. Exercise-family splits and synthetic fitted models are implemented separately; their existence does not verify this unseen release.
+The adapter rejects missing grading/catalog fields, ambiguous timestamps and duplicate event/header keys. `audit.json` records event exclusions, label semantics and original table/catalog hashes; the processing manifest hashes the derived artifacts. This adapter is validated on original synthetic fixtures only. **The official S19 archive is privately acquired; catalog, grading/order interpretation and reviewed real-source provenance remain import gates**. Current terms restrict use to noncommercial research and prohibit redistribution; see the [acquisition record](docs/release-acquisition.md). No real student data is committed. Exercise-family splits and synthetic fitted models are implemented separately; their existence does not validate this release's grading, chronology or catalog.
 
 ## Optional research workflows
 

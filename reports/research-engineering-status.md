@@ -1,6 +1,6 @@
 # Research engineering status
 
-Execution report: October 17, 2026 (America/Toronto). Sprint days are work units;
+Execution report: October 18, 2026 (America/Toronto). Sprint days are work units;
 this report aggregates reviewed changes across work units 3-10, not completed days of
 empirical research. Earlier reports retain their original execution evidence.
 
@@ -33,11 +33,14 @@ remote inference service. Weights/cache/receipt remain outside public Git under
 ignored project storage. Checkpoint-specific licensing metadata is still absent;
 source-code MIT observations are recorded separately in the encoder contract.
 
-No usable CodeWorkout release has been obtained. Earlier downloads are empty and
-the current browser session needs manual sign-in. The release, usage permissions,
-statement/concept catalog, first-scored-run grading interpretation and timestamps
-must be verified before real import/training. There are no measured real-data
-metrics, untouched-test report or learning-effectiveness claims.
+On October 18, the official full S19 archive downloaded successfully through the
+user-authenticated browser, passed ZIP verification and was privately extracted.
+Its exact size/checksum and current research-only/non-redistribution observations
+are recorded in [release acquisition](../docs/release-acquisition.md). Structural
+audit found chronology/timezone issues requiring an explicit source-backed policy;
+statement/concept coverage, grading and reviewed real-source provenance remain
+import gates. There are no real-data prediction metrics, untouched-test report or
+learning-effectiveness claims.
 
 Next deliverables require the verified release/catalog, comparative real-data runs
 and model selection. Locked-test comparison and final release work retain their own acceptance
