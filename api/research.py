@@ -1,5 +1,6 @@
 """Opt-in stateless serving for declared synthetic portable baseline artifacts."""
 
+import json
 import os
 from pathlib import Path
 
@@ -7,7 +8,8 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from practice_engine.models.artifacts import RateArtifact
-from practice_engine.models.portable import load_baseline_artifact
+from practice_engine.models.calibrated_artifacts import CalibratedBaselineArtifact
+from practice_engine.models.portable import parse_baseline_artifact
 from practice_engine.models.serving import PredictionInput, predict_inputs
 
 router = APIRouter(prefix="/research", tags=["synthetic research"])
@@ -38,8 +40,13 @@ def _artifact():
     if not configured:
         raise HTTPException(status_code=503, detail="research_model_not_configured")
     try:
-        artifact = load_baseline_artifact(Path(configured))
-        if artifact.provenance.source_kind != "synthetic":
+        serialized = Path(configured).read_bytes()
+        payload = json.loads(serialized)
+        calibrated = isinstance(payload, dict) and payload.get("artifact_version") == "temperature-baseline-artifact-v1"
+        artifact = (CalibratedBaselineArtifact.model_validate_json(serialized) if calibrated
+                    else parse_baseline_artifact(serialized))
+        base = artifact.baseline() if calibrated else artifact
+        if base.provenance.source_kind != "synthetic":
             raise ValueError("Real-data provenance gate remains unmet")
         return artifact
     except (OSError, ValueError, TypeError, RecursionError):
@@ -48,6 +55,17 @@ def _artifact():
 
 
 def _metadata(artifact):
+    if isinstance(artifact, CalibratedBaselineArtifact):
+        base = artifact.baseline()
+        metadata = _metadata(base)
+        metadata.update(artifact_version=artifact.artifact_version, calibrated=True,
+                        base_artifact_version=base.artifact_version,
+                        base_artifact_sha256=artifact.base_artifact_sha256,
+                        artifact_sha256=artifact.artifact_sha256,
+                        calibration={"method": "temperature-scaling-v1",
+                                     "temperature": artifact.calibrator_payload["temperature"],
+                                     "validation_record": artifact.validation_record.model_dump(mode="json")})
+        return metadata
     return {"model_kind": "rate" if isinstance(artifact, RateArtifact) else artifact.model_kind,
             "variant": artifact.variant if isinstance(artifact, RateArtifact) else None,
             "artifact_version": artifact.artifact_version, "model_version": artifact.model_version,

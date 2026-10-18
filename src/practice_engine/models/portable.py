@@ -58,8 +58,12 @@ def save_baseline_artifact(path: Path, model: LogisticBaseline | BKTBaseline,
 
 
 def load_baseline_artifact(path: Path) -> RateArtifact | PortableBaselineArtifact:
+    return parse_baseline_artifact(path.read_bytes())
+
+
+def parse_baseline_artifact(serialized: str | bytes) -> RateArtifact | PortableBaselineArtifact:
+    """Validate a known uncalibrated baseline from already-read JSON bytes."""
     import json
-    serialized = path.read_bytes()
     payload = json.loads(serialized)
     if not isinstance(payload, dict):
         raise ValueError("Baseline artifact must be a JSON object")

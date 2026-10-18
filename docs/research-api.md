@@ -15,7 +15,7 @@ $env:PRACTICE_RESEARCH_MODEL = 'C:\private\runs\logistic-smoke\model.json'
 
 `GET /research/model` reports model/feature/artifact versions, payload hash,
 dataset/source kind and declared source/split provenance. It explicitly identifies
-synthetic, uncalibrated software-test output (`research_results=false`). This
+synthetic software-test output and calibration status (`research_results=false`). This
 declaration does not authenticate data permission or empirical predictive quality.
 
 `POST /research/predict` takes an object with only `inputs`: 1–1000 label-free
@@ -39,3 +39,28 @@ Never configure an untrusted file or expose this unauthenticated demo publicly.
 `/models/current`, `/predict`, learner profiles, recommendations and the dashboard
 continue using the existing synthetic heuristic. Configuring the research path
 does not select it for replay, train a model or establish learning effectiveness.
+
+## Calibrated baseline envelopes
+
+The same server path can select `temperature-baseline-artifact-v1` envelopes from
+the [validation calibration workflow](calibration-runs.md). No separate endpoint
+or configuration knob is added. The underlying base must still declare synthetic
+source data. Loading validates the embedded base, envelope/fitting hashes and
+matching provenance; unknown versions and modified artifacts fail closed with the
+same private 503 response. Files are read once per request and parsed in memory.
+
+Calibrated metadata keeps the underlying model/feature/payload identity, sets
+`artifact_version` to the envelope version and `calibrated=true`, and adds
+`base_artifact_version`, `base_artifact_sha256`, `artifact_sha256` plus `calibration`.
+The latter declares the temperature-scaling method, scalar and full validation
+fitting record: partition, source/split provenance, validation/probability hashes,
+fitting count and predeclared grid. `is_synthetic=true` and `research_results=false`
+remain explicit. Hashes and records are declarations, not authenticated provenance.
+`calibrated=true` means a fitted scalar is applied; it does not certify empirical
+calibration quality, especially on the same validation observations used to fit it.
+
+Label-free queries and existing limits are unchanged. The adapter preserves live
+envelope integrity checks and applies the scalar to base probabilities. Existing
+uncalibrated baseline responses are unchanged. The current inspector deliberately
+rejects calibrated responses rather than labeling them uncalibrated; presenting
+calibration in the UI is a separate change. Replay continues using the heuristic.

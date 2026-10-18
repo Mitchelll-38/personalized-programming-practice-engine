@@ -30,3 +30,10 @@ This PR loads no files, trains no model and changes no API endpoint, active mode
 calibration flag or learner profile. Artifact provenance remains declared, not
 authenticated evidence of data permission or empirical quality. Neural checkpoint
 serving is a separate adapter; importing this module does not require Torch.
+
+The adapter also accepts reviewed `CalibratedBaselineArtifact` envelopes. It
+retains the same label-free causal inputs and delegates to the wrapper's live
+integrity checks and scalar prediction. The wrapper's public `baseline()` returns
+a detached, validated base artifact for metadata/source inspection; changing that
+copy cannot alter the wrapper. Calibration provenance remains declared rather
+than authenticated evidence. See [research-api.md](research-api.md) for metadata.

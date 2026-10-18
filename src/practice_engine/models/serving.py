@@ -5,6 +5,7 @@ from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, model
 from practice_engine.data.schema import Candidate, Interaction, PredictionExample
 
 from .artifacts import RateArtifact
+from .calibrated_artifacts import CalibratedBaselineArtifact
 from .features import historical_features
 from .portable import PortableBaselineArtifact
 
@@ -42,14 +43,14 @@ class PredictionScore(BaseModel):
     predicted_correctness: StrictFloat = Field(ge=0, le=1, allow_inf_nan=False)
 
 
-def predict_inputs(artifact: RateArtifact | PortableBaselineArtifact,
+def predict_inputs(artifact: RateArtifact | PortableBaselineArtifact | CalibratedBaselineArtifact,
                    inputs: list[PredictionInput]) -> list[PredictionScore]:
     """Preserve query order and revalidate causal boundaries before prediction.
 
     Supported artifacts recheck their payload integrity during prediction. This
     adapter does not fit a model, expose target labels or activate an API model.
     """
-    if not isinstance(artifact, (RateArtifact, PortableBaselineArtifact)):
+    if not isinstance(artifact, (RateArtifact, PortableBaselineArtifact, CalibratedBaselineArtifact)):
         raise ValueError("Only reviewed portable baseline artifacts are supported")
     if any(not isinstance(row, PredictionInput) for row in inputs):
         raise ValueError("Queries must be PredictionInput objects")
