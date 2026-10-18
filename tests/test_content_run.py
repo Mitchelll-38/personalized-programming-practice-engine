@@ -88,6 +88,63 @@ def test_binary_test_examples_never_parsed(prepared, tmp_path):
     assert changed["test_examples_read"] is False
 
 
+def test_evaluator_extensions_cannot_add_row_or_learner_outputs(prepared, tmp_path, monkeypatch):
+    original = content_run.evaluate
+    def extended(*args):
+        return {**original(*args), "future_rows": [{"student_id": "private", "score": .2}],
+                "future_learners": {"private": {"label": True}}}
+    monkeypatch.setattr(content_run, "evaluate", extended)
+    run(prepared, tmp_path / "run")
+    payload = json.loads((tmp_path / "run/validation.json").read_text())
+    assert set(payload) == {"aggregate", "equal_student_macro", "metric_definitions"}
+    assert "private" not in json.dumps(payload)
+
+
+@pytest.mark.parametrize("fail_replay", [False, True])
+def test_default_sized_replay_scopes_threads_and_determinism(prepared, tmp_path, monkeypatch, fail_replay):
+    bundle, cache, encoder = prepared
+    first = json.loads((bundle / "validation.jsonl").read_text().splitlines()[0])
+    rows = []
+    for index in range(32):
+        row = {**first, "target_sequence_index": 100 + index,
+               "candidate": {**first["candidate"], "problem_id": f"heldout-{index}"}}
+        rows.append(json.dumps(row))
+    (bundle / "validation.jsonl").write_text("\n".join(rows) + "\n")
+    refresh(bundle)
+    original = content_run.load_content_checkpoint
+    observed_batches = []
+    def checked(path):
+        checkpoint = original(path)
+        class Checked:
+            def logits(self, inputs):
+                assert torch.get_num_threads() == 1 and torch.are_deterministic_algorithms_enabled()
+                observed_batches.append(len(inputs.lengths))
+                if fail_replay:
+                    raise ValueError("injected replay failure")
+                return checkpoint.logits(inputs)
+        return Checked()
+    monkeypatch.setattr(content_run, "load_content_checkpoint", checked)
+    threads, enabled, warn = torch.get_num_threads(), torch.are_deterministic_algorithms_enabled(), torch.is_deterministic_algorithms_warn_only_enabled()
+    try:
+        torch.set_num_threads(2)
+        torch.use_deterministic_algorithms(False, warn_only=True)
+        if fail_replay:
+            with pytest.raises(ValueError, match="injected replay"):
+                content_run.train_content(bundle, cache, tmp_path / "run", encoder=encoder,
+                    config=ContentTrainingConfig(max_epochs=1))
+            assert not (tmp_path / "run").exists() and not list(tmp_path.glob(".run.*"))
+        else:
+            result = content_run.train_content(bundle, cache, tmp_path / "run", encoder=encoder,
+                config=ContentTrainingConfig(max_epochs=1))
+            assert result["reload_predictions_equal"] and result["validation_examples"] == 32
+        assert observed_batches == [32]
+        assert torch.get_num_threads() == 2 and not torch.are_deterministic_algorithms_enabled()
+        assert torch.is_deterministic_algorithms_warn_only_enabled()
+    finally:
+        torch.use_deterministic_algorithms(enabled, warn_only=warn)
+        torch.set_num_threads(threads)
+
+
 @pytest.mark.parametrize("fault", ["unverified", "corrupt", "missing-cache", "modified-cache"])
 def test_source_gate_and_cache_integrity_fail_without_publication(prepared, tmp_path, monkeypatch, fault):
     bundle, cache, _ = prepared

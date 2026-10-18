@@ -21,6 +21,24 @@ from .content import ContentTrainingConfig, fit_content
 from .content_cache import load_content_entries
 
 
+def _replay(checkpoint, rows, vocabulary, entries, encoder, batch_size):
+    threads = torch.get_num_threads()
+    deterministic = torch.are_deterministic_algorithms_enabled()
+    warn_only = torch.is_deterministic_algorithms_warn_only_enabled()
+    try:
+        torch.set_num_threads(1)
+        torch.use_deterministic_algorithms(True)
+        probabilities = []
+        with torch.device("cpu"), torch.inference_mode():
+            for start in range(0, len(rows), batch_size):
+                batch = make_content_batch(rows[start:start + batch_size], vocabulary, entries, encoder)
+                probabilities.extend(torch.sigmoid(checkpoint.logits(batch.inputs)).tolist())
+        return tuple(probabilities)
+    finally:
+        torch.use_deterministic_algorithms(deterministic, warn_only=warn_only)
+        torch.set_num_threads(threads)
+
+
 def train_content(bundle: Path, directory: Path, output: Path, *, encoder: EncoderConfig | None = None,
                   config: ContentTrainingConfig | None = None) -> dict:
     bundle, output = Path(bundle), Path(output)
@@ -40,8 +58,8 @@ def train_content(bundle: Path, directory: Path, output: Path, *, encoder: Encod
     inventory = {"cache_namespace": CACHE_NAMESPACE, "encoder": encoder.model_dump(),
                  "entries": {key: entries[key].entry_sha256 for key in sorted(entries)}}
     fit = fit_content(verified.train, verified.validation, entries, encoder, config=config)
-    metrics = {key: value for key, value in evaluate(verified.validation, fit.validation_probabilities).items()
-               if key != "per_student"}
+    evaluation = evaluate(verified.validation, fit.validation_probabilities)
+    metrics = {key: evaluation[key] for key in ("aggregate", "equal_student_macro", "metric_definitions")}
     run = {"run_version": "content-run-v1", "dataset_kind": "synthetic", "research_results": False,
         "model_version": "content-lstm-v1", "feature_version": "content-inputs-forward-v1",
         "config": asdict(config), "config_sha256": payload_hash(asdict(config)),
@@ -63,13 +81,8 @@ def train_content(bundle: Path, directory: Path, output: Path, *, encoder: Encod
             staging = Path(temporary)
             metadata = save_content_checkpoint(staging / "model", fit.model, fit.vocabulary, encoder, verified.provenance)
             checkpoint = load_content_checkpoint(staging / "model")
-            probabilities = []
-            with torch.device("cpu"), torch.inference_mode():
-                for start in range(0, len(verified.validation), config.batch_size):
-                    rows = verified.validation[start:start + config.batch_size]
-                    batch = make_content_batch(rows, fit.vocabulary, entries, encoder)
-                    probabilities.extend(torch.sigmoid(checkpoint.logits(batch.inputs)).tolist())
-            if tuple(probabilities) != fit.validation_probabilities:
+            probabilities = _replay(checkpoint, verified.validation, fit.vocabulary, entries, encoder, config.batch_size)
+            if probabilities != fit.validation_probabilities:
                 raise ValueError("Content checkpoint reload prediction mismatch")
             run.update(reload_predictions_equal=True, checkpoint_metadata_sha256=metadata.metadata_sha256,
                        checkpoint_weights_sha256=metadata.weights_sha256)

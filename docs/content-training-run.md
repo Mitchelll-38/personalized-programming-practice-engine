@@ -33,6 +33,10 @@ hash binds the sorted key→entry-checksum map plus encoder and namespace. It is
 declared content identity, not encoder-origin or permission authentication.
 No per-row predictions, learner/problem IDs, text/code, labels or cache vectors
 are persisted. Vocabulary tags and learned weights follow the checkpoint contract.
+Validation fields are explicitly limited to `aggregate`, `equal_student_macro`
+and `metric_definitions`; future evaluator output fields are not published.
+Checkpoint replay uses one deterministic CPU thread, matching optimizer validation,
+and restores caller threads/determinism/warn-only settings even on replay failure.
 
 Publication uses same-filesystem staging and an owned cooperating-writer lock.
 Existing destinations/competing locks are preserved and owned temporary state is
