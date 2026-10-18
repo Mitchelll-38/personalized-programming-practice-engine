@@ -538,3 +538,40 @@ Integrated checks at `7b8da45` passed 110 audit/adapter/bootstrap/metric cases i
 chronology and reviewed real-source support. The prepared organizer clarification
 email remains unsent pending explicit sending authorization; no contact or student
 data transmission occurred during these engineering PRs.
+
+## October 18 HOME desktop handover verification
+
+The corrected project directory was freshly cloned at clean main `72725ca`.
+Remote checks confirm PRs #75-81 merged, no open PRs at inspection, and successful
+CI/browser/neural-encoder workflows on that exact head. No local checkout was
+overwritten. The private CodeWorkout release directory is absent on this desktop;
+previous acquisition evidence describes the earlier machine, not files available
+in this clone. No archive/catalog was redownloaded and no outreach occurred.
+
+A three-engineer team is implementing bounded DKT validation/reload batches and
+pure paired ranking-metric bootstrap intervals in separate contained worktrees.
+Purpose, owners, acceptance and dependencies are recorded before implementation
+in the feature contracts and continuing-work plan. Current GitHub authentication
+is read-only for this repository, so publication and integration are blocked
+pending writer access. Local work must not be called merged or CI-verified.
+
+Local verification: the model engineer's ranking segment passed 61 focused
+ranking/bootstrap/metric checks, and the independent platform reviewer reran the
+same 61 checks with no blocking findings. The platform engineer's DKT segment
+passed 59 training/forward/checkpoint/serving checks; independent model-engineer
+source review found no blocking defects. These are original synthetic software
+checks. Final commit review and remote CI remain required before integration.
+
+The clean main baseline at `72725ca` passed **828 tests, three expected skips**
+in 92.50 seconds on this desktop with Python 3.12.13 and the pinned development,
+CPU neural and encoder dependencies. This verifies current main, not the new
+feature heads. The reviewed local commits are `3a21b0c` on
+`feat/paired-ranking-bootstrap` and `6f0e039` on `fix/dkt-validation-batches`.
+Both have focused local checks and saved draft PR descriptions. Neither is pushed
+or merged; final-head GitHub checks cannot run until write authentication is ready.
+
+The model engineer independently reran 52 DKT training/forward/checkpoint tests
+at final local head `6f0e039`: all passed in 14.27 seconds, with no review findings.
+The coordinator's local documentation diff was independently reviewed for factual
+accuracy, privacy and unmerged-work disclosure with no findings. This is agent
+review, not a human GitHub approval; remote final-head CI remains pending.
