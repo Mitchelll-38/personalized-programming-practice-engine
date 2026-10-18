@@ -474,3 +474,34 @@ skips in 15.19 seconds, covering both new modules plus importer/manifest/bundle
 boundaries. Private original-archive and 50-candidate replays passed independently.
 Real chronology and training still await authoritative timezone clarification; the
 prepared email remains unsent pending the user's explicit authorization.
+
+## October 18 reproducible audit rollout
+
+[#75 comparative-study protocol](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/75)
+merged after independent model/data-engineer review of exact head `2196784`,
+relative-link verification and all applicable final-head CI. It declares primary
+validation log-loss ranking, fixed seed/configuration and incomplete-run handling,
+calibration separation and locked-test reporting before real metrics exist.
+Resource ceilings, real-source support and the test/bootstrap evaluator remain
+explicitly pending. No training, results or publication rights are implied.
+
+[#76 chronology aggregates](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/76)
+merged after independent coordinator source review, 33 final collector checks
+and all final-head CI. Review corrected maximum tie size for singleton-only inputs
+and clarified that invalid-Order rows are excluded from the ordered sequence.
+The label-free projected interface produces fixed aggregate keys, distinguishes
+raw wall-time decreases from same-literal observations, and never converts zones
+or creates histories. Private official projections reproduced 272 Run timestamp
+tie groups (673 rows), 403 mixed-literal learners and three scoped wall-time
+decreases; all three are within one literal. These are source diagnostics, not a
+verified causal timeline. Source-backed chronology remains unresolved.
+
+[#77 structural auditor](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/77)
+merged after independent coordinator source/contract review, 45 related checks and
+all final-head CI. Independent private replay matched acquisition hashes for both
+tables, 201,570 MainTable records and 69,627 CodeState records, with zero key/join
+diagnostics and all Run scores finite/in-range. Its API/CLI reads only those two
+tables and emits fixed aggregate diagnostics, including unavailable-field `null`
+values; unknown headers/events and private rows never enter receipts. Hash stability
+is per table, not an atomic two-table snapshot. The receipt remains private; no
+outcome distribution, chronology policy or real-source training gate was added.
