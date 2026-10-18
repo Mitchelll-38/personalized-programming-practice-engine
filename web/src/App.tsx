@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { getSnapshot, recordOutcome, type Snapshot, type RecommendationChoice as ChoiceAcknowledgement } from "./api";
 import ResearchInspector from "./ResearchInspector";
 import RecommendationChoice from "./RecommendationChoice";
+import PolicyInspection from "./PolicyInspection";
 
 const label = (id: string) => id.replace(/[_-]/g, " ");
 const percent = (value: number) => `${Math.round(value * 100)}%`;
@@ -199,6 +200,7 @@ export default function App() {
                 <p className="section-note">
                   Select an exercise to inspect its prompt and ranking reasons.
                 </p>
+                <PolicyInspection ranking={snapshot.ranking} />
                 {snapshot.ranking.recommendations.length ? (
                   <ol className="recommendation-list">
                     {snapshot.ranking.recommendations.map((item, index) => (
