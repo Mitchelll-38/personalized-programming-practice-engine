@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { getSnapshot, recordOutcome, type Snapshot } from "./api";
 import ResearchInspector from "./ResearchInspector";
 import RecommendationChoice from "./RecommendationChoice";
@@ -14,12 +14,15 @@ export default function App() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [refreshPending, setRefreshPending] = useState(false);
+  const loadGeneration = useRef(0);
 
   const load = useCallback(async () => {
+    const generation = ++loadGeneration.current;
     setLoading(true);
     setError("");
     try {
       const next = await getSnapshot();
+      if (generation !== loadGeneration.current) return;
       setSnapshot(next);
       setSelectedId((current) =>
         next.exercises.some((item) => item.problem_id === current)
@@ -30,18 +33,20 @@ export default function App() {
       );
       setRefreshPending(false);
     } catch (err) {
+      if (generation !== loadGeneration.current) return;
       setError(
         err instanceof Error
           ? err.message
           : "Could not reach the local API. Start the server and retry.",
       );
     } finally {
-      setLoading(false);
+      if (generation === loadGeneration.current) setLoading(false);
     }
   }, []);
 
   useEffect(() => {
     void load();
+    return () => { loadGeneration.current += 1; };
   }, [load]);
 
   async function simulate(correct: boolean) {
