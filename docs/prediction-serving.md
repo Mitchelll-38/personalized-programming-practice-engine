@@ -37,3 +37,25 @@ integrity checks and scalar prediction. The wrapper's public `baseline()` return
 a detached, validated base artifact for metadata/source inspection; changing that
 copy cannot alter the wrapper. Calibration provenance remains declared rather
 than authenticated evidence. See [research-api.md](research-api.md) for metadata.
+
+## Optional DKT inference adapter
+
+Owner: coordinator. Purpose: query a loaded strict CPU DKT checkpoint through the
+same label-free causal request/ordered probability contract as portable baselines.
+Dependency: checkpoint #26 and input boundary #30. Acceptance: require a reviewed
+checkpoint and typed revalidated requests; retain known/unknown and cold-start
+semantics and live integrity checks; emit finite ordered scores; importing the
+existing generic serving/API modules remains free of Torch. Implementation lives
+in a separate optional module. No checkpoint file loading, API activation, neural
+calibration or measured research results are added by this adapter.
+
+
+Import `predict_dkt_inputs` from `practice_engine.models.dkt_serving` only in an
+optional neural environment. It accepts an already-loaded `DKTCheckpoint` and a
+list of `PredictionInput` objects, returning ordered `PredictionScore` objects.
+Unknown candidate IDs retain the checkpoint's declared train-count fallback;
+empty histories retain its zero recurrent state. Every call revalidates request
+copies, nested metadata and live checkpoint weights, including empty batches.
+The legacy checkpoint interface receives the same fixed internal false-label
+sentinel used by baseline serving; it never accepts a client outcome. This
+optional import requires Torch, while generic API/serving imports do not.
