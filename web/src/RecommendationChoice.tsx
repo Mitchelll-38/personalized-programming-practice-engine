@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { recordRecommendationChoice } from "./api";
+import { recordRecommendationChoice, type RecommendationChoice as ChoiceAcknowledgement } from "./api";
 
-export default function RecommendationChoice({ snapshotId, problemId, busy }: { snapshotId: string; problemId: string; busy: boolean }) {
+export default function RecommendationChoice({ snapshotId, problemId, busy, onRecorded }: {
+  snapshotId: string; problemId: string; busy: boolean; onRecorded: (choice: ChoiceAcknowledgement) => void;
+}) {
   const [state, setState] = useState<"idle" | "pending" | "recorded" | "error">("idle");
   const [error, setError] = useState("");
   const pending = useRef<AbortController | null>(null);
@@ -14,8 +16,11 @@ export default function RecommendationChoice({ snapshotId, problemId, busy }: { 
     setState("pending");
     setError("");
     try {
-      await recordRecommendationChoice(snapshotId, problemId, controller.signal);
-      if (!controller.signal.aborted) setState("recorded");
+      const choice = await recordRecommendationChoice(snapshotId, problemId, controller.signal);
+      if (!controller.signal.aborted) {
+        setState("recorded");
+        onRecorded(choice);
+      }
     } catch (error) {
       if (!controller.signal.aborted) {
         setError(error instanceof Error ? error.message : "Could not record this choice. Please retry.");

@@ -56,11 +56,11 @@ export type Snapshot = {
   ranking: Ranking;
 };
 
-async function request<T>(path: string, options?: RequestInit): Promise<T> {
+async function request<T>(path: string, options?: RequestInit, errors?: Partial<Record<number, string>>): Promise<T> {
   const response = await fetch(`/api${path}`, options);
   if (!response.ok)
     throw new Error(
-      `API request failed (${response.status}). Check that the local API is running, then retry.`,
+      errors?.[response.status] ?? `API request failed (${response.status}). Check that the local API is running, then retry.`,
     );
   return response.json() as Promise<T>;
 }
@@ -76,12 +76,16 @@ export async function getSnapshot(): Promise<Snapshot> {
   return { model, exercises, history, profile, ranking };
 }
 
-export function recordOutcome(problem_id: string, correct: boolean) {
+export function recordOutcome(problem_id: string, correct: boolean, choice_id?: string) {
   return request<Interaction>("/attempts", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ student_id: "demo", problem_id, correct }),
-  });
+    body: JSON.stringify({ student_id: "demo", problem_id, correct, ...(choice_id !== undefined ? { choice_id } : {}) }),
+  }, choice_id !== undefined ? {
+    404: "Recorded choice was not found. Refresh the workspace before retrying.",
+    422: "Recorded choice does not match this exercise. Refresh the workspace before retrying.",
+    409: "Recorded choice already has a different simulated outcome. Refresh before recording another outcome.",
+  } : undefined);
 }
 
 export type RecommendationChoice = {

@@ -14,7 +14,9 @@ async function workspace(page: Page, request: APIRequestContext) {
   } }));
   await page.route("**/api/students/demo/history", (route) => route.fulfill({ json: history }));
   await page.route("**/api/attempts", async (route) => {
-    const row = { ...route.request().postDataJSON(), sequence_index: history.length, attempt_number: 1 };
+    const body = route.request().postDataJSON();
+    const row = { student_id: body.student_id, problem_id: body.problem_id, correct: body.correct,
+      sequence_index: history.length, attempt_number: 1 };
     history.push(row);
     snapshot = "b".repeat(32);
     await route.fulfill({ status: 201, json: row });

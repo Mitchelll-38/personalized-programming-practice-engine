@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getSnapshot, recordOutcome, type Snapshot } from "./api";
+import { getSnapshot, recordOutcome, type Snapshot, type RecommendationChoice as ChoiceAcknowledgement } from "./api";
 import ResearchInspector from "./ResearchInspector";
 import RecommendationChoice from "./RecommendationChoice";
 
@@ -14,6 +14,7 @@ export default function App() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [refreshPending, setRefreshPending] = useState(false);
+  const [acknowledgedChoice, setAcknowledgedChoice] = useState<ChoiceAcknowledgement | null>(null);
   const loadGeneration = useRef(0);
 
   const load = useCallback(async () => {
@@ -49,13 +50,18 @@ export default function App() {
     return () => { loadGeneration.current += 1; };
   }, [load]);
 
+  useEffect(() => { setAcknowledgedChoice(null); }, [selectedId, snapshot?.ranking.snapshot_id]);
+
   async function simulate(correct: boolean) {
     if (!selectedId || saving) return;
     setSaving(true);
     setError("");
     setNotice("");
     try {
-      const stored = await recordOutcome(selectedId, correct);
+      // Capture only a choice already acknowledged at this click. A pending
+      // choice cannot retroactively attach to the outcome being submitted.
+      const stored = await recordOutcome(selectedId, correct, activeChoice?.choice_id);
+      setAcknowledgedChoice(null);
       setNotice(
         `Simulated ${correct ? "correct" : "incorrect"} outcome recorded as interaction ${stored.sequence_index}.`,
       );
@@ -78,6 +84,8 @@ export default function App() {
   const selectedRanking = snapshot?.ranking.recommendations.find(
     (item) => item.problem_id === selectedId,
   );
+  const activeChoice = acknowledgedChoice?.problem_id === selectedId && acknowledgedChoice.snapshot_id === snapshot?.ranking.snapshot_id
+    ? acknowledgedChoice : null;
   const correctCount =
     snapshot?.history.filter((item) => item.correct).length ?? 0;
 
@@ -283,10 +291,11 @@ export default function App() {
                         </p>
                       </div>
                     )}
-                      {selectedRanking && <RecommendationChoice key={`${snapshot.ranking.snapshot_id}:${selectedId}`} snapshotId={snapshot.ranking.snapshot_id} problemId={selectedId} busy={saving || loading || refreshPending} />}
+                      {selectedRanking && <RecommendationChoice key={`${snapshot.ranking.snapshot_id}:${selectedId}`} snapshotId={snapshot.ranking.snapshot_id} problemId={selectedId} busy={saving || loading || refreshPending} onRecorded={setAcknowledgedChoice} />}
                     <ResearchInspector key={`${selectedId}:${JSON.stringify(snapshot.history)}`} snapshot={snapshot} candidate={selected} busy={saving || loading || refreshPending} />
                     <div className="simulation">
                       <h3>Replay a simulated outcome</h3>
+                      {activeChoice && <p role="status">The next simulated outcome will link to your recorded choice. Choosing alone does not grade code.</p>}
                       <p>
                         Record a synthetic result to recalculate the concept
                         profile and recommendations. This does not grade code.
