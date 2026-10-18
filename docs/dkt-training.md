@@ -50,3 +50,30 @@ epoch losses and selected epoch. Test bytes are integrity-hashed but never decod
 as examples. Synthetic validation metrics are software smoke evidence only:
 `research_results=false`, `test_evaluated=false`, `calibrated=false`. No API model
 activation, real-data training, calibration or learning-effectiveness claim follows.
+
+## October 18: bounded validation and reload plan
+
+Owner: platform engineer. Purpose: remove whole-validation padded tensor allocation
+from the training workflow and selected-checkpoint reload check. Dependencies:
+existing DKT forward/checkpoint interfaces and the optional pinned CPU environment.
+Acceptance: every validation/reload call uses at most the configured `batch_size`;
+ordered probabilities, unknown-candidate population fallback, aggregate log-loss
+selection and selected-state reload parity remain intact, including a short final
+batch. Synthetic-only bundle validation and unread test examples remain required.
+
+Implement sequential validation slices and checkpoint reload slices using the
+existing training batch limit. Verify parity against whole-batch predictions,
+unequal final chunks, batch allocation limits and the existing deterministic,
+early-stopping, publication and poisoned-test regressions. This bounds rows per
+padded tensor, not history length, total dataset memory or elapsed run time; it does
+not approve a real-release resource budget or enable real training.
+
+Validation and selected-checkpoint reload now use sequential slices of at most
+`batch_size` examples. Ordered scalar predictions are collected before aggregate
+metrics are computed, so a short last slice has its proper example weight. Reload
+uses the same slice boundaries as in-memory validation for exact selected-state
+parity. Tensor allocations scale with each slice's longest history; the loaded
+partitions and scalar probabilities still occupy memory for the full dataset.
+Changing batch size may produce ordinary floating-point differences and is not a
+promise of bitwise equivalence across configurations. Checkpoint inference outside
+this training workflow retains its caller-supplied batch interface.
