@@ -505,3 +505,36 @@ tables and emits fixed aggregate diagnostics, including unavailable-field `null`
 values; unknown headers/events and private rows never enter receipts. Hash stability
 is per table, not an atomic two-table snapshot. The receipt remains private; no
 outcome distribution, chronology policy or real-source training gate was added.
+
+The documentation rollout record and acquisition/continuing-work links merged in
+[#78](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/78)
+after independent model/data-engineer review and all applicable final-head CI.
+Integrated Python verification at `d2ecb9c` passed **787 tests, three expected
+skips**, in 172.30 seconds. Main CI, neural/encoder checks, browser smoke and local
+container workflows also passed at that revision. No empirical model result or
+learning-effect claim follows from these software checks.
+
+[#79 chronology CSV adapter](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/79)
+merged after independent calibration-engineer review with 76 related checks,
+coordinator supplementary review with 51 adapter/collector checks, private source
+hash/aggregate parity and all final-head CI. It projects seven exact string fields
+from MainTable and verifies v6 metadata's declared restricted scope; byte/row caps
+and generic errors bound the local CSV interface. Observed consistency `true`
+does not approve a timeline: interpretation remains unresolved and no zone
+normalization, canonical import or real-source training is enabled.
+
+[#80 paired student bootstrap](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/80)
+merged after independent platform-engineer review, 39 related checks and all
+final-head CI. A separate expanded-row/statistics-quantile calculation reproduced
+all 12 interval outputs over 200 seeded draws with unequal clusters, both labels
+and boundary probabilities. Review found and corrected non-string student IDs in
+copied model objects, adding `None`/integer regressions. The pure utility preserves
+whole-student draw multiplicity for observation/equal-student log-loss/Brier and
+paired differences. It returns aggregate estimates only and reads no files;
+locked-test access, ranking-metric intervals and empirical results remain separate.
+
+Integrated checks at `7b8da45` passed 110 audit/adapter/bootstrap/metric cases in
+1.43 seconds. Real interaction import/model comparison still requires authoritative
+chronology and reviewed real-source support. The prepared organizer clarification
+email remains unsent pending explicit sending authorization; no contact or student
+data transmission occurred during these engineering PRs.
