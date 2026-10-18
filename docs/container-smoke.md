@@ -32,6 +32,11 @@ It builds on a fresh Linux runner, checks replay, removes/recreates containers,
 checks persisted history and receipt idempotency, then cleans its network and
 containers even after failure. Failure logs show container diagnostics. It checks
 the HTML shell and HTTP boundaries; existing Playwright CI checks browser JS.
+Private bind directories are created by the host runner before Compose startup;
+otherwise Docker can create root-owned parents and prevent the host smoke from
+writing its separate receipt. The first Linux CI run exposed this ownership gap
+after all HTTP assertions passed; directory creation fixes the cause without
+loosening permissions or changing the application checks.
 
 On client date 2026-10-17, both script phases passed against a separately built
 local instance on port 18081, including conflict rejection with no history append.
