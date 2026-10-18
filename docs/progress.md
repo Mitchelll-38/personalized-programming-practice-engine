@@ -140,3 +140,50 @@ maintenance instructions. Work stays inside `.worktrees/`; private data stays
 inside ignored `.data/private/data/`. No usable real release or real-data results
 are currently recorded. Each resumed feature retains its own tests, documentation,
 independent review and PR rather than becoming a combined continuation PR.
+
+
+### Reviewed deliveries on October 17
+
+The folder-maintenance change was delivered in [PR #34](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/34);
+[PR #33](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/33)
+reconciled the delivery record after resumption. The following focused changes
+were independently reviewed and merged after their final-head CI passed:
+
+- [#35 embedding cache](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/35):
+  exact content/configuration identities, finite immutable vectors and atomic
+  no-overwrite publication. Baseline engineer independently reviewed the boundary;
+  26 focused tests passed. Caller-provided vectors do not prove encoder execution.
+- [#37 calibrated envelopes](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/37):
+  bind a portable baseline, validation-fitting record and scalar in a checked
+  artifact. Model engineer reviewed 62 focused artifact/scalar checks; coordinator
+  ran 79 regressions. Hashes identify content, not authenticated provenance.
+- [#36 research inspector](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/36):
+  optional causal, label-free baseline inspection without changing replay ranking.
+  Review caught truthiness checks that accepted missing/string flags; exact boolean
+  checks and six malformed-flag browser cases fixed that finding. All ten browser
+  scenarios and the build passed before final independent approval.
+- [#38 validation calibration command](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/38):
+  reload an existing baseline, verify bundle provenance, fit only on validation
+  and publish artifact/reliability/run records. Independent baseline review passed
+  14 workflow tests; broader checks passed 99 with three expected protocol skips.
+  Before/after diagnostics use fitting observations, not independent reliability evidence.
+- [#39 encoder environment](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/39):
+  optional pinned dependencies and offline CPU CI. Independent review checked
+  imports, dependency consistency and lazy API imports; 63 regressions passed.
+  This installs software, not model weights or a real dataset.
+- [#40 calibrated research API](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/40):
+  serve known synthetic calibrated envelopes with explicit scalar/fitting metadata,
+  preserving label-free inputs and unchanged replay behavior. Model engineer
+  independently approved the final head after 52 focused API/serving checks.
+
+Recommendation snapshot storage remains under review in #41. Review found that
+valid JSON could carry a different record identity than its database row; the
+coordinator added row/payload binding and regressions before requesting rereview.
+The product engineer owns a separate calibrated-inspector PR; the model engineer
+owns a frozen CodeBERT extraction PR. Neither is recorded as merged here.
+
+No usable CodeWorkout release has been obtained: prior archive downloads contain
+zero bytes. DataShop authentication is pending again; an account's existence does
+not supply a usable release. Real import verification, statement/concept coverage,
+real training, locked-test evaluation and learning-effectiveness evidence remain
+unmet gates. Software tests and synthetic calibration runs do not satisfy them.
