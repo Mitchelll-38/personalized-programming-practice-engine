@@ -575,3 +575,16 @@ at final local head `6f0e039`: all passed in 14.27 seconds, with no review findi
 The coordinator's local documentation diff was independently reviewed for factual
 accuracy, privacy and unmerged-work disclosure with no findings. This is agent
 review, not a human GitHub approval; remote final-head CI remains pending.
+
+## October 18 resumed HOME publication
+
+After the user completed GitHub login and resumed work, repository push access
+was verified without changing credentials. Refreshed origin/main remains
+`72725ca`; no preexisting open PRs or local checkout edits were found. The prior
+read-only authentication blocker is resolved. Private release assets remain
+absent here; no redownload, organizer outreach, real import or training occurred.
+
+The reviewed ranking and DKT branches were published initially as draft PRs
+[#82](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/82)
+and [#83](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/83).
+Exact final-head checks and current local reruns are pending before rollout.

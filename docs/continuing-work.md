@@ -106,7 +106,7 @@ as a pure probability-score utility, without a test loader. Its original synthet
 checks and independent expanded-row oracle establish software arithmetic only;
 real selection, calibration, locked-test evaluation and publication remain pending.
 
-## October 18 HOME desktop continuation (local work, not rollout)
+## October 18 HOME desktop preparation (historical local snapshot)
 
 Owner: coordinating engineer. Purpose: verify the handover on this desktop and
 record two dependency-ready, separately reviewed engineering segments.
@@ -128,6 +128,23 @@ that exact main head. The private release directory is absent on this desktop;
 a clone does not transfer the archive, catalog, weights or private draft.
 No redownload, organizer outreach, real import or real training was performed.
 
-The current GitHub credential has read access but lacks repository push access.
+At preparation time, the GitHub credential had read access but lacked push access.
 Local implementation and independent review can proceed; PR publication, final-head
 CI and merging require a writer account. These segments are not merged deliveries.
+
+## October 18 resumed publication
+
+The user completed GitHub web authentication and explicitly resumed project work.
+Read-only permission verification confirms repository push access. Remote main
+still matches `72725ca`; no preexisting open PRs or checkout changes were found.
+The earlier authentication blocker is resolved. Private release assets remain
+absent on this desktop, and authoritative chronology/provenance still gate real
+import/training. Organizer outreach remains unauthorized.
+
+The reviewed ranking and DKT changes are published as separate draft PRs
+[#82](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/82)
+and [#83](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/83).
+Current local checks are being rerun, and GitHub workflows must pass on the exact
+final head before either change is marked delivered. The coordinator owns the
+rollout record; feature engineers retain their isolated branches and cross-review
+responsibility. No empirical result follows from this publication.
