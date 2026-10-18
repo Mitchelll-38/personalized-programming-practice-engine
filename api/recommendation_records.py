@@ -63,14 +63,21 @@ def record_snapshot(snapshot: RecommendationSnapshot) -> StoredSnapshot:
     return stored
 
 
+def _reconstruct(row) -> StoredSnapshot:
+    stored = StoredSnapshot.model_validate_json(row[2])
+    if stored.snapshot_id != row[0] or stored.created_at.isoformat() != row[1]:
+        raise ValueError("Snapshot payload identity does not match its database row")
+    return stored
+
+
 def get_snapshot(snapshot_id: str) -> StoredSnapshot | None:
     if not isinstance(snapshot_id, str) or not re.fullmatch(r"[a-f0-9]{32}", snapshot_id):
         raise ValueError("Invalid snapshot ID")
     with connect() as db:
         _initialize(db)
-        row = db.execute("SELECT payload_json FROM recommendation_snapshots WHERE snapshot_id = ?",
+        row = db.execute("SELECT snapshot_id, created_at, payload_json FROM recommendation_snapshots WHERE snapshot_id = ?",
                          (snapshot_id,)).fetchone()
-    return StoredSnapshot.model_validate_json(row[0]) if row else None
+    return _reconstruct(row) if row else None
 
 
 def list_snapshots(*, limit: int = 50) -> list[StoredSnapshot]:
@@ -78,6 +85,6 @@ def list_snapshots(*, limit: int = 50) -> list[StoredSnapshot]:
         raise ValueError("Snapshot limit must be an integer between 1 and 500")
     with connect() as db:
         _initialize(db)
-        rows = db.execute("SELECT payload_json FROM recommendation_snapshots "
+        rows = db.execute("SELECT snapshot_id, created_at, payload_json FROM recommendation_snapshots "
                           "ORDER BY created_at DESC, snapshot_id DESC LIMIT ?", (limit,)).fetchall()
-    return [StoredSnapshot.model_validate_json(row[0]) for row in rows]
+    return [_reconstruct(row) for row in rows]

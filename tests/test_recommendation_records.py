@@ -87,3 +87,17 @@ def test_invalid_ids_and_corrupt_payload_fail_closed(database):
                    ('{"unexpected":"corrupt"}', saved.snapshot_id))
     with pytest.raises(ValueError):
         get_snapshot(saved.snapshot_id)
+
+
+@pytest.mark.parametrize("field,value", [("snapshot_id", "0" * 32),
+    ("created_at", "2000-01-01T00:00:00Z")])
+def test_valid_json_with_mismatched_row_identity_fails_closed(database, field, value):
+    saved = record_snapshot(snapshot())
+    payload = json.loads(saved.model_dump_json())
+    payload[field] = value
+    with sqlite3.connect(database) as db:
+        db.execute("UPDATE recommendation_snapshots SET payload_json = ? WHERE snapshot_id = ?",
+                   (json.dumps(payload), saved.snapshot_id))
+    for read in (lambda: get_snapshot(saved.snapshot_id), list_snapshots):
+        with pytest.raises(ValueError, match="identity"):
+            read()
