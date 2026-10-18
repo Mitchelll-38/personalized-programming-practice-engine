@@ -8,6 +8,8 @@ from uuid import uuid4
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, model_validator
 
 from api.storage import connect
+from api.practice_policy import PracticePolicy
+from practice_engine.models.artifacts import payload_hash
 
 
 class ScoredCandidate(BaseModel):
@@ -27,11 +29,18 @@ class RecommendationSnapshot(BaseModel):
     policy_version: str = Field(min_length=1, max_length=256, pattern=r"\S")
     dataset_version: str = Field(min_length=1, max_length=256, pattern=r"\S")
     calibrated: StrictBool = False
+    policy_config: PracticePolicy | None = None
+    policy_sha256: str | None = Field(default=None, pattern=r"^[a-f0-9]{64}$")
     history_sequence_index: StrictInt = Field(ge=-1)
     candidates: tuple[ScoredCandidate, ...] = Field(min_length=1, max_length=1000)
 
     @model_validator(mode="after")
     def unique_candidates(self):
+        if (self.policy_config is None) != (self.policy_sha256 is None):
+            raise ValueError("Policy configuration and hash must be recorded together")
+        if self.policy_config is not None and (self.policy_config.policy_version != self.policy_version
+                or payload_hash(self.policy_config.model_dump()) != self.policy_sha256):
+            raise ValueError("Policy identity differs from snapshot metadata")
         ids = [row.problem_id for row in self.candidates]
         if len(set(ids)) != len(ids):
             raise ValueError("Snapshot candidates must be distinct")

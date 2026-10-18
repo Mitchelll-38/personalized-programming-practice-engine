@@ -9,6 +9,8 @@ from api.catalog import BY_ID, EXERCISES
 from api.heuristics import concept_profile, estimate, first_attempts, recommend
 from api.recommendation_records import RecommendationSnapshot, ScoredCandidate, record_snapshot
 from api import storage
+from api.practice_policy import configured_policy
+from practice_engine.models.artifacts import payload_hash
 from api.research import router as research_router
 from api.recommendation_choices import router as choices_router
 
@@ -95,18 +97,21 @@ def profile():
 
 @app.get("/students/demo/recommendations")
 def recommendations():
+    policy = configured_policy()
     observed = storage.history()
-    ranked = recommend(observed)
+    ranked = recommend(observed, policy)
     metadata = current_model()
     position = max((row["sequence_index"] for row in observed), default=-1)
     stored = record_snapshot(RecommendationSnapshot(
         model_id=metadata["model_id"], dataset_version=metadata["dataset_version"],
-        calibrated=metadata["calibrated"], policy_version="demo-ranking-v1",
+        calibrated=metadata["calibrated"], policy_version=policy.policy_version,
+        policy_config=policy, policy_sha256=payload_hash(policy.model_dump()),
         history_sequence_index=position,
         candidates=tuple(ScoredCandidate(problem_id=row["problem_id"],
             predicted_correctness=row["predicted_correctness"], score=row["score"]) for row in ranked)))
     return {"student_id": "demo", "is_demo": True, "policy_version": stored.snapshot.policy_version,
             "snapshot_id": stored.snapshot_id, "history_sequence_index": position,
+            "policy_config": stored.snapshot.policy_config.model_dump(), "policy_sha256": stored.snapshot.policy_sha256,
             "recommendations": ranked}
 
 
