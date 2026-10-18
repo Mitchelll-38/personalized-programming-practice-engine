@@ -408,6 +408,16 @@ h3 {
   font-size: 11px;
   overflow-wrap: anywhere;
 }
+.policy-inspection {
+  margin: 0 0 16px;
+}
+.policy-record {
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+.policy-record pre {
+  white-space: pre-wrap;
+}
 .simulation {
   border-top: 1px solid #eaeaea;
   padding-top: 20px;
