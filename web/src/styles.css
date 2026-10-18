@@ -297,7 +297,7 @@ h2 {
   font:
     11px "Courier New",
     monospace;
-  color: #7e8c81;
+  color: #5f6c60;
   align-self: flex-start;
   padding-top: 3px;
 }
@@ -312,7 +312,7 @@ h2 {
 }
 .recommendation-copy > span {
   display: block;
-  color: #6d776d;
+  color: #5f6c60;
   font-size: 10px;
   margin-top: 4px;
   text-transform: capitalize;
@@ -328,7 +328,7 @@ h2 {
 }
 .probability > span {
   font-size: 9px;
-  color: #6b766d;
+  color: #5f6c60;
 }
 .library {
   margin-top: 23px;
@@ -445,7 +445,7 @@ h3 {
 .save-status {
   display: block;
   font-size: 10px;
-  color: #748071;
+  color: #5f6c60;
   margin-top: 12px;
 }
 .concept-list {
@@ -496,7 +496,7 @@ meter::-moz-meter-bar {
 }
 .concept p {
   font-size: 10px;
-  color: #77816f;
+  color: #5f6c60;
   margin: 6px 0 0;
 }
 .concept-evidence {
@@ -522,7 +522,7 @@ table {
 }
 th {
   font-weight: 500;
-  color: #788272;
+  color: #5f6c60;
   font-size: 10px;
   padding: 0 10px 10px 0;
   border-bottom: 1px solid #eaeaea;
@@ -537,7 +537,7 @@ tr:last-child td {
 }
 .mono {
   font-family: "Courier New", monospace;
-  color: #788471;
+  color: #5f6c60;
 }
 .outcome {
   font-size: 10px;
@@ -554,7 +554,7 @@ tr:last-child td {
   color: #8a6945;
 }
 .table-note {
-  color: #7a8274;
+  color: #5f6c60;
   font-size: 10px;
   margin: 12px 0 0;
 }
@@ -562,7 +562,7 @@ footer {
   display: flex;
   justify-content: space-between;
   gap: 16px;
-  color: #7a8175;
+  color: #5f6c60;
   font-size: 10px;
   padding-top: 25px;
 }
