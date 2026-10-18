@@ -10,9 +10,11 @@ from api.heuristics import concept_profile, estimate, first_attempts, recommend
 from api.recommendation_records import RecommendationSnapshot, ScoredCandidate, record_snapshot
 from api import storage
 from api.research import router as research_router
+from api.recommendation_choices import router as choices_router
 
 app = FastAPI(title="Programming Practice Engine — synthetic demo", description="Local synthetic replay with optional stateless research baselines. No Java execution; calibration status is explicit.")
 app.include_router(research_router)
+app.include_router(choices_router)
 
 
 class StrictRequest(BaseModel):
