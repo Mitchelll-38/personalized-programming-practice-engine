@@ -10,7 +10,7 @@ from api.heuristics import concept_profile, estimate, first_attempts, recommend
 from api import storage
 from api.research import router as research_router
 
-app = FastAPI(title="Programming Practice Engine — synthetic demo", description="Local synthetic replay with an optional stateless synthetic research baseline. No Java execution or calibrated probabilities.")
+app = FastAPI(title="Programming Practice Engine — synthetic demo", description="Local synthetic replay with optional stateless research baselines. No Java execution; calibration status is explicit.")
 app.include_router(research_router)
 
 

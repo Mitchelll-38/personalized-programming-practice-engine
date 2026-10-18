@@ -73,6 +73,11 @@ class CalibratedBaselineArtifact(BaseModel):
         probabilities = _baseline(self.base_artifact).predict(examples)
         return TemperatureScaler.from_dict(self.calibrator_payload).predict(probabilities)
 
+    def baseline(self) -> RateArtifact | PortableBaselineArtifact:
+        """Return a detached validated base, preserving live envelope checks."""
+        self.valid_contents()
+        return _baseline(self.base_artifact)
+
 
 def save_calibrated_artifact(path: Path, base: RateArtifact | PortableBaselineArtifact,
                              scaler: TemperatureScaler,
