@@ -94,9 +94,14 @@ validation ranking, seed/failure policy and locked-test reporting before real
 metrics exist. Its resource amendment and real-source evaluator remain pending;
 it does not enable real training or replace any acceptance gate.
 
-Reproducible structural diagnostics (#77) and the pure label-free chronology
-collector (#76) are merged. The next platform segment is a separate CSV adapter
-for the collector: verify the declared restricted scope, hash the exact private
-tables and project only the seven chronology fields. It must preserve unresolved
-interpretation and cannot create histories. Coordinator owns final private replay
-and integration; the model/data engineer independently reviews its boundaries.
+Reproducible structural diagnostics (#77), the pure label-free chronology
+collector (#76) and its separate [CSV adapter](chronology-csv.md) (#79) are merged.
+The adapter verifies declared restricted scope, hashes the exact private tables
+and projects only the seven chronology fields. Independent review and private
+replay preserved unresolved interpretation; no histories are created. Source-backed
+chronology and reviewed real-source support remain the next import dependencies.
+
+The day-nine [paired student bootstrap](student-bootstrap.md) (#80) is also merged
+as a pure probability-score utility, without a test loader. Its original synthetic
+checks and independent expanded-row oracle establish software arithmetic only;
+real selection, calibration, locked-test evaluation and publication remain pending.
