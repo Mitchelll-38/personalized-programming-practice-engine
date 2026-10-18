@@ -1,0 +1,16 @@
+.git
+.worktrees
+.venv
+.data
+artifacts
+data/processed
+data/raw
+**/node_modules
+**/__pycache__
+**/.pytest_cache
+**/.env*
+**/*.sqlite*
+**/*.db
+web/dist
+web/test-results
+web/playwright-report
