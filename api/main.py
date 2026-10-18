@@ -49,6 +49,7 @@ class PredictionRequest(StrictRequest):
 
 
 class AttemptRequest(StrictRequest):
+    choice_id: Annotated[str, Field(strict=True, pattern=r"^[a-f0-9]{32}$")] | None = None
     student_id: Literal["demo"]
     problem_id: str
     correct: StrictBool
@@ -118,4 +119,11 @@ def predict(request: PredictionRequest):
 @app.post("/attempts", status_code=201)
 def attempts(request: AttemptRequest):
     ensure_known([request.problem_id])
-    return storage.record(request.problem_id, request.correct)
+    try:
+        return storage.record(request.problem_id, request.correct, choice_id=request.choice_id)
+    except storage.ChoiceConflictError:
+        raise HTTPException(status_code=409, detail="choice_outcome_conflict") from None
+    except LookupError:
+        raise HTTPException(status_code=404, detail="recommendation_choice_not_found") from None
+    except ValueError:
+        raise HTTPException(status_code=422, detail="invalid_choice_attempt_link") from None
