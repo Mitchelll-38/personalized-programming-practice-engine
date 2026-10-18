@@ -410,8 +410,8 @@ smokes do not close these gates; no new features were invented to obscure them.
 ### October 18: official release acquired, import gates remain
 
 The user restored DataShop authentication and the browser connection worked.
-The official S19 full release (file27181, posted February10,2022) downloaded as a
-nonempty7,927,271-byte ZIP and passed full CRC verification. SHA256:
+The official S19 full release (file 27181, posted February 10, 2022) downloaded as a
+nonempty 7,927,271-byte ZIP and passed full CRC verification. SHA256:
 `c0c21654766c05da4f1beb691ca152181e3b08679855dc70ea7cea01a500cec1`.
 The verified archive, safe extraction and member-hash receipt stay inside ignored
 project-private storage; no new acquired archive remains in Downloads. Current
@@ -425,3 +425,52 @@ training and serving gates remain unchanged. No real canonical data or model run
 was created. Catalog/source research and a separate bounded archive-inspection
 utility are independent next segments; exact current evidence is maintained in
 [release-acquisition.md](release-acquisition.md).
+
+
+[#71 acquisition record](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/71)
+merged after independent model-engineer verification of the actual archive,
+five-document review and all final-head CI. README/status distinguish successful
+private acquisition from unchanged real-import/model gates. No raw data, catalog
+content, account email or session material was published.
+
+Subsequent independent source/catalog audit located the exact organizer-linked
+sheet: 50 problem prompts and 18 binary annotation columns. An explicitly narrow
+assignment spelling crosswalk gives complete 50/50 coverage; no generic numeric
+identifier conversion or instructor-ground-truth claim is allowed. Original CSV
+and audit/coverage receipts stay private. The archive inspector and catalog mapper
+are separate small engineering segments.
+
+The timezone review found a substantive unresolved issue: naive timestamps have
+mixed 0/UTC labels for most subjects, while the archived organizer wording does
+not establish whether 0 is UTC or relative to Eastern time. Formal scoped Order
+cannot resolve cross-problem chronology. Label-blind sensitivity checks establish
+that interpretation affects history order; they do not select a policy. A private
+clarification draft is ready and sending it awaits explicit user authorization.
+[Source evidence and limits](catalog-chronology-audit.md) are maintained separately.
+No canonical real histories, real-source provenance flags or training run was made.
+
+
+[#72 bounded archive inspection](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/72)
+merged after coordinator source review, 42 independent archive/import/manifest
+checks and all final-head CI. An independent private official-archive smoke matched
+the acquisition archive SHA and all six file hashes. The narrow profile permits
+only the six CSV members and three known empty directory markers, preflights ZIP
+directory allocation and streams bounded CRC/hashes. It never parses rows, extracts
+files or authorizes real-data provenance/training. Only original synthetic ZIP
+fixtures are committed.
+
+
+[#73 organizer catalog mapping](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/73)
+merged after coordinator source review, 98 independent related checks (three
+expected protocol skips) and all final-head CI. Independent private replay matched
+all 50 saved candidate values exactly, preserving release IDs, prompt text and
+original positive concept headers. The frozen result has detached receipt metadata
+binding source/inventory/crosswalk/policy/candidate hashes. Only original synthetic
+CSV fixtures are public; mapped actual candidate JSON and receipts remain private.
+No interaction import, timezone normalization, source flags or training was added.
+
+Integrated data checks at `06f518d` passed 115 cases with three expected protocol
+skips in 15.19 seconds, covering both new modules plus importer/manifest/bundle
+boundaries. Private original-archive and 50-candidate replays passed independently.
+Real chronology and training still await authoritative timezone clarification; the
+prepared email remains unsent pending the user's explicit authorization.

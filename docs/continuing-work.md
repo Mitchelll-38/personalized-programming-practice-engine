@@ -70,3 +70,21 @@ containers/CI (#63/#65), loaded-content adapter/profile (#66/#68), walkthrough
 segments are gated empirical work, not reasons to manufacture additional features.
 No locked-test run, real-data comparison or learning-effect report is
 completed by this software-only progression.
+
+
+## October 18 acquisition follow-up
+
+Official archive acquisition is complete in #71; the previous sign-in/download
+blocker is resolved. The prior table remains a historical plan. Current segmented
+ownership before any real-data provenance/training change:
+
+| Owner | Segment | Acceptance | Dependency |
+|---|---|---|---|
+| Platform engineer | Bounded archive inspector | Exact known shape, streaming CRC/hash receipt, resource/path checks, no row parsing or authorization claims | Private acquired archive; merged PR #72 |
+| Model/data engineer | Organizer catalog mapping | One-to-one narrow assignment spelling crosswalk, exact release IDs/prompt/header tags, complete coverage and private outputs | Audited organizer sheet; merged #73, no chronology changes |
+| Coordinator/data lead | Chronology evidence and clarification | Authoritative interpretation of mixed timezone labels and reviewed scoped ordering/exclusions | Public source ambiguity; organizer contact authorization pending |
+
+The [catalog/chronology audit](catalog-chronology-audit.md) records source evidence
+and remaining uncertainty. Real-source manifests, canonical histories and training
+remain disabled. Data access no longer blocks structural/catalog setup; chronology
+and source/provenance acceptance still block real model runs.
