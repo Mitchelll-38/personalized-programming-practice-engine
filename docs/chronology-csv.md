@@ -59,3 +59,14 @@ Archive verification, structural compatibility, catalog mapping, chronology
 interpretation, canonical import and training remain separate reviewed stages.
 This utility does not authorize source use, resolve UTC/0 or choose an exclusion
 policy. Keep private-release receipts under ignored project-private storage.
+
+## Verification record
+
+On client date 2026-10-18, 76 adapter/collector/importer/manifest checks passed in
+5.84 seconds, including 18 original synthetic adapter cases. They verify exact
+projection parity, ignored outcome/code poisoning, forbidden unrelated-table reads,
+metadata/header/scope failures, limits, actual source mutation and safe CLI errors.
+The private official replay matched acquisition table hashes/row counts and prior
+aggregate chronology diagnostics. Declared consistency was true while interpreted
+chronology remained unresolved with no normalization or global timeline approval.
+The receipt stays private; no canonical history or empirical model run was made.
