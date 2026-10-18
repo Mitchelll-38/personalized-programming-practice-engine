@@ -46,7 +46,8 @@ Responses add full normalized `policy_config` and canonical `policy_sha256`; the
 snapshot retains that same immutable configuration/hash and matching v2 version.
 No original configuration-file path is returned. Historical v1 records lacking
 both fields remain readable with null configuration/hash; their original scoring
-rule is documented in earlier commits. A hash without configuration (or mismatched
+rule is documented in earlier commits. Known v2 records require both fields even when both are absent from old-style JSON.
+A hash without configuration (or mismatched
 version/hash) fails snapshot validation. Hashes detect declared content changes,
 not authenticated provenance. This affects the heuristic policy only; optional
 fitted-model inspection continues independently.

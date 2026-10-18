@@ -96,7 +96,8 @@ def test_snapshot_policy_binding_revalidates_copies_and_old_records_remain_reada
     api, path = client
     body = api.get("/students/demo/recommendations").json()
     saved = get_snapshot(body["snapshot_id"])
-    for change in ({"policy_sha256": "0" * 64}, {"policy_version": "different"}, {"policy_sha256": None}):
+    for change in ({"policy_sha256": "0" * 64}, {"policy_version": "different"}, {"policy_sha256": None},
+                   {"policy_config": None, "policy_sha256": None}):
         with pytest.raises(ValueError):
             record_snapshot(saved.snapshot.model_copy(update=change))
     assert len(list_snapshots()) == 1
@@ -109,4 +110,14 @@ def test_snapshot_policy_binding_revalidates_copies_and_old_records_remain_reada
     with sqlite3.connect(path) as db:
         db.execute("UPDATE recommendation_snapshots SET payload_json=? WHERE snapshot_id=?",
                    (json.dumps(legacy), old.snapshot_id))
+    assert get_snapshot(old.snapshot_id) == old
+
+    stripped = json.loads(saved.model_dump_json())
+    stripped["snapshot"].pop("policy_config")
+    stripped["snapshot"].pop("policy_sha256")
+    with sqlite3.connect(path) as db:
+        db.execute("UPDATE recommendation_snapshots SET payload_json=? WHERE snapshot_id=?",
+                   (json.dumps(stripped), saved.snapshot_id))
+    with pytest.raises(ValueError, match="Version 2"):
+        get_snapshot(saved.snapshot_id)
     assert get_snapshot(old.snapshot_id) == old

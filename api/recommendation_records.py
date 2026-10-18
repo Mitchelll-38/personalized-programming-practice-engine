@@ -36,6 +36,8 @@ class RecommendationSnapshot(BaseModel):
 
     @model_validator(mode="after")
     def unique_candidates(self):
+        if self.policy_version == "transparent-ranking-v2" and self.policy_config is None:
+            raise ValueError("Version 2 snapshots require the exact policy configuration")
         if (self.policy_config is None) != (self.policy_sha256 is None):
             raise ValueError("Policy configuration and hash must be recorded together")
         if self.policy_config is not None and (self.policy_config.policy_version != self.policy_version
