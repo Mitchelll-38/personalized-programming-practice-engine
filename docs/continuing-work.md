@@ -15,7 +15,7 @@ The user requests continuous progress across planned days. Complete and review s
 
 Other product, BKT, neural, calibration and release tasks follow in their own reviewed PRs once these foundations are integrated. Do not bundle multiple rows into a day-sized PR.
 
-## October 14 execution snapshot and next segments
+## October 14 execution snapshot and planned segments (historical)
 
 The foundations above are integrated. Logistic/BKT and CPU DKT run commands now
 exercise synthetic train/validation bundles; the research API serves reviewed
@@ -47,3 +47,23 @@ work and reviewed small PRs while recording the unresolved gate.
 - Research artifacts wrap a JSON-serializable model payload with its model type/version and dataset/split/feature provenance. A saved model is not automatically the active API model.
 - Holdout module lives under `data/` and returns partition metadata plus partitioned examples. Holdout histories exclude all validation/test exercise responses across all groups, including earlier held-out responses in later scored histories. Student holdouts keep observed test prefixes allowed under their separate protocol.
 - Initial metrics live under `evaluation/`; accept examples and probabilities, and do not choose thresholds or calibrators using test data.
+
+
+## October 17 current segments
+
+The historical table above records the earlier plan. Cache, inspector, calibrated
+envelopes/run/API, encoder environment/extraction and recommendation generation
+are now merged; see the chronological ledger and linked PRs. The following work
+has distinct owners and review boundaries:
+
+| Owner | Segment | Acceptance | Dependency |
+|---|---|---|---|
+| Coordinator | Explicit choice storage/API (#46) | Intact snapshot/candidate context; strict requests; server IDs/time; no grade mutation | Merged generation #44 |
+| Product engineer | Explicit choice button | No default/browse logging; context-safe acknowledgement/error; replay independent | Choice API before merge |
+| Model engineer | Content batch foundation | Train-only concept vocabulary; verified frozen vectors; causal history and separate labels | Merged encoder #45 |
+| Model engineer | Content forward network | Packed history; candidate-conditioned output; masks/cold start/gradient checks | Reviewed batch foundation |
+| Coordinator/data lead | Real release receipt/audit | Nonempty valid archive, actual usage/catalog/grading/time verification | DataShop authentication and working download |
+
+Training/checkpoint support follows the reviewed content interface in further
+small PRs. No locked-test run, real-data comparison or learning-effect report is
+completed by this software-only progression.
