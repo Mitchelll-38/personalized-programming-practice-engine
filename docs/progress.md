@@ -190,3 +190,35 @@ zero bytes. DataShop authentication is pending again; an account's existence doe
 not supply a usable release. Real import verification, statement/concept coverage,
 real training, locked-test evaluation and learning-effectiveness evidence remain
 unmet gates. Software tests and synthetic calibration runs do not satisfy them.
+
+
+### October 17: calibrated presentation, generation records and frozen encoder
+
+- [#43 calibrated inspector](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/43)
+  merged after coordinator review, independent build/16 calibration browser cases,
+  author full 20 browser cases and final-head CI. Explicit scalar/validation-fit
+  labels avoid implying independently established reliability. The initial local
+  reviewer run used system Python and could not import the package; rerunning with
+  the documented shared environment passed.
+- [#44 generation recording](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/44)
+  merged after model engineer review, 65 independently rerun API/storage/research
+  tests and final-head CI. Each response references the exact stored ordered
+  ranking and history position. GET records generation; retries can add records.
+  Generation does not establish display or choice.
+- [#45 frozen CodeBERT](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/45)
+  merged after coordinator review, 35 independent adapter/cache tests and final-head
+  CI. Review found that an extra unverified tokenizer file could shadow checked
+  vocabulary; the final snapshot guard and regression reject unexpected files.
+  The official 498,627,950-byte weights were downloaded privately and matched the
+  expected SHA-256. Frozen CPU inference on three original synthetic content inputs
+  produced finite 768-dimensional vectors and identical cache-hit reloads in a
+  29.23-second smoke run. A receipt stays in ignored private encoder storage.
+  This establishes local encoder execution, not predictive quality. Source MIT
+  terms and absent checkpoint-specific license metadata remain distinguished.
+
+The next segmented work is choice backend #46, an explicit product choice action,
+and content-model batching followed by a separate forward network. Choice events
+remain separate from simulated correctness. The engineers agreed that browsing a
+prompt or accepting a default selection must not automatically record a choice.
+The [research engineering status](../reports/research-engineering-status.md)
+aggregates work-unit acceptance without claiming blocked experiments are complete.
