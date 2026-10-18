@@ -110,7 +110,9 @@ available. Report every declared comparator and the selected checkpoint's metric
 sample/student counts, unknown-ID coverage and history-length strata (0, 1-4,
 5-19, 20+). Uncertainty should resample whole students with fixed seed 38 and
 1,000 paired bootstrap replicates, report 95% percentile intervals, and identify
-undefined/sparse estimates; this evaluator/bootstrap is not implemented yet.
+undefined/sparse estimates. The [paired student bootstrap](student-bootstrap.md)
+implements log-loss/Brier intervals; a locked-test evaluator and ranking-metric
+intervals remain unimplemented.
 Family results are a separate report if that protocol clears its own gates.
 
 Never revise features, seeds, calibration or selection after test inspection.
