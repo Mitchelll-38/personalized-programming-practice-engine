@@ -126,3 +126,17 @@ contains only an empty failed archive, not a usable release. A local move receip
 is retained under ignored `artifacts/`. Future worktree/storage locations are
 documented in `AGENTS.md`. Feature development and agent implementation remain
 paused until the user requests continuation.
+
+## October 17, 2026 — resumed segmented development
+
+The user resumed the project. The coordinator restored the three-person workflow
+from the contained worktrees: the product engineer continues the optional fitted
+baseline inspector; the model engineer continues the frozen embedding-cache
+boundary; the coordinator owns calibration artifact integration, data access and
+ordered PR rollout. Unfinished files were preserved across the folder move.
+
+The earlier progress-document PR is being reconciled with the merged folder
+maintenance instructions. Work stays inside `.worktrees/`; private data stays
+inside ignored `.data/private/data/`. No usable real release or real-data results
+are currently recorded. Each resumed feature retains its own tests, documentation,
+independent review and PR rather than becoming a combined continuation PR.
