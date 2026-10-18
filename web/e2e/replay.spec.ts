@@ -1,4 +1,44 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Request } from "@playwright/test";
+
+test("live explicit choice binds the displayed generation without changing outcomes", async ({ page, request }) => {
+  const before = await Promise.all(["history", "profile"].map(async (name) =>
+    (await request.get(`/api/students/demo/${name}`)).json()));
+  const rankings: Request[] = [];
+  const choices: Request[] = [];
+  let attempts = 0;
+  page.on("request", (call) => {
+    const path = new URL(call.url()).pathname;
+    if (path === "/api/students/demo/recommendations") rankings.push(call);
+    if (path === "/api/recommendation-choices" && call.method() === "POST") choices.push(call);
+    if (path === "/api/attempts" && call.method() === "POST") attempts += 1;
+  });
+  await page.goto("/");
+  await page.getByLabel("Exercise library").selectOption("java-count");
+  const pane = page.getByRole("region", { name: "Recommendation choice" });
+  const button = pane.getByRole("button", { name: "Choose this recommendation", exact: true });
+  await expect(button).toBeEnabled();
+  expect(choices).toHaveLength(0);
+  // The latest workspace request owns the displayed snapshot, including when
+  // StrictMode has started multiple initial batches. Do not fetch a new ranking.
+  const displayed = await (await rankings.at(-1)!.response())!.json();
+  expect(displayed.recommendations.some((row: { problem_id: string }) => row.problem_id === "java-count")).toBe(true);
+  const responsePromise = page.waitForResponse((response) =>
+    new URL(response.url()).pathname === "/api/recommendation-choices" && response.request().method() === "POST");
+  await button.click();
+  const response = await responsePromise;
+  expect(response.status()).toBe(201);
+  expect(response.request().postDataJSON()).toEqual({ snapshot_id: displayed.snapshot_id, problem_id: "java-count" });
+  const saved = await response.json();
+  expect(saved).toMatchObject({ snapshot_id: displayed.snapshot_id, problem_id: "java-count" });
+  expect(saved.choice_id).toMatch(/^[a-f0-9]{32}$/);
+  expect(saved.created_at).toMatch(/(Z|\+00:00)$/);
+  await expect(pane).toContainText("Choice recorded for this recommendation snapshot");
+  expect(choices).toHaveLength(1);
+  expect(attempts).toBe(0);
+  const after = await Promise.all(["history", "profile"].map(async (name) =>
+    (await request.get(`/api/students/demo/${name}`)).json()));
+  expect(after).toEqual(before);
+});
 
 test("live replay persists first evidence and excludes successful retries", async ({ page, request }) => {
   const errors: string[] = [];

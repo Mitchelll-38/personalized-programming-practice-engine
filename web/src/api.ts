@@ -38,6 +38,8 @@ export type Ranking = {
   student_id: string;
   is_demo: boolean;
   policy_version: string;
+  snapshot_id: string;
+  history_sequence_index: number;
   recommendations: Recommendation[];
 };
 export type Model = {
@@ -80,6 +82,27 @@ export function recordOutcome(problem_id: string, correct: boolean) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ student_id: "demo", problem_id, correct }),
   });
+}
+
+export type RecommendationChoice = {
+  choice_id: string;
+  created_at: string;
+  snapshot_id: string;
+  problem_id: string;
+};
+
+export async function recordRecommendationChoice(snapshot_id: string, problem_id: string, signal: AbortSignal): Promise<RecommendationChoice> {
+  const response = await fetch("/api/recommendation-choices", {
+    method: "POST", signal, headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ snapshot_id, problem_id }),
+  });
+  if (response.status !== 201) throw new Error(`Could not record this choice (${response.status}). Retry or refresh the workspace.`);
+  const choice = await response.json() as RecommendationChoice;
+  if (!choice || typeof choice.choice_id !== "string" || !/^[a-f0-9]{32}$/.test(choice.choice_id) ||
+      choice.snapshot_id !== snapshot_id || choice.problem_id !== problem_id ||
+      typeof choice.created_at !== "string" || !/(Z|\+00:00)$/.test(choice.created_at) || !Number.isFinite(Date.parse(choice.created_at)))
+    throw new Error("Unexpected choice acknowledgement. The request may already have been recorded.");
+  return choice;
 }
 
 type ResearchBaseModel = {
