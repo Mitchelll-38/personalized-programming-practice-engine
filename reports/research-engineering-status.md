@@ -10,8 +10,8 @@ empirical research. Earlier reports retain their original execution evidence.
 | 4: BKT/evaluation | BKT (#16), probability/equal-student metrics (#13), portable inference/run integration (#21, #29, #30, #32) | Real-data comparison and latency measurements |
 | 5: DKT | CPU environment, causal batching/forward, strict checkpoints and bounded trainer (#18, #19, #26, #31) | Real-data training, validation selection and measured run budget |
 | 6: content inputs | Exact cache (#35), optional environment (#39), frozen local CodeBERT extraction (#45) | Verified real problem statements/concepts and content coverage |
-| 7: content model/product | Separate content batching/forward changes planned; generated ranking context now retained (#41, #44) | Content model/training comparison and explicit choice UI |
-| 8: calibration/policy | Reliability diagnostics/scalar (#24, #27), bound envelopes/run/API (#37, #38, #40), inspector (#36, #43) | Independent calibration evidence, actual choice/attempt linkage and policy effectiveness |
+| 7: content model/product | Causal content batching/forward (#49, #53); generated ranking context (#41, #44) | Content checkpoints/training comparison; explicit choice UI awaits final CI |
+| 8: calibration/policy | Reliability diagnostics/scalar (#24, #27), bound envelopes/run/API (#37, #38, #40), inspector (#36, #43), explicit choice backend (#46) | Independent calibration evidence, choice/attempt linkage and policy effectiveness |
 
 PR numbers refer to the [public repository PR history](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pulls?q=is%3Apr+is%3Amerged).
 Detailed review findings, test evidence and direct feature links are maintained in
@@ -41,3 +41,17 @@ Next deliverables are separate choice backend/UI PRs and content batching/forwar
 PRs. Later training/checkpoint, locked-test comparison, packaging and release work
 retain their own acceptance gates. A green synthetic test suite does not complete
 those gates. Hosted deployment remains a separate milestone.
+
+
+A local timing smoke on October 17 used the original committed synthetic fixture,
+seed 38, a problem-rate artifact (8 train/2 validation examples) and two label-free
+validation queries. Test bytes were integrity-checked by the training workflow;
+no test examples were parsed or evaluated. On Windows/Python 3.12.5, Intel Core
+Ultra 7 155U (12 cores/14 logical processors), 100 repeated loaded-adapter calls
+after five warmups measured 0.0802 ms median and 0.0953 ms nearest-rank p95 per
+two-query batch. Read/parse/validation measured 17.4015 ms separately; it is not a
+guaranteed cold-disk timing. The machine was also running development tasks.
+This tiny repeated synthetic batch is a software smoke, not production performance,
+model accuracy or an encoder/API benchmark. Exact bytes/config and aggregate report
+remain under ignored `artifacts/inference-profile-smoke/`; see the
+[inference timing contract](../docs/inference-profile.md).
