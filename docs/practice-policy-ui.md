@@ -2,7 +2,7 @@
 
 Owner: baseline engineer. Purpose: disclose the configured challenge range and
 exact policy record without computing scores in the browser or claiming learning
-benefits. Dependency: backend policy PR #61. Acceptance: known v2/demo metadata,
+benefits. Dependency: merged backend policy PR #61. Acceptance: known v2/demo metadata,
 finite bounded values and matching version/hash shape; invalid metadata fallback;
 separate ranking, model inspection, choice and simulated-outcome behavior.
 
@@ -26,3 +26,7 @@ configured weights nor a declared hash prove calibration or policy effectiveness
 The [backend contract](practice-policy.md) owns score calculation, configuration
 loading and snapshot binding. Browser fixtures test presentation/guard behavior
 using original synthetic data and do not validate predictive or teaching quality.
+
+An unmocked browser check also compares the displayed band, exact configuration
+and digest to the latest real v2 generation response. This checks integration
+with server metadata; it does not establish policy effectiveness.

@@ -56,3 +56,24 @@ for (const [name, update] of [
     await expect(page.getByRole("alert")).toHaveCount(0);
   });
 }
+
+test("live v2 policy disclosure matches the displayed generation metadata", async ({ page }) => {
+  const rankings: import("@playwright/test").Request[] = [];
+  page.on("request", (call) => {
+    if (new URL(call.url()).pathname === "/api/students/demo/recommendations") rankings.push(call);
+  });
+  await page.goto("/");
+  const pane = page.getByRole("complementary", { name: "Practice policy inspection" });
+  await expect(pane).toContainText("Heuristic challenge band");
+  // Inspect the generation actually loaded by the latest workspace request.
+  // A separate API fetch would create a different recommendation snapshot.
+  const displayed = await (await rankings.at(-1)!.response())!.json();
+  expect(displayed).toMatchObject({ is_demo: true, student_id: "demo", policy_version: "transparent-ranking-v2" });
+  const policy = displayed.policy_config;
+  await expect(pane).toContainText(`${(policy.challenge_lower * 100).toFixed(1)}\u2013${(policy.challenge_upper * 100).toFixed(1)}%`);
+  await pane.getByText("Inspect policy configuration").click();
+  expect(await pane.locator("pre").textContent()).toBe(JSON.stringify(policy, null, 2));
+  await expect(pane).toContainText(displayed.policy_sha256);
+  await expect(pane).toContainText("Learning benefits of this range have not been measured");
+  await expect(page.getByRole("button", { name: "Simulate correct", exact: true })).toBeEnabled();
+});
