@@ -76,3 +76,7 @@ History-length summaries (#85) also passed independent exact-head review and all
 applicable CI before squash merge. They provide fixed-bin aggregate arithmetic,
 not a locked-test runner or empirical error report. The remaining real-source,
 resource and selection dependencies above still apply.
+
+Integrated code verification at `e4f4e84` passed 869 tests with three expected
+skips on this desktop. This is synthetic software evidence; it does not satisfy
+real-data comparison, calibration, locked-test or learning-effectiveness acceptance.
