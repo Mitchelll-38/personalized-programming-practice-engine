@@ -1,6 +1,7 @@
 """Transparent demo estimates, not a trained or calibrated knowledge model."""
 
 from api.catalog import BY_ID, CONCEPT_IDS
+from api.practice_policy import PracticePolicy
 
 
 def first_attempts(history: list[dict]) -> list[dict]:
@@ -36,18 +37,29 @@ def estimate(history: list[dict], candidate_ids: list[str]) -> list[dict]:
     return [{"problem_id": candidate, "predicted_correctness": round(sum(profile[c] for c in BY_ID[candidate]["concept_ids"]) / len(BY_ID[candidate]["concept_ids"]), 6)} for candidate in candidate_ids]
 
 
-def recommend(history: list[dict]) -> list[dict]:
-    """Prefer unseen practice near 0.65; lower scores for weak prerequisites."""
+def recommend(history: list[dict], policy: PracticePolicy | None = None) -> list[dict]:
+    """Rank a declared challenge range, observable concept need and novelty."""
+    policy = PracticePolicy() if policy is None else policy
+    if not isinstance(policy, PracticePolicy):
+        raise ValueError("PracticePolicy is required")
+    policy = PracticePolicy.model_validate(policy.model_dump())
     attempted = {row["problem_id"] for row in history}
     profile = {row["concept_id"]: row for row in concept_profile(history)}
     recommendations = []
     for prediction in estimate(history, list(BY_ID)):
         exercise = BY_ID[prediction["problem_id"]]
         probability = prediction["predicted_correctness"]
-        weak = [c for c in exercise["prerequisites"] if profile[c]["estimated_performance"] < 0.6]
+        weak = [c for c in exercise["prerequisites"] if profile[c]["estimated_performance"] < policy.prerequisite_threshold]
         seen = exercise["problem_id"] in attempted
-        score = round(1 - abs(probability - 0.65) - 0.1 * len(weak) - 0.3 * seen, 6)
-        reasons = ["Demo estimate favors practice near 65% estimated correctness.", "Previously attempted; replay is ranked lower." if seen else "New exercise in this replay."]
+        distance = max(policy.challenge_lower - probability, probability - policy.challenge_upper, 0.)
+        need = sum((1 - profile[c]["estimated_performance"]) / (1 + profile[c]["supporting_attempts"])
+                   for c in exercise["concept_ids"]) / len(exercise["concept_ids"])
+        score = round(1 - distance + policy.need_weight * need
+                      - policy.prerequisite_penalty * len(weak) - policy.repeat_penalty * seen, 6)
+        position = "below" if probability < policy.challenge_lower else "above" if probability > policy.challenge_upper else "within"
+        reasons = [f"Demo estimate is {position} the configured {policy.challenge_lower:.1%}-{policy.challenge_upper:.1%} challenge range.",
+                   "Concept need uses estimated performance and distinct first-attempt support.",
+                   "Previously attempted in this replay." if seen else "New exercise in this replay."]
         if weak:
             reasons.append("Review prerequisite concepts: " + ", ".join(weak) + ".")
         if any(profile[c]["supporting_attempts"] == 0 for c in exercise["concept_ids"]):
