@@ -20,9 +20,12 @@ require ISO dates and seconds, at most six fractional digits and optional ISO
 offset/Z. Aware timestamps are counted but excluded from wall-time diagnostics;
 invalid timestamp/Order strings are counted, never silently coerced.
 
-Tie counts concern naive wall-time equality, not simultaneous instants. Order is
+Tie counts concern naive wall-time equality, not simultaneous instants; maximum
+tie size is zero when no tie exists. Order is
 ASCII nonnegative decimal without leading zeros. Duplicate Order groups prevent
 comparisons across either adjacent boundary; CSV order never resolves duplicates.
+Invalid-Order rows are excluded from the ordered sequence, so adjacency means
+adjacent remaining orderable rows, not adjacent original events.
 Adjacent uniquely ordered naive events yield raw wall-time decreases. Separate
 counts distinguish same-nonempty-literal comparable pairs/decreases from mixed or
 missing-literal incomparable pairs. Even same-literal observations are not proof

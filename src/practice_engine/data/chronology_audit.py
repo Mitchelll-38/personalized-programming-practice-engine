@@ -83,8 +83,8 @@ def _collect(events: list[ChronologyEvent]) -> dict:
     tied_subjects, decreasing_subjects, decreasing_scopes = set(), set(), set()
     for (subject, _), values in times.items():
         n = len(values)
-        counts["max_wall_time_tie_size"] = max(counts["max_wall_time_tie_size"], n)
         if n > 1:
+            counts["max_wall_time_tie_size"] = max(counts["max_wall_time_tie_size"], n)
             tied_subjects.add(subject)
             counts["wall_time_tie_groups"] += 1
             counts["wall_time_tied_rows"] += n

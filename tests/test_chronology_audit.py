@@ -70,6 +70,13 @@ def test_missing_literals_do_not_claim_comparability():
     assert c["same_literal_pairs"] == c["same_literal_decreases"] == 0
 
 
+def test_no_ties_means_zero_max_and_adjacency_excludes_invalid_orders():
+    c = counts([event("1", "03"), event("invalid", "02"), event("2", "01")])
+    assert c["max_wall_time_tie_size"] == 0
+    assert c["invalid_orders"] == 1
+    assert c["adjacent_raw_wall_time_pairs"] == c["raw_wall_time_decreases"] == 1
+
+
 @pytest.mark.parametrize("order", ["", "01", "-1", "+1", "1.0", "1e2", " 1", "١", "9" * 19])
 def test_order_strictness_and_missing_order_tie(order):
     c = counts([event(order), event("2")])
