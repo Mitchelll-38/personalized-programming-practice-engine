@@ -11,6 +11,13 @@ const model = {
 };
 const json = (route: Route, value: unknown, status = 200) => route.fulfill({ status, json: value });
 const prediction = (problem_id: string, probability = .73) => ({ model, predictions: [{ problem_id, predicted_correctness: probability }] });
+const calibratedModel = {
+  ...model, calibrated: true, artifact_version: "temperature-baseline-artifact-v1",
+  base_artifact_version: model.artifact_version, base_artifact_sha256: "d".repeat(64), artifact_sha256: "e".repeat(64),
+  calibration: { method: "temperature-scaling-v1", temperature: 2,
+    validation_record: { fit_partition: "validation", provenance: model.provenance,
+      validation_sha256: "f".repeat(64), probabilities_sha256: "0".repeat(64), n_examples: 12, temperature_grid: [1, 2] } },
+};
 
 async function workspace(page: Page) {
   // Intentionally out of order; retry position 8 must advance target timing but
@@ -125,6 +132,54 @@ for (const [name, change] of [
     await expect(pane.getByRole("alert")).toContainText("Unexpected research response");
     await expect(pane).not.toContainText("73%");
     await expect(pane).not.toContainText("Synthetic fitted estimate");
+    await expect(page.getByRole("button", { name: "Simulate correct", exact: true })).toBeEnabled();
+  });
+}
+
+test("calibrated inspection labels scaling and fitting limits without changing replay", async ({ page }, testInfo) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const pane = await workspace(page);
+  await page.route("**/api/research/predict", (route) => json(route, {
+    model: calibratedModel, predictions: [{ problem_id: "java-count", predicted_correctness: .62 }],
+  }));
+  await pane.getByRole("button", { name: "Inspect fitted baseline", exact: true }).click();
+  await expect(pane.getByRole("heading", { name: "Temperature-scaled synthetic estimate" })).toBeVisible();
+  await expect(pane).toContainText("62%");
+  await expect(pane).toContainText("Temperature: 2 · Fitted on 12 validation examples");
+  await expect(pane).toContainText("reliability has not been independently established");
+  await expect(pane).not.toContainText("Uncalibrated");
+  await pane.getByText("Inspect declared calibration record").click();
+  await expect(pane).toContainText("temperature-scaling-v1");
+  await expect(pane).toContainText(calibratedModel.artifact_sha256);
+  await expect(pane).toContainText("Declared hashes do not authenticate provenance");
+  expect(await pane.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
+  await pane.screenshot({ path: testInfo.outputPath("calibrated-inspector-mobile.png") });
+  await expect(page.locator("footer")).toContainText("demo-history-v1");
+  await expect(page.getByRole("button", { name: "Simulate correct", exact: true })).toBeEnabled();
+});
+
+for (const [name, change] of [
+  ["unknown envelope", { artifact_version: "future-envelope" }],
+  ["unknown method", { calibration: { ...calibratedModel.calibration, method: "future-method" } }],
+  ["invalid temperature", { calibration: { ...calibratedModel.calibration, temperature: 0 } }],
+  ["missing receipt", { calibration: { method: "temperature-scaling-v1", temperature: 2 } }],
+  ["wrong fitting partition", { calibration: { ...calibratedModel.calibration,
+    validation_record: { ...calibratedModel.calibration.validation_record, fit_partition: "test" } } }],
+  ["mismatched provenance", { calibration: { ...calibratedModel.calibration,
+    validation_record: { ...calibratedModel.calibration.validation_record, provenance: { ...model.provenance, dataset_version: "different" } } } }],
+  ["invalid fitting hash", { calibration: { ...calibratedModel.calibration,
+    validation_record: { ...calibratedModel.calibration.validation_record, validation_sha256: "bad" } } }],
+  ["string calibration declaration", { calibrated: "true" }],
+  ["contradictory uncalibrated envelope", { calibrated: false }],
+] as const) {
+  test(`calibrated response rejects ${name}`, async ({ page }) => {
+    const pane = await workspace(page);
+    await page.route("**/api/research/predict", (route) => json(route, {
+      model: { ...calibratedModel, ...change }, predictions: [{ problem_id: "java-count", predicted_correctness: .62 }],
+    }));
+    await pane.getByRole("button", { name: "Inspect fitted baseline", exact: true }).click();
+    await expect(pane.getByRole("alert")).toContainText("Unexpected research response");
+    await expect(pane).not.toContainText("62%");
     await expect(page.getByRole("button", { name: "Simulate correct", exact: true })).toBeEnabled();
   });
 }

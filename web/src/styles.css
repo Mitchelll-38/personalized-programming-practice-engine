@@ -404,6 +404,10 @@ h3 {
   margin: 12px 0 0;
   color: #677464;
 }
+.calibration-record {
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
 .simulation {
   border-top: 1px solid #eaeaea;
   padding-top: 20px;

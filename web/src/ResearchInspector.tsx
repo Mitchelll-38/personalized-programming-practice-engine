@@ -1,5 +1,26 @@
 import { useEffect, useState } from "react";
-import { getResearchModel, predictResearch, type Exercise, type ResearchInput, type ResearchPrediction, type Snapshot } from "./api";
+import { getResearchModel, predictResearch, type Exercise, type ResearchInput, type ResearchModel, type ResearchPrediction, type Snapshot } from "./api";
+
+const digest = (value: unknown) => typeof value === "string" && /^[a-f0-9]{64}$/.test(value);
+function validCalibration(model: ResearchModel): boolean {
+  if (model.calibrated === false) return model.artifact_version !== "temperature-baseline-artifact-v1";
+  if (model.calibrated !== true) return false;
+  const calibration = model.calibration;
+  const record = calibration?.validation_record;
+  const provenance = record?.provenance;
+  const fields = ["dataset_version", "source_kind", "source_sha256", "split_version", "split_sha256", "fit_partition"] as const;
+  return model.artifact_version === "temperature-baseline-artifact-v1" &&
+    ["rate-artifact-v1", "portable-baseline-artifact-v1"].includes(model.base_artifact_version) &&
+    digest(model.base_artifact_sha256) && digest(model.artifact_sha256) &&
+    calibration?.method === "temperature-scaling-v1" && Number.isFinite(calibration.temperature) && calibration.temperature > 0 &&
+    record?.fit_partition === "validation" && Number.isInteger(record.n_examples) && record.n_examples > 0 &&
+    digest(record.validation_sha256) && digest(record.probabilities_sha256) &&
+    Array.isArray(record.temperature_grid) && record.temperature_grid.every((value) => Number.isFinite(value) && value > 0) &&
+    record.temperature_grid.includes(calibration.temperature) && !!provenance && !!model.provenance &&
+    provenance.source_kind === "synthetic" && provenance.fit_partition === "train" && provenance.dataset_version === model.dataset_version &&
+    digest(provenance.source_sha256) && digest(provenance.split_sha256) &&
+    fields.every((field) => typeof provenance[field] === "string" && provenance[field].length > 0 && provenance[field] === model.provenance[field]);
+}
 
 function inputFor(snapshot: Snapshot, candidate: Exercise): ResearchInput {
   const catalog = new Map(snapshot.exercises.map((exercise) => [exercise.problem_id, exercise]));
@@ -38,7 +59,7 @@ export default function ResearchInspector({ snapshot, candidate, busy }: { snaps
         if (controller.signal.aborted) return;
         if (!result) { setState({ status: "unconfigured" }); return; }
         const score = result.predictions[0];
-        if (result.model.is_synthetic !== true || result.model.source_kind !== "synthetic" || result.model.calibrated !== false || result.model.research_results !== false ||
+        if (result.model.is_synthetic !== true || result.model.source_kind !== "synthetic" || !validCalibration(result.model) || result.model.research_results !== false ||
             result.predictions.length !== 1 || score.problem_id !== candidate.problem_id ||
             !Number.isFinite(score.predicted_correctness) || score.predicted_correctness < 0 || score.predicted_correctness > 1)
           throw new Error("Unexpected research response. Retry inspection.");
@@ -63,10 +84,23 @@ export default function ResearchInspector({ snapshot, candidate, busy }: { snaps
         state.status === "unconfigured" ? <p>No fitted baseline configured. The demo remains available.</p> :
         state.status === "error" ? <div role="alert"><p>{state.message}</p><button onClick={() => setRetry(retry + 1)}>Retry inspection</button></div> :
         state.status === "ready" ? <div className="reason-box">
-          <h3>Synthetic fitted estimate · Uncalibrated</h3>
+          <h3>{state.result.model.calibrated ? "Temperature-scaled synthetic estimate" : "Synthetic fitted estimate · Uncalibrated"}</h3>
           <p>Predicted correctness: <strong>{Math.round(state.result.predictions[0].predicted_correctness * 100)}%</strong></p>
           <p>Model: <code>{state.result.model.model_kind} / {state.result.model.model_version}</code></p>
           <p>Dataset: <code>{state.result.model.dataset_version}</code></p>
+          {state.result.model.calibrated && <>
+            <p>Temperature: {state.result.model.calibration.temperature} · Fitted on {state.result.model.calibration.validation_record.n_examples} validation examples.</p>
+            <p>Scalar scaling is applied; reliability has not been independently established.</p>
+            <details className="calibration-record">
+              <summary>Inspect declared calibration record</summary>
+              <p>Method: <code>{state.result.model.calibration.method}</code></p>
+              <p>Envelope: <code>{state.result.model.artifact_sha256}</code></p>
+              <p>Base artifact: <code>{state.result.model.base_artifact_sha256}</code></p>
+              <p>Validation bytes: <code>{state.result.model.calibration.validation_record.validation_sha256}</code></p>
+              <p>Fitting probabilities: <code>{state.result.model.calibration.validation_record.probabilities_sha256}</code></p>
+              <p>Declared hashes do not authenticate provenance or establish calibration quality.</p>
+            </details>
+          </>}
           <p>Software-test output; no measured research result or learning gain.</p>
         </div> : null}
     </div>}
