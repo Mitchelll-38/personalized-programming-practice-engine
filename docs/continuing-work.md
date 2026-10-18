@@ -148,3 +148,17 @@ Current local checks are being rerun, and GitHub workflows must pass on the exac
 final head before either change is marked delivered. The coordinator owns the
 rollout record; feature engineers retain their isolated branches and cross-review
 responsibility. No empirical result follows from this publication.
+
+The ranking and bounded-DKT segments merged separately through #82 and #83 after
+independent review and successful exact-final-head CI. The history-length report
+segment (#85) has its own purpose/acceptance/owner contract and draft-to-review
+workflow. Integrated verification and rollout evidence are maintained in the
+chronological ledger. These engineering changes do not approve real chronology,
+resource budgets, training, locked tests or publication of acquired content.
+
+History-length summaries (#85) are now merged after independent review and all
+applicable exact-final-head CI. The [history-length contract](history-length-evaluation.md)
+specifies observation-weighted bins and explicit sparse/empty handling. Further
+real-source orchestration and locked-test work await authoritative chronology,
+private assets, reviewed source support and resource/selection decisions; do not
+expand speculative interfaces to stand in for those dependencies.

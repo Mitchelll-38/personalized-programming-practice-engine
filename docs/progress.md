@@ -588,3 +588,42 @@ The reviewed ranking and DKT branches were published initially as draft PRs
 [#82](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/82)
 and [#83](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/83).
 Exact final-head checks and current local reruns are pending before rollout.
+
+### Reviewed HOME code rollout
+
+[#82 ranking uncertainty](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/82)
+squash-merged as `4908aa1` after independent exact-head review and all ten
+applicable final-head checks succeeded. Current local replay passed 61 focused
+checks; the independent platform reviewer had also passed 61. The utility reports
+paired whole-student ROC AUC/incorrect-positive AP intervals with explicit one-class
+replicate counts and conditional-interval limits. It adds no evaluator or test access.
+
+[#83 bounded DKT validation](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/83)
+squash-merged as `ad08774` after independent exact-head model review and all ten
+applicable final-head checks succeeded. Current local verification passed 59
+focused cases; independent model execution passed 52. Validation and selected
+checkpoint reload respect the configured batch size while preserving ordered
+predictions, unknown-ID fallback and aggregate early-selection semantics. This
+bounds rows per padded tensor, not total data/history memory or run time.
+
+Main was fast-forwarded cleanly to `ad08774`. The next separate reviewed segment,
+[#85 history-length summaries](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/85),
+implements the protocol's fixed reporting strata without a loader. Author and
+independent platform reviewer each passed 33 focused checks at `791a059`; final-head
+GitHub checks remain pending before this segment can be called delivered.
+
+[#85 history-length summaries](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/85)
+squash-merged as `e4f4e84` after independent approval of exact head `791a059` and
+all ten applicable final-head checks succeeded. Both author and platform reviewer
+passed 33 focused cases. The pure utility uses existing observation-weighted
+metrics for history lengths 0, 1-4, 5-19 and 20+, validates all inputs before
+binning and reports explicit empty/one-class results without row or student IDs.
+It does not read files, certify causal histories or unlock test access.
+
+Main was fast-forwarded cleanly to `e4f4e84`; full integrated Python verification
+is running with pinned optional dependencies and offline encoder settings.
+The team assessed remaining work: private release/catalog/encoder assets are
+absent here; source-backed chronology, reviewed real-source manifests/loaders,
+resource pilot/ceilings and validation selection precede empirical calibration,
+locked-test evaluation, results and final research reproduction. No further
+independent feature is clearly needed without speculating about these contracts.

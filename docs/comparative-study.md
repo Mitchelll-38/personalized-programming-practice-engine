@@ -61,8 +61,9 @@ bounded training pilot on the available local CPU. Record machine and peak memor
 then freeze an explicit per-run wall-time/memory ceiling and total experiment
 budget in a reviewed amendment. **No numeric resource ceiling is approved yet.**
 No paid compute, GPU availability or full-release feasibility is assumed. Existing
-DKT validation batching can materialize a whole partition; a pilot must account
-for this before launch. No run starts until the resource amendment is merged.
+DKT validation and selected-checkpoint reload now respect configured batch size;
+full dataset storage and longest-history memory still require a bounded pilot.
+No run starts until the resource amendment is merged.
 Stop exhausted runs, retain failure records, and report the comparison incomplete
 rather than selecting the most favorable completed seed or extending its budget.
 
@@ -111,8 +112,11 @@ sample/student counts, unknown-ID coverage and history-length strata (0, 1-4,
 5-19, 20+). Uncertainty should resample whole students with fixed seed 38 and
 1,000 paired bootstrap replicates, report 95% percentile intervals, and identify
 undefined/sparse estimates. The [paired student bootstrap](student-bootstrap.md)
-implements log-loss/Brier intervals; a locked-test evaluator and ranking-metric
-intervals remain unimplemented.
+implements log-loss/Brier and aggregate ranking intervals. Ranking intervals are
+conditional on both-class bootstrap draws, with explicit undefined counts and
+sparse-cluster limits. A locked-test evaluator remains unimplemented.
+The pure [history-length evaluator](history-length-evaluation.md) provides fixed-bin
+aggregate arithmetic without a loader or permission to inspect test examples.
 Family results are a separate report if that protocol clears its own gates.
 
 Never revise features, seeds, calibration or selection after test inspection.
