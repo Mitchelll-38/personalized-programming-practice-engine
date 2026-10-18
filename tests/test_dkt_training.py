@@ -161,3 +161,90 @@ def test_family_holdout_predictions_use_population_fallback_and_cli_runs(tmp_pat
     assert run["provenance"]["split_version"] == "family-holdout-v1"
     assert all(row.candidate.problem_id not in loaded.metadata.vocabulary["problem_ids"] for row in validation)
     assert loaded.predict(validation) == [loaded.metadata.unknown_probability] * len(validation)
+
+
+def test_validation_chunks_preserve_order_fallback_and_whole_batch_parity(bundle, monkeypatch):
+    import practice_engine.training.dkt as trainer
+    from practice_engine.models.dkt import DKT, UNK, ExerciseVocabulary, make_batch
+
+    verified = load_training_bundle(bundle)
+    vocabulary = ExerciseVocabulary.fit(verified.train)
+    rows = verified.train[:4] + verified.validation[:1]
+    rows[-1] = rows[-1].model_copy(update={
+        "candidate": rows[-1].candidate.model_copy(update={"problem_id": "unseen-validation"})})
+    model = DKT(vocabulary.size, embedding_size=4, hidden_size=5).eval()
+    batch = make_batch(rows, vocabulary)
+    with torch.inference_mode():
+        expected = torch.sigmoid(model(batch.inputs)).tolist()
+    expected = [.25 if candidate == UNK else value
+                for candidate, value in zip(batch.inputs.candidate_ids.tolist(), expected)]
+    sizes = []
+
+    def bounded_batch(examples, vocabulary):
+        sizes.append(len(examples))
+        assert len(examples) <= 2
+        return make_batch(examples, vocabulary)
+
+    monkeypatch.setattr(trainer, "make_batch", bounded_batch)
+    actual = trainer._probabilities(model, rows, vocabulary, .25, 2)
+    assert sizes == [2, 2, 1]
+    assert actual == pytest.approx(expected, abs=1e-7)
+    assert actual[-1] == .25
+
+    # Reject a nonfinite logit in the final partial chunk, even for an unknown ID.
+    original_forward = model.forward
+    def nonfinite_last(inputs):
+        logits = original_forward(inputs)
+        return logits * float("nan") if len(inputs.candidate_ids) == 1 else logits
+    monkeypatch.setattr(model, "forward", nonfinite_last)
+    with pytest.raises(ValueError, match="Nonfinite DKT validation"):
+        trainer._probabilities(model, rows, vocabulary, .25, 2)
+
+
+def test_training_validation_and_reload_are_bounded_and_metrics_weight_examples(tmp_path, monkeypatch):
+    import math
+    import practice_engine.models.dkt_artifacts as artifacts
+    import practice_engine.training.dkt as trainer
+    from practice_engine.data.schema import Interaction
+
+    source, directory = tmp_path / "source.jsonl", tmp_path / "bundle"
+    rows = [Interaction(student_id=f"s{s}", problem_id=f"p{p}", sequence_index=p,
+                        problem_text="Original synthetic batching case", concept_ids=("loops",),
+                        correct=p % 2 == 0, attempt_number=1) for s in range(10) for p in range(5)]
+    source.write_text("".join(row.model_dump_json() + "\n" for row in rows))
+    subprocess.run([sys.executable, "-m", "practice_engine.data.cli", str(source),
+                    "--synthetic", "--output", str(directory)], capture_output=True, check=True)
+    verified = load_training_bundle(directory)
+    assert len(verified.validation) > 3 and len(verified.validation) % 3
+    original_batch = trainer.make_batch
+    validation_sizes, reload_sizes = [], []
+    validation_students = {row.student_id for row in verified.validation}
+
+    def bounded_batch(examples, vocabulary):
+        assert len(examples) <= 3
+        if examples[0].student_id in validation_students:
+            validation_sizes.append(len(examples))
+        return original_batch(examples, vocabulary)
+
+    def bounded_reload(examples, vocabulary):
+        reload_sizes.append(len(examples))
+        assert len(examples) <= 3
+        return original_batch(examples, vocabulary)
+
+    monkeypatch.setattr(trainer, "make_batch", bounded_batch)
+    monkeypatch.setattr(artifacts, "make_batch", bounded_reload)
+    output = tmp_path / "run"
+    config = DKTTrainingConfig(max_epochs=2, patience=2, embedding_size=4, hidden_size=5, batch_size=3)
+    run = train_dkt(directory, output, config=config)
+    chunks = [min(3, len(verified.validation) - start) for start in range(0, len(verified.validation), 3)]
+    assert validation_sizes == chunks * (run["epochs_completed"] + 1)
+    assert reload_sizes == chunks
+    checkpoint = load_dkt_checkpoint(output / "model")
+    probabilities = [value for start in range(0, len(verified.validation), 3)
+                     for value in checkpoint.predict(verified.validation[start:start + 3])]
+    loss = -sum(math.log(p if row.label else 1 - p)
+                for row, p in zip(verified.validation, probabilities)) / len(probabilities)
+    metrics = json.loads((output / "validation.json").read_text())
+    assert metrics["aggregate"]["log_loss"] == pytest.approx(loss)
+    assert run["epochs"][run["best_epoch"] - 1]["validation_log_loss"] == pytest.approx(loss)
+    assert run["test_evaluated"] is False and run["research_results"] is False

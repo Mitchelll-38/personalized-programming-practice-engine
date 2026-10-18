@@ -39,16 +39,19 @@ class DKTTrainingConfig:
             raise ValueError("learning_rate must be finite in (0, 1]")
 
 
-def _probabilities(model, examples, vocabulary, unknown_probability):
+def _probabilities(model, examples, vocabulary, unknown_probability, batch_size):
     model.eval()
-    batch = make_batch(examples, vocabulary)
+    probabilities = []
     with torch.inference_mode():
-        logits = model(batch.inputs)
-        if not torch.isfinite(logits).all():
-            raise ValueError("Nonfinite DKT validation predictions")
-        values = torch.sigmoid(logits).tolist()
-    return [unknown_probability if candidate == UNK else value
-            for candidate, value in zip(batch.inputs.candidate_ids.tolist(), values)]
+        for start in range(0, len(examples), batch_size):
+            batch = make_batch(examples[start:start + batch_size], vocabulary)
+            logits = model(batch.inputs)
+            if not torch.isfinite(logits).all():
+                raise ValueError("Nonfinite DKT validation predictions")
+            values = torch.sigmoid(logits).tolist()
+            probabilities.extend(unknown_probability if candidate == UNK else value
+                for candidate, value in zip(batch.inputs.candidate_ids.tolist(), values))
+    return probabilities
 
 
 def _fit(train, validation, config):
@@ -74,7 +77,7 @@ def _fit(train, validation, config):
             nn.utils.clip_grad_norm_(model.parameters(), 5., error_if_nonfinite=True)
             optimizer.step()
             loss_sum += loss.item() * len(rows)
-        probabilities = _probabilities(model, validation, vocabulary, unknown)
+        probabilities = _probabilities(model, validation, vocabulary, unknown, config.batch_size)
         metrics = evaluate(validation, probabilities)
         validation_loss = metrics["aggregate"]["log_loss"]
         history.append({"epoch": epoch, "training_bce": loss_sum / len(train),
@@ -87,7 +90,7 @@ def _fit(train, validation, config):
             if stale >= config.patience:
                 break
     model.load_state_dict(best_state)
-    probabilities = _probabilities(model, validation, vocabulary, unknown)
+    probabilities = _probabilities(model, validation, vocabulary, unknown, config.batch_size)
     return model, vocabulary, correct, probabilities, history, best_epoch
 
 
@@ -116,7 +119,10 @@ def _run_training(bundle: Path, output: Path, config: DKTTrainingConfig) -> dict
             staging = Path(temporary)
             metadata = save_dkt_checkpoint(staging / "model", model, vocabulary, verified.provenance,
                                            training_total=len(verified.train), training_correct=correct)
-            reloaded = load_dkt_checkpoint(staging / "model").predict(verified.validation)
+            checkpoint = load_dkt_checkpoint(staging / "model")
+            reloaded = []
+            for start in range(0, len(verified.validation), config.batch_size):
+                reloaded.extend(checkpoint.predict(verified.validation[start:start + config.batch_size]))
             if reloaded != probabilities:
                 raise ValueError("Selected checkpoint reload prediction mismatch")
             run.update(checkpoint_metadata_sha256=metadata.metadata_sha256,
