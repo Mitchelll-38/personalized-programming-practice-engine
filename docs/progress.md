@@ -337,11 +337,6 @@ No real-data result, calibration or model-serving activation follows from this.
   choice, linked outcome/exact retry, API restart persistence and Swagger schema.
   Review added raw-data/database build-context exclusions and corrected Swagger's
   proxy root path. Runtime images exclude private state and optional ML packages.
-- [#62 policy disclosure](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/62)
-  merged after coordinator review and final-head CI. Fifteen independent guarded
-  metadata cases passed; a separate real-backend browser check matched displayed
-  configuration/hash to the generated response. The owner ran all 56 browser
-  cases. Configured challenge bands remain hypotheses without measured benefit.
 - [#66 label-free content adapter](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/66)
   merged after coordinator review, 91 independent related checks and all
   final-head CI. Already-loaded checkpoints derive vocabulary/encoder identity
@@ -349,6 +344,11 @@ No real-data result, calibration or model-serving activation follows from this.
   and revalidated; ordered finite scores require live integrity even for empty
   batches. There is no file/network loading, encoder initialization or API
   activation. A private actual-vector synthetic smoke matched direct inference.
+- [#62 policy disclosure](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/62)
+  merged after coordinator review and final-head CI. Fifteen independent guarded
+  metadata cases passed; a separate real-backend browser check matched displayed
+  configuration/hash to the generated response. The owner ran all 56 browser
+  cases. Configured challenge bands remain hypotheses without measured benefit.
 - [#65 container CI](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/65)
   merged after independent product/model review and final-head checks. Real Linux
   builds checked proxy/schema, choice without grading, exact linked retry and
@@ -375,3 +375,9 @@ directory/project/port. Inspection, explicit choice, simulated outcomes and
 duplicate-request receipts are explained as separate behaviors. No model or
 real-data completion is claimed. A subsequent product audit found low contrast
 in several small evidence/status/history labels; a focused fix is underway.
+
+
+A later DataShop browser recheck still lists the login page. Binding that observed
+tab again failed after10 seconds during browser focus setup; no authentication or
+download was performed. The previously requested manual sign-in and working
+browser connection remain external dependencies. No usable release was acquired.
