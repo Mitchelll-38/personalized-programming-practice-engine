@@ -22,7 +22,9 @@ $env:PYTHONPATH = 'src'
 `audit_structure(Path(...))` returns the same deterministic JSON as the module
 CLI. Only `MainTable.csv` and `CodeStates/CodeStates.csv` are opened. Both include
 byte length and SHA-256, calculated before and after parsing on the same open file
-to reject changes. No file is written. Keep private-release receipts in ignored
+to reject changes during that table's pass. This is per-table stability, not an
+atomic snapshot across tables; audit a quiescent extracted release. No file is
+written. Keep private-release receipts in ignored
 project storage; public publication of aggregates still requires review.
 
 Each table reports logical CSV records after the header, malformed-width records,
