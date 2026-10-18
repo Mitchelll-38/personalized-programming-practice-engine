@@ -1,5 +1,12 @@
 # Dataset access and provenance — day 2
 
+**Current update, October 18:** the official full S19 archive has now downloaded
+successfully, passed ZIP/hash verification and been safely extracted into ignored
+project storage. See [release-acquisition.md](release-acquisition.md) for exact
+identity, current terms observations and remaining catalog/label/order/provenance
+gates. No real canonical import or model training has run. The dated sections below
+preserve the earlier failed-download investigation; they are historical status.
+
 Investigated October 12–13, 2026 (day 2 is a sprint work unit). **No usable real student dataset acquired or redistributed. No real-data model trained. The empirical day-two gate remains unmet.**
 
 The [official SoLAR announcement](https://www.solaresearch.org/2021/11/the-2nd-csedm-data-challenge-in-cooperation-with-solar-is-happening-now/) links the [challenge dataset page](https://sites.google.com/ncsu.edu/csedm-dc-2021/dataset) and [organizer-linked starter code](https://github.com/YangAzure/CSEDMDataChallenge). The dataset page redirected this browsing tool to Google sign-in and could not be inspected. This does not prove the dataset is unavailable through all routes.
