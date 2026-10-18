@@ -58,14 +58,14 @@ has distinct owners and review boundaries:
 
 | Owner | Segment | Acceptance | Dependency |
 |---|---|---|---|
-| Coordinator | Local container recipe | Runtime-only API, built web/proxy, private persistent database, loopback-only port, actual retry/restart checks | Existing replay; separate container CI follows |
-| Product engineer | Optional policy inspection | Known v2/demo config only, exact record/hash, honest learning caveat, quiet invalid-metadata fallback | Merged policy backend #61; separate UI #62 |
-| Model engineer | Synthetic content-run publication | Verified train/validation bundle/cache, aggregate metrics, exact checkpoint replay, atomic new output, test rows unread | Merged checkpoint #55, cache #58 and optimizer #59; PR #60 |
+| Coordinator | Integrated rollout record | Merged links, actual verification, corrected CI findings and explicit unmet gates | Merged #60-#66 behavior; no day-completion claim |
+| Product engineer | Secondary-text contrast correction | Meaningful evidence/status/history/rank text meets 4.5:1 on actual normal/selected/hover surfaces; focused colors only | Scoped product audit; merged walkthrough #67 |
+| Model engineer | Loaded-content inference profile | Bounded label-free queries/offline entries, exact identity hashes, separate load/cache/inference costs, restored CPU settings | Merged adapter #66; no encoder download or API activation |
 | Coordinator/data lead | Real release receipt/audit | Nonempty valid archive, actual usage/catalog/grading/time verification | DataShop sign-in and working browser download |
 
 
 Choice-to-attempt backend/UI (#56/#57), strict checkpoints (#55), cache preparation
-(#58), optimizer (#59) and configurable policy backend (#61) are merged. Content
-serving adapters and container CI follow their foundations in further small PRs.
+(#58), optimizer/run (#59/#60), configured policy/backend UI (#61/#62), local
+containers/CI (#63/#65) and loaded-content adapter (#66) are merged.
 No locked-test run, real-data comparison or learning-effect report is
 completed by this software-only progression.
