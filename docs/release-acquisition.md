@@ -77,3 +77,9 @@ mapping receipts. These are available locally for the next reviewed data stage;
 the generic importer is not enabled for ambiguous chronology. Use the
 [bounded archive inspector](release-archive-inspection.md) to reproduce byte/CRC
 checks without parsing records or granting source authorization.
+
+The [structural auditor](codeworkout-structural-audit.md) now reproduces table
+hashes and aggregate compatibility diagnostics without importing interactions.
+The separate [chronology collector](chronology-aggregate-audit.md) accepts only
+label-free projections and reports unresolved wall-time observations. Neither
+utility establishes a timezone policy or enables real-source training.

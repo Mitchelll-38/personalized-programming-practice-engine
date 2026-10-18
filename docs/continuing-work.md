@@ -93,3 +93,10 @@ The prospective [comparative-study protocol](comparative-study.md) specifies
 validation ranking, seed/failure policy and locked-test reporting before real
 metrics exist. Its resource amendment and real-source evaluator remain pending;
 it does not enable real training or replace any acceptance gate.
+
+Reproducible structural diagnostics (#77) and the pure label-free chronology
+collector (#76) are merged. The next platform segment is a separate CSV adapter
+for the collector: verify the declared restricted scope, hash the exact private
+tables and project only the seven chronology fields. It must preserve unresolved
+interpretation and cannot create histories. Coordinator owns final private replay
+and integration; the model/data engineer independently reviews its boundaries.
