@@ -10,8 +10,8 @@ empirical research. Earlier reports retain their original execution evidence.
 | 4: BKT/evaluation | BKT (#16), probability/equal-student metrics (#13), portable inference/run integration (#21, #29, #30, #32) | Real-data comparison and latency measurements |
 | 5: DKT | CPU environment, causal batching/forward, strict checkpoints and bounded trainer (#18, #19, #26, #31) | Real-data training, validation selection and measured run budget |
 | 6: content inputs | Exact cache (#35), optional environment (#39), frozen local CodeBERT extraction (#45) | Verified real problem statements/concepts and content coverage |
-| 7: content model/product | Causal content batching/forward (#49, #53); generated ranking context (#41, #44) | Content checkpoints/training comparison and linked outcomes |
-| 8: calibration/policy | Reliability diagnostics/scalar (#24, #27), bound envelopes/run/API (#37, #38, #40), inspector (#36, #43), explicit choice backend/UI (#46, #48) | Independent calibration evidence, choice/attempt linkage and policy effectiveness |
+| 7: content model/product | Causal content batching/forward (#49, #53), strict checkpoint/cache/optimizer (#55, #58, #59); generated ranking context (#41, #44) | Reviewed run publication and real-data training comparison |
+| 8: calibration/policy | Reliability diagnostics/scalar (#24, #27), bound envelopes/run/API (#37, #38, #40), inspector (#36, #43), explicit choices (#46, #48), linked outcomes (#56, #57), configured policy (#61) | Independent calibration evidence and policy effectiveness |
 
 PR numbers refer to the [public repository PR history](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pulls?q=is%3Apr+is%3Amerged).
 Detailed review findings, test evidence and direct feature links are maintained in
@@ -37,8 +37,8 @@ statement/concept catalog, first-scored-run grading interpretation and timestamp
 must be verified before real import/training. There are no measured real-data
 metrics, untouched-test report or learning-effectiveness claims.
 
-Next deliverables are separate choice/outcome linkage and content checkpoint/training
-PRs. Locked-test comparison, packaging and release work retain their own acceptance
+Next deliverables are separate content-run publication, optional policy disclosure
+and local container PRs. Locked-test comparison, packaging and release work retain their own acceptance
 gates. A green synthetic test suite does not complete
 those gates. Hosted deployment remains a separate milestone.
 
