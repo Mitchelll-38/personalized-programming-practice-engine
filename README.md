@@ -44,6 +44,8 @@ SQLite defaults to `.data/demo.sqlite3` (ignored by git). Override with `$env:PR
 
 The Vite development server proxies `/api` to port 8000. A production static build needs an equivalent same-origin reverse proxy; day 1 does not include a hosted deployment.
 
+[Synthetic replay walkthrough](docs/demo-walkthrough.md): inspect the policy, record an explicit choice, simulate outcomes and understand retry/persistence behavior.
+
 ## Research data pipeline
 
 ```powershell
