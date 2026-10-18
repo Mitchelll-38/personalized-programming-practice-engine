@@ -22,7 +22,7 @@ the panel explains this while keeping simulated demo retries available.
 Selection/history changes reset opt-in and abort pending requests. Hiding the panel
 or refreshing/saving the replay also aborts work and hides previous probabilities.
 Responses are checked against the requested candidate and require literal boolean
-declarations: `is_synthetic=true`, `calibrated=false`, `research_results=false`,
+declarations: `is_synthetic=true`, a boolean `calibrated`, `research_results=false`,
 with `source_kind=synthetic`. Missing flags and string booleans fail inspection.
 The prediction response supplies the displayed model metadata, so a
 model replaced between metadata and prediction requests is identified correctly.
@@ -33,3 +33,26 @@ Playwright uses isolated synthetic route fixtures to check request timing, exclu
 of retries/target responses, catalog metadata, history refresh, missing configuration,
 recoverable errors, pending-request cancellation and already-attempted candidates.
 These mocked probabilities test UI behavior; they are not measured model results.
+
+## Temperature-scaled synthetic output
+
+Owner: baseline engineer. Purpose: display the calibrated research API introduced
+in PR #40 without claiming measured reliability. Acceptance: preserve uncalibrated
+flow and strict flags, reject malformed calibrated declarations, identify scalar
+application and its validation fitting record. No backend or policy selection is
+changed by this UI follow-up.
+
+`calibrated=true` is accepted only for the known temperature envelope/method with
+a finite positive scalar in the declared fitting grid. The validation receipt must
+identify validation fitting, a positive integer example count, valid hash strings
+and source/split provenance matching the displayed model. These client checks
+protect presentation; the backend owns artifact/payload validation. The client
+does not recompute hashes or authenticate the producer.
+
+The panel shows **Temperature-scaled synthetic estimate**, the scalar and fitting
+count, followed by **reliability has not been independently established**. An
+optional record discloses method and envelope/base/fitting hashes. Same-validation
+fitting is not independent calibration evidence. The existing uncalibrated label,
+request timing/cancellation, error recovery and heuristic replay remain unchanged.
+Browser fixtures check valid mobile presentation and malformed metadata rejection;
+their displayed probabilities remain synthetic UI test data.

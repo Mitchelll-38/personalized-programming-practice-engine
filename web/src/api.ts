@@ -82,7 +82,7 @@ export function recordOutcome(problem_id: string, correct: boolean) {
   });
 }
 
-export type ResearchModel = {
+type ResearchBaseModel = {
   model_kind: "rate" | "logistic" | "bkt";
   variant: "global" | "problem" | null;
   model_version: string;
@@ -92,7 +92,6 @@ export type ResearchModel = {
   dataset_version: string;
   source_kind: "synthetic";
   is_synthetic: true;
-  calibrated: false;
   research_results: false;
   provenance: {
     dataset_version: string;
@@ -103,6 +102,25 @@ export type ResearchModel = {
     fit_partition: "train";
   };
 };
+export type ResearchModel = ResearchBaseModel & ({ calibrated: false } | {
+  calibrated: true;
+  artifact_version: "temperature-baseline-artifact-v1";
+  base_artifact_version: "rate-artifact-v1" | "portable-baseline-artifact-v1";
+  base_artifact_sha256: string;
+  artifact_sha256: string;
+  calibration: {
+    method: "temperature-scaling-v1";
+    temperature: number;
+    validation_record: {
+      fit_partition: "validation";
+      provenance: ResearchBaseModel["provenance"];
+      validation_sha256: string;
+      probabilities_sha256: string;
+      n_examples: number;
+      temperature_grid: number[];
+    };
+  };
+});
 export type ResearchInput = {
   student_id: "demo";
   target_sequence_index: number;
