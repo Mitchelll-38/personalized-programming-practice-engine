@@ -4,8 +4,8 @@ Owner: product engineer. Purpose: help a new user distinguish inspecting an
 exercise, explicitly choosing a recommendation and recording simulated correctness.
 Acceptance: current labels; a clean synthetic replay checked against real browser
 flows; accurate retry/linkage and private persistence behavior; honest model/data
-gates. Dependencies: container recipe #63 (merged) and policy disclosure #62
-(required before this guide merges). No application behavior changes.
+gates. Dependencies: merged container recipe #63 and policy disclosure #62.
+No application behavior changes.
 
 ## Start a separate local demo
 
@@ -104,3 +104,15 @@ describes overrides and persistence in more detail.
 All examples are software demonstrations on synthetic records. Real CodeWorkout
 release access, usage terms, catalog/grading verification and real-data evaluation
 remain open gates. There is no locked-test report or measured learning gain.
+
+## Verification record
+
+On client date 2026-10-17, three existing live browser cases passed against a
+fresh isolated synthetic database (10.5 seconds): explicit choice without outcome
+mutation, first-attempt/retry evidence and linked outcome/idempotent receipt replay.
+After integrating policy disclosure #62 and current main, its unmocked v2 metadata
+case also passed (7.5 seconds). Four local documentation links resolved, and Compose
+configuration confirmed a contained private bind path and loopback port 8081.
+These checks verify the documented software flow; they do not establish model
+quality or learning effectiveness. The container build/runtime checks are recorded
+separately in the [local container guide](local-containers.md).
