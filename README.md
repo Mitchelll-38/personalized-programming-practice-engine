@@ -64,6 +64,9 @@ The adapter rejects missing grading/catalog fields, ambiguous timestamps and dup
 
 ## Optional research workflows
 
+For a built frontend and API in one local command, see the
+[Docker Compose demo instructions](docs/local-containers.md).
+
 Keep private data, model weights and encoder caches under ignored project storage.
 These opt-in workflows are separate from the heuristic replay:
 
