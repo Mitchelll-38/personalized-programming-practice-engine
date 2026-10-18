@@ -28,3 +28,8 @@ an older snapshot remains valid historical context. The UI does not replace a
 failed snapshot ID with a newly generated ID silently. Fetching fresh ranking data
 does not itself log a choice. The research inspector and heuristic ranking/profile
 continue operating independently of this action.
+
+The unmocked live browser case captures the displayed generation's actual response
+identity, submits one explicit choice and checks the persisted 201 acknowledgement.
+History/profile stay identical and no attempt request is sent. Separate mocked
+browser cases cover failure/retry, duplicate activation and stale-context handling.
