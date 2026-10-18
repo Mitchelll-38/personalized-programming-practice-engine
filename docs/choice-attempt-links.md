@@ -10,7 +10,8 @@ retains its existing behavior. No retroactive or inferred choice association.
 
 The API accepts an optional `choice_id` to `POST /attempts`, retaining its current response
 shape/status201. A valid choice must match the supplied problem. Unknown choices
-return404, mismatched problems422, and an already-linked choice with different
+return404; a different known exercise returns422. Unknown catalog exercises retain
+the existing404 response before link validation. An already-linked choice with different
 correctness409. Repeating the identical choice/problem/correct request returns the
 original interaction and appends no retry. This is explicit per-choice idempotency,
 not global idempotency for unlinked manual attempts. Each choice links to at most

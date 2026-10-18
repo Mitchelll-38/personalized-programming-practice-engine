@@ -51,6 +51,7 @@ def test_conflicting_outcome_wrong_problem_and_unknown_choice_do_not_add_attempt
     assert api.post("/attempts", json={**body, "choice_id": "0" * 32}).status_code == 404
     other = "java-sum" if body["problem_id"] != "java-sum" else "java-even"
     assert api.post("/attempts", json={**body, "problem_id": other}).status_code == 422
+    assert api.post("/attempts", json={**body, "problem_id": "not-in-catalog"}).status_code == 404
     assert api.get("/students/demo/history").json() == before
     assert api.post("/attempts", json=body).status_code == 201
     after = api.get("/students/demo/history").json()
