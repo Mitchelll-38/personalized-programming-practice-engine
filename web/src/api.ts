@@ -81,3 +81,51 @@ export function recordOutcome(problem_id: string, correct: boolean) {
     body: JSON.stringify({ student_id: "demo", problem_id, correct }),
   });
 }
+
+export type ResearchModel = {
+  model_kind: "rate" | "logistic" | "bkt";
+  variant: "global" | "problem" | null;
+  model_version: string;
+  feature_version: string;
+  artifact_version: string;
+  model_sha256: string;
+  dataset_version: string;
+  source_kind: "synthetic";
+  is_synthetic: true;
+  calibrated: false;
+  research_results: false;
+  provenance: {
+    dataset_version: string;
+    source_kind: "synthetic";
+    source_sha256: string;
+    split_version: string;
+    split_sha256: string;
+    fit_partition: "train";
+  };
+};
+export type ResearchInput = {
+  student_id: "demo";
+  target_sequence_index: number;
+  history: (Interaction & Pick<Exercise, "problem_text" | "concept_ids">)[];
+  candidate: Pick<Exercise, "problem_id" | "problem_text" | "concept_ids">;
+};
+export type ResearchPrediction = {
+  model: ResearchModel;
+  predictions: { problem_id: string; predicted_correctness: number }[];
+};
+
+async function researchRequest<T>(path: string, signal: AbortSignal, body?: ResearchInput): Promise<T | null> {
+  const response = await fetch(`/api/research/${path}`, {
+    signal,
+    ...(body ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ inputs: [body] }) } : {}),
+  });
+  if (response.status === 503) {
+    const error = await response.json();
+    if (error.detail === "research_model_not_configured") return null;
+  }
+  if (!response.ok) throw new Error("Fitted baseline unavailable. Check the local research model and retry inspection.");
+  return response.json() as Promise<T>;
+}
+
+export const getResearchModel = (signal: AbortSignal) => researchRequest<ResearchModel>("model", signal);
+export const predictResearch = (query: ResearchInput, signal: AbortSignal) => researchRequest<ResearchPrediction>("predict", signal, query);
