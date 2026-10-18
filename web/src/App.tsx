@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { getSnapshot, recordOutcome, type Snapshot } from "./api";
 import ResearchInspector from "./ResearchInspector";
+import RecommendationChoice from "./RecommendationChoice";
 
 const label = (id: string) => id.replace(/[_-]/g, " ");
 const percent = (value: number) => `${Math.round(value * 100)}%`;
@@ -277,6 +278,7 @@ export default function App() {
                         </p>
                       </div>
                     )}
+                      {selectedRanking && <RecommendationChoice key={`${snapshot.ranking.snapshot_id}:${selectedId}`} snapshotId={snapshot.ranking.snapshot_id} problemId={selectedId} busy={saving || loading || refreshPending} />}
                     <ResearchInspector key={`${selectedId}:${JSON.stringify(snapshot.history)}`} snapshot={snapshot} candidate={selected} busy={saving || loading || refreshPending} />
                     <div className="simulation">
                       <h3>Replay a simulated outcome</h3>
