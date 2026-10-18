@@ -65,3 +65,15 @@ The format adapter, manifest and training gates remain unchanged. Acquisition is
 complete; authorized statement/concept coverage, grading interpretation,
 time/order policy, compatibility and reviewed real-source provenance remain
 separate acceptance gates. No canonical real-data import or training has run.
+
+The subsequent [catalog/chronology audit](catalog-chronology-audit.md) identifies
+the organizer-linked prompt/concept source and explains why timezone interpretation
+still blocks real causal histories despite complete audited problem coverage.
+
+
+Private setup also includes the exact organizer CSV and reviewed
+`catalog/mapped-candidates-v1.json`, with original-source, release-inventory and
+mapping receipts. These are available locally for the next reviewed data stage;
+the generic importer is not enabled for ambiguous chronology. Use the
+[bounded archive inspector](release-archive-inspection.md) to reproduce byte/CRC
+checks without parsing records or granting source authorization.

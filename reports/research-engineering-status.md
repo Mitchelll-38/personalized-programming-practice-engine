@@ -38,8 +38,10 @@ user-authenticated browser, passed ZIP verification and was privately extracted.
 Its exact size/checksum and current research-only/non-redistribution observations
 are recorded in [release acquisition](../docs/release-acquisition.md). Structural
 audit found chronology/timezone issues requiring an explicit source-backed policy;
-statement/concept coverage, grading and reviewed real-source provenance remain
-import gates. There are no real-data prediction metrics, untouched-test report or
+the organizer-linked catalog now has complete audited 50-problem coverage under
+a narrow assignment spelling crosswalk, with one researcher's concept estimates.
+[Chronology ambiguity](../docs/catalog-chronology-audit.md), reviewed mapping/use
+policy, grading and real-source provenance remain import gates. There are no real-data prediction metrics, untouched-test report or
 learning-effectiveness claims.
 
 Next deliverables require the verified release/catalog, comparative real-data runs
