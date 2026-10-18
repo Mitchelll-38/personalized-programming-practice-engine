@@ -94,7 +94,7 @@ def _fingerprint(model):
 
 def _restore(metadata, state):
     # Loading a checkpoint must not advance the caller's initialization RNG.
-    with torch.random.fork_rng(devices=[]):
+    with torch.device("cpu"), torch.random.fork_rng(devices=[]):
         model = ContentLSTM(**metadata.config.model_dump()).float().cpu()
     expected = model.state_dict()
     if not isinstance(state, dict) or set(state) != set(expected):

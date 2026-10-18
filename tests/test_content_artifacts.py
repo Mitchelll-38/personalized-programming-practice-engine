@@ -69,6 +69,21 @@ def test_parity_detachment_cpu_rng_and_tensor_only_load(saved, monkeypatch):
     assert {file.name for file in path.iterdir()} == {"metadata.json", "weights.pt"}
 
 
+def test_restore_pins_cpu_and_preserves_ambient_device_and_rng(saved):
+    path, model, _, _, _, inputs = saved
+    expected = model(inputs).detach()
+    rng = torch.random.get_rng_state().clone()
+    prior_device = torch.empty(0).device
+    with torch.device("meta"):
+        assert torch.empty(0).device.type == "meta"
+        loaded = load_content_checkpoint(path)
+        assert torch.empty(0).device.type == "meta"
+        assert all(parameter.device.type == "cpu" for parameter in loaded._model.parameters())
+    assert torch.empty(0).device == prior_device
+    assert torch.equal(rng, torch.random.get_rng_state())
+    assert torch.equal(loaded.logits(inputs), expected)
+
+
 @pytest.mark.parametrize("mutation", [
     lambda p: p.update(calibrated=True), lambda p: p.update(feature_version="changed"),
     lambda p: p.update(extra="row data"), lambda p: p["config"].update(hidden_size=True),

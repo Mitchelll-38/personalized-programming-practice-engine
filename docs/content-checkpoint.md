@@ -29,8 +29,9 @@ prototype bounded rather than supporting arbitrary checkpoint architectures.
 `load_content_checkpoint(directory)` rejects duplicate JSON fields, unsupported
 versions, extra metadata, invalid identities/checksums and state keys/shapes/types
 or nonfinite weights. Deserialization uses `weights_only=True`, `map_location=cpu`;
-the new canonical model is in evaluation mode and does not advance initialization
-RNG. `checkpoint.logits(ContentInputs)` checks live metadata, architecture and weight
+the new canonical model is allocated in an explicit CPU context, is in evaluation
+mode and preserves initialization RNG and the caller's ambient default device.
+`checkpoint.logits(ContentInputs)` checks live metadata, architecture and weight
 integrity, then returns finite uncalibrated logits under inference mode. Construct
 inputs with the checkpoint vocabulary and encoder through the validated producer;
 raw tensors alone cannot establish encoder or causal provenance. No prediction
