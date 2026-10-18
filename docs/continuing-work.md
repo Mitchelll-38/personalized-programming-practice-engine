@@ -58,14 +58,15 @@ has distinct owners and review boundaries:
 
 | Owner | Segment | Acceptance | Dependency |
 |---|---|---|---|
-| Coordinator | Integrated rollout record | Merged links, actual verification, corrected CI findings and explicit unmet gates | Merged #60-#66 behavior; no day-completion claim |
-| Product engineer | Secondary-text contrast correction | Meaningful evidence/status/history/rank text meets 4.5:1 on actual normal/selected/hover surfaces; focused colors only | Scoped product audit; merged walkthrough #67 |
-| Model engineer | Loaded-content inference profile | Bounded label-free queries/offline entries, exact identity hashes, separate load/cache/inference costs, restored CPU settings | Merged adapter #66; no encoder download or API activation |
-| Coordinator/data lead | Real release receipt/audit | Nonempty valid archive, actual usage/catalog/grading/time verification | DataShop sign-in and working browser download |
+| Coordinator/data lead | Verified real release receipt and audit | Nonempty permitted archive, hash/terms, actual catalog/grading/order review and locked import counts | DataShop sign-in and working browser download |
+| Model engineer | Fair comparative validation and selection | Fixed real splits/seeds/budgets, baselines/DKT/content and feasible ablations; validation-only selection/calibration | Verified real data/catalog; actual compute budget |
+| Product engineer | Selected-model results/probes and final rehearsal | Evidence-based model/result presentation, fixed concept probes, final reproduction guide | Actual comparisons/calibration and selected serving contract |
 
 
 Choice-to-attempt backend/UI (#56/#57), strict checkpoints (#55), cache preparation
 (#58), optimizer/run (#59/#60), configured policy/backend UI (#61/#62), local
-containers/CI (#63/#65) and loaded-content adapter (#66) are merged.
+containers/CI (#63/#65), loaded-content adapter/profile (#66/#68), walkthrough
+(#67) and focused secondary-text contrast (#70) are merged. The next table
+segments are gated empirical work, not reasons to manufacture additional features.
 No locked-test run, real-data comparison or learning-effect report is
 completed by this software-only progression.

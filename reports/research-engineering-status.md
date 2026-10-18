@@ -12,8 +12,8 @@ empirical research. Earlier reports retain their original execution evidence.
 | 6: content inputs | Exact cache (#35), optional environment (#39), frozen local CodeBERT extraction (#45) | Verified real problem statements/concepts and content coverage |
 | 7: content model/product | Causal batching/forward (#49, #53), checkpoint/cache/optimizer/run (#55, #58, #59, #60), loaded adapter (#66); ranking context (#41, #44) | Real-data training comparison and evidence-based model selection |
 | 8: calibration/policy | Reliability/scalar (#24, #27), bound envelopes/run/API (#37, #38, #40), inspector (#36, #43), choices (#46, #48), linked outcomes (#56, #57), configured policy/disclosure (#61, #62) | Independent calibration evidence and policy effectiveness |
-| 9: reproducibility/evaluation | Runtime-only local container recipe (#63), real proxy/retry/recreation CI (#65), strict artifact checks | Selected-model locked-test report and grouped real-data errors |
-| 10: release rehearsal | Locked image/runtime inputs, fresh Linux container rehearsal (#63, #65), synthetic walkthrough (#67); evolving contracts/progress | Complete clean-machine research reproduction and final report/release |
+| 9: reproducibility/evaluation | Runtime-only containers (#63), real proxy/retry/recreation CI (#65), strict artifacts and offline content profiler (#68) | Selected-model locked-test report and grouped real-data errors |
+| 10: release rehearsal | Locked image/runtime inputs, fresh Linux container rehearsal (#63, #65), synthetic walkthrough (#67), focused contrast correction (#70); evolving contracts/progress | Complete clean-machine research reproduction and final report/release |
 
 PR numbers refer to the [public repository PR history](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pulls?q=is%3Apr+is%3Amerged).
 Detailed review findings, test evidence and direct feature links are maintained in
@@ -39,8 +39,8 @@ statement/concept catalog, first-scored-run grading interpretation and timestamp
 must be verified before real import/training. There are no measured real-data
 metrics, untouched-test report or learning-effectiveness claims.
 
-Next deliverables are separate loaded-content profiling and a focused secondary
-text contrast correction. Locked-test comparison and final release work retain their own acceptance
+Next deliverables require the verified release/catalog, comparative real-data runs
+and model selection. Locked-test comparison and final release work retain their own acceptance
 gates. A green synthetic test suite does not complete
 those gates. Hosted deployment remains a separate milestone.
 

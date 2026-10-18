@@ -381,3 +381,27 @@ A later DataShop browser recheck still lists the login page. Binding that observ
 tab again failed after10 seconds during browser focus setup; no authentication or
 download was performed. The previously requested manual sign-in and working
 browser connection remain external dependencies. No usable release was acquired.
+
+[#68 offline content profiling](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/68)
+merged after coordinator review, 98 independent related checks and all final-head
+CI. Bounded label-free queries and exact offline entries bind checkpoint/query/cache
+identities. Load, parse, cache and warmup costs are separate from aggregate
+loaded-adapter timings; feature building and live integrity stay inside samples.
+Caller CPU settings/RNG are restored on failure/success. The private two-query
+actual-vector smoke is software evidence, not representative compute or model quality.
+
+[#70 text contrast](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/70)
+merged after coordinator source/mobile visual review, an independent real-DOM
+contrast check and all final-head CI. Nine color declarations now meet the
+normal-text threshold on actual initial/hover/selected/mobile surfaces; original
+failures were reproduced. Layout/actions are preserved. This targeted correction
+does not assert complete accessibility conformance.
+
+The three-engineer review found no further concrete product release defect.
+Remaining planned acceptance requires verified real data/catalog and its causal
+audit, locked partitions, fair comparative validation/ablations/compute records,
+validation-only selection/calibration, untouched-test/grouped-error reporting and
+clean-machine reproduction of that actual research. Selected-model activation,
+concept probes and result views depend on that evidence. Learning effectiveness
+still requires a prospective study. Current synthetic-only software and toy timing
+smokes do not close these gates; no new features were invented to obscure them.
