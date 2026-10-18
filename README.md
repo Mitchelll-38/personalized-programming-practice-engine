@@ -2,13 +2,20 @@
 
 Programming knowledge-tracing research with an inspectable Java practice replay dashboard.
 
-**Days 1–2 engineering implemented:** canonical causal data pipeline, strict CodeWorkout format adapter, audited CLI and versioned manifests, FastAPI + SQLite, and a React/TypeScript replay with supporting-history diagnostics. All committed data and demo outcomes are **synthetic**. The current predictor is an untrained, uncalibrated heuristic; no empirical ML results or learning gains are claimed. Day-two real-data acceptance remains blocked on verified access, terms and metadata.
+The project includes a causal data pipeline, strict CodeWorkout format adapter,
+versioned research artifacts/runs, FastAPI + SQLite, and a React replay dashboard.
+Offline software supports rate/logistic/BKT models, CPU ID-only DKT training,
+validation-only temperature scaling and frozen CodeBERT extraction. All committed
+data and demo outcomes are **synthetic**. The active replay uses an untrained,
+uncalibrated heuristic; an optional inspector queries fitted synthetic research
+baselines separately. No real-data metrics or learning gains are claimed. Verified
+release access, usage terms and statement/concept metadata remain open gates.
 
 [Two-week plan for three engineers](docs/sprint-plan.md) · [Day-one integration contract](docs/day-1-contract.md) · [Data access status](docs/data-access.md) · [Day-one delivery report](reports/day-1.md)
 
 [Day-two delivery and individual PRs](reports/day-2.md) · [Browser replay smoke test](docs/browser-smoke.md)
 
-[Chronological progress record](docs/progress.md) tracks implementation, decisions and review findings as work advances. Offline research now includes exercise-family holdouts, rate/logistic/BKT models, portable artifacts and an ID-only DKT forward pass. The active demo remains synthetic; real-data training/evaluation is not yet claimed.
+[Chronological progress record](docs/progress.md) tracks implementation, decisions and review findings as work advances. The [research engineering status](reports/research-engineering-status.md) separates merged software from unmet experimental acceptance criteria across sprint work units.
 
 Engineering workflow: [AGENTS.md](AGENTS.md) requires small, focused PRs, isolated agent worktrees, independent review and passing CI before rollout. All changes, including documentation and tests, follow this workflow.
 
@@ -53,7 +60,18 @@ The default input is **canonical JSONL**. For the organizer-documented CodeWorko
 .\.venv\Scripts\python.exe -m practice_engine.data.cli data/fixtures/codeworkout --format codeworkout --catalog data/fixtures/codeworkout/catalog.json --output data/processed/codeworkout-smoke --synthetic --dataset-version codeworkout-synthetic-v1
 ```
 
-The adapter rejects missing grading/catalog fields, ambiguous timestamps and duplicate event/header keys. `audit.json` records event exclusions, label semantics and original table/catalog hashes; the processing manifest hashes the derived artifacts. This adapter is validated on original synthetic fixtures only. **Real release access, usage terms, grading semantics and catalog provenance remain unverified**; complete those gates before importing real data. No real student data is committed. Exercise-family splits and trained models remain later work.
+The adapter rejects missing grading/catalog fields, ambiguous timestamps and duplicate event/header keys. `audit.json` records event exclusions, label semantics and original table/catalog hashes; the processing manifest hashes the derived artifacts. This adapter is validated on original synthetic fixtures only. **Real release access, usage terms, grading semantics and catalog provenance remain unverified**; complete those gates before importing real data. No real student data is committed. Exercise-family splits and synthetic fitted models are implemented separately; their existence does not verify this unseen release.
+
+## Optional research workflows
+
+Keep private data, model weights and encoder caches under ignored project storage.
+These opt-in workflows are separate from the heuristic replay:
+
+- [Student/family baseline runs](docs/baseline-training.md) and [CPU DKT training](docs/dkt-training.md).
+- [Validation calibration runs](docs/calibration-runs.md) and [research API configuration](docs/research-api.md).
+- [Research inspector](docs/research-inspector.md), including explicit scalar-fitting limitations.
+- [Optional encoder setup](docs/encoder-environment.md) and [frozen extraction](docs/codebert-extraction.md).
+- [Recommendation generation records](docs/recommendation-records.md); generation is not proof of display or choice.
 
 ## Verify
 
