@@ -115,11 +115,14 @@ class ContentCheckpoint:
     _model: ContentLSTM
     _state_sha256: str
 
-    def logits(self, inputs: ContentInputs) -> torch.Tensor:
+    def validate_integrity(self) -> None:
         # Pydantic frozen envelopes do not deep-freeze vocabulary dictionaries.
         ContentMetadata.model_validate(self.metadata.model_dump())
         if _fingerprint(self._model) != self._state_sha256:
             raise ValueError("Loaded content checkpoint changed")
+
+    def logits(self, inputs: ContentInputs) -> torch.Tensor:
+        self.validate_integrity()
         with torch.inference_mode():
             return self._model(inputs)
 

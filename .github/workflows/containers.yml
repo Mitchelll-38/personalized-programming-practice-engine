@@ -1,0 +1,48 @@
+name: Local containers
+on:
+  push:
+    paths: &container_paths
+      - '.github/workflows/containers.yml'
+      - '.dockerignore'
+      - 'deploy/**'
+      - 'scripts/container_smoke.py'
+      - 'requirements-runtime.lock'
+      - 'api/**'
+      - 'src/**'
+      - 'web/**'
+  pull_request:
+    paths: *container_paths
+permissions:
+  contents: read
+jobs:
+  containers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PRACTICE_DEMO_DATA_DIR: ${{ github.workspace }}/.data/private/data/container-ci
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Prepare host-owned private directories
+        run: mkdir -p "$PRACTICE_DEMO_DATA_DIR"
+      - name: Build and start isolated demo
+        run: docker compose -p practice-engine-ci -f deploy/compose.yaml up --build -d --wait --wait-timeout 60
+      - name: Exercise real proxy and outcome boundaries
+        run: python scripts/container_smoke.py replay --state .data/private/data/container-ci-receipt.json
+      - name: Recreate services while preserving private data
+        run: |
+          docker compose -p practice-engine-ci -f deploy/compose.yaml down
+          docker compose -p practice-engine-ci -f deploy/compose.yaml up -d --wait --wait-timeout 60
+      - name: Verify persistence and retry after restart
+        run: python scripts/container_smoke.py verify --state .data/private/data/container-ci-receipt.json
+      - name: Diagnostic logs on failure
+        if: failure()
+        run: docker compose -p practice-engine-ci -f deploy/compose.yaml logs --tail 80
+      - name: Remove containers and network
+        if: always()
+        run: docker compose -p practice-engine-ci -f deploy/compose.yaml down

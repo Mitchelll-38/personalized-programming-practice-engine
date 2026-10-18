@@ -271,3 +271,60 @@ DataShop remains at sign-in. The browser tab was replaced; reconnecting to the
 observed login tab timed out twice on focus setup. No authentication was automated,
 no archive was acquired, and the release/catalog/real-training gates remain open.
 All project worktrees and private encoder artifacts remain inside the project root.
+
+
+### October 17: content training foundations and policy records
+
+- [#55 content checkpoints](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/55)
+  merged after independent coordinator review and final-head CI. Review reproduced
+  loading failure under an ambient meta device; explicit CPU restoration now
+  preserves caller device/RNG context. The coordinator ran 72 related checks;
+  the owner ran 128. Checkpoints bind architecture, vocabulary, encoder,
+  provenance and tensor integrity without activating a served model.
+- [#56 choice/attempt linkage](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/56)
+  binds one explicit choice and matching simulated outcome transactionally.
+  Same-payload retries return the original result; conflicts do not append rows.
+  Independent product review and final-head CI passed. Unknown catalog exercise
+  behavior was clarified separately from a known mismatched choice exercise.
+- [#58 offline content cache preparation](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/58)
+  verifies the synthetic bundle before encoder work, caches train/validation
+  content and returns an aggregate inventory receipt without parsing test rows.
+  Model-engineer independent review and final-head CI passed. An actual private
+  smoke used the original synthetic fixture: 8 train/2 validation examples,
+  three cached content entries, 83.11 seconds including encoder initialization.
+- [#57 optional outcome linkage UI](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/57)
+  merged after coordinator review, ten independent selected browser cases,
+  the owner's full 40-case suite and final-head CI. A real endpoint check
+  confirmed that retrying the same choice produced one history row. Pending or
+  absent acknowledgement remains ordinary unlinked replay; failures never silently
+  fall back to an unlinked outcome.
+- [#59 content optimizer](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/59)
+  adds bounded CPU training, train-only concepts, validation-only early selection
+  and restored caller random/thread/determinism state. Independent coordinator
+  review and final-head CI passed. The in-memory optimizer neither publishes a
+  run nor evaluates test examples; run publication is separate PR #60.
+- [#61 configurable heuristic policy](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/61)
+  merged after independent product review, 42 policy/snapshot checks and all
+  final-head CI. Exact normalized parameters and canonical hashes are retained
+  with each generated snapshot. Review caught acceptance of missing v2 policy
+  identity; corrected validation and regression reject it while preserving v1
+  history. The default 60-80% band and bounded weights are untrained hypotheses,
+  with no measured learning benefit. Optional UI disclosure is separate PR #62.
+
+The next independent segments are reviewed synthetic content-run publication,
+optional policy inspection and a local container recipe. A three-epoch private
+run with actual cached original-synthetic vectors has exact checkpoint replay;
+this is software execution evidence, not real-data quality. Container builds and
+local proxy/retry/restart/Swagger checks passed on separate draft PR #63. No usable
+CodeWorkout release or verified real-data catalog has been acquired; those gates
+remain open. All private artifacts and worktrees remain project-contained.
+
+
+[#60 synthetic content runs](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/60)
+merged after coordinator review, 100 independent related checks (three expected
+protocol skips) and all final-head CI. Review replaced metric filtering with an
+explicit aggregate whitelist and enforced one-thread deterministic reload parity
+while restoring caller settings on success/failure. The owner ran 111 related
+checks and repeated the private three-epoch actual-vector synthetic smoke with
+exact parity. Publication is atomic into a new directory; test rows stay unread.
+No real-data result, calibration or model-serving activation follows from this.

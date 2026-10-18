@@ -40,7 +40,18 @@ export type Ranking = {
   policy_version: string;
   snapshot_id: string;
   history_sequence_index: number;
+  policy_config?: PracticePolicy | null;
+  policy_sha256?: string | null;
   recommendations: Recommendation[];
+};
+export type PracticePolicy = {
+  policy_version: "transparent-ranking-v2";
+  challenge_lower: number;
+  challenge_upper: number;
+  need_weight: number;
+  prerequisite_penalty: number;
+  repeat_penalty: number;
+  prerequisite_threshold: number;
 };
 export type Model = {
   model_id: string;
