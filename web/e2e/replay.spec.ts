@@ -76,3 +76,39 @@ test("live replay persists first evidence and excludes successful retries", asyn
   expect(errors).toEqual([]);
   await expect(page.getByRole("alert")).toHaveCount(0);
 });
+
+test("live acknowledged choice links one outcome and identical retry returns its receipt", async ({ page, request }) => {
+  const before = await (await request.get("/api/students/demo/history")).json();
+  const beforeProfile = await (await request.get("/api/students/demo/profile")).json();
+  await page.goto("/");
+  await page.getByLabel("Exercise library").selectOption("java-count");
+  const pane = page.getByRole("region", { name: "Recommendation choice" });
+  const choicePromise = page.waitForResponse((response) =>
+    new URL(response.url()).pathname === "/api/recommendation-choices" && response.request().method() === "POST");
+  await pane.getByRole("button", { name: "Choose this recommendation", exact: true }).click();
+  const choiceResponse = await choicePromise;
+  expect(choiceResponse.status()).toBe(201);
+  const choice = await choiceResponse.json();
+  await expect(page.getByText(/The next simulated outcome will link/)).toBeVisible();
+  const attemptPromise = page.waitForResponse((response) =>
+    new URL(response.url()).pathname === "/api/attempts" && response.request().method() === "POST");
+  await page.getByRole("button", { name: "Simulate correct", exact: true }).click();
+  const attemptResponse = await attemptPromise;
+  expect(attemptResponse.status()).toBe(201);
+  const payload = attemptResponse.request().postDataJSON();
+  expect(payload).toEqual({ student_id: "demo", problem_id: "java-count", correct: true, choice_id: choice.choice_id });
+  const saved = await attemptResponse.json();
+  expect(saved.sequence_index).toBe(before.at(-1).sequence_index + 1);
+  await expect(page.getByRole("button", { name: "Simulate correct", exact: true })).toBeEnabled();
+  await expect(page.getByText(/The next simulated outcome will link/)).toHaveCount(0);
+  await expect(pane.getByRole("button", { name: "Choose this recommendation", exact: true })).toBeEnabled();
+  const after = await (await request.get("/api/students/demo/history")).json();
+  expect(after).toEqual([...before, saved]);
+  const afterProfile = await (await request.get("/api/students/demo/profile")).json();
+  expect(afterProfile.total_interactions).toBe(beforeProfile.total_interactions + 1);
+  const retry = await request.post("/api/attempts", { data: payload });
+  expect(retry.status()).toBe(201);
+  expect(await retry.json()).toEqual(saved);
+  expect(await (await request.get("/api/students/demo/history")).json()).toEqual(after);
+  expect(await (await request.get("/api/students/demo/profile")).json()).toEqual(afterProfile);
+});

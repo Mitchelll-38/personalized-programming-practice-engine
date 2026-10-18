@@ -19,7 +19,7 @@ If the outcome request fails ambiguously, the same choice remains available for
 an explicit retry. The backend returns the original interaction for an identical
 choice/problem/correct retry; the UI refreshes from that unchanged receipt rather
 than appending an optimistic interaction. No new choice is created for retry.
-Conflicting-outcome 409, missing-choice 404 and wrong-problem 422 have explicit
+Conflicting-outcome 409, missing-choice/unknown-exercise 404 and wrong-known-problem 422 have explicit
 errors. The UI never silently drops the choice ID or retries unlinked. If saving
 succeeded but workspace refresh failed, existing refresh-pending behavior blocks
 another simulation until refresh recovery.
@@ -29,3 +29,9 @@ duplicate-safe receipts. These records remain synthetic replay events, not proof
 of exposure, recommendation causality or learning effectiveness. No research model
 or ranking policy changes. Browser fixtures exercise request/context/retry behavior
 independently of the backend's transaction tests.
+
+An unmocked live case follows the existing seeded replay scenario. It captures the
+real choice acknowledgement and optional-ID outcome request, checks one added
+interaction, then retries that exact payload against the real endpoint. The original
+201 receipt and unchanged history/profile establish integration of the backend's
+duplicate-safe behavior. The refreshed UI clears local linkage for later outcomes.

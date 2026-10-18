@@ -89,7 +89,7 @@ test("ambiguous attempt failure retains the same choice for an identical receipt
   await expect(page.locator("tbody tr")).toHaveCount(1);
 });
 
-for (const [status, message] of [[404, "Recorded choice was not found"], [422, "Recorded choice does not match"], [409, "Recorded choice already has a different simulated outcome"]] as const) {
+for (const [status, message] of [[404, "Recorded choice or exercise was not found"], [422, "Recorded choice does not match"], [409, "Recorded choice already has a different simulated outcome"]] as const) {
   test(`linked outcome ${status} is explicit and never falls back unlinked`, async ({ page, request }) => {
     const { attempts } = await workspace(page, request);
     await page.route("**/api/attempts", (route) => route.fulfill({ status, json: { detail: "synthetic link error" } }));

@@ -82,7 +82,7 @@ export function recordOutcome(problem_id: string, correct: boolean, choice_id?: 
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ student_id: "demo", problem_id, correct, ...(choice_id !== undefined ? { choice_id } : {}) }),
   }, choice_id !== undefined ? {
-    404: "Recorded choice was not found. Refresh the workspace before retrying.",
+    404: "Recorded choice or exercise was not found. Refresh the workspace before retrying.",
     422: "Recorded choice does not match this exercise. Refresh the workspace before retrying.",
     409: "Recorded choice already has a different simulated outcome. Refresh before recording another outcome.",
   } : undefined);
