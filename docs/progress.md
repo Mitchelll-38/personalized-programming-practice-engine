@@ -222,3 +222,52 @@ remain separate from simulated correctness. The engineers agreed that browsing a
 prompt or accepting a default selection must not automatically record a choice.
 The [research engineering status](../reports/research-engineering-status.md)
 aggregates work-unit acceptance without claiming blocked experiments are complete.
+
+
+### October 17: causal sequences, explicit choices and timing
+
+- [#49 content batches](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/49)
+  merged after coordinator review, 49 independent content/encoder/cache checks and
+  final-head CI. Training-only immutable concept IDs and exact frozen vector
+  identities feed padded causal histories; target labels remain separate.
+- [#51 workspace loading](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/51)
+  fixes overlapping StrictMode snapshot requests publishing stale success, errors
+  or loading completion. Browser CI on other PRs exposed duplicate research
+  requests; the team fixed the source race rather than relaxing count assertions.
+  Four deterministic regressions passed independent review; an original-code
+  negative control reproduced stale data. Final-head CI passed before merge.
+- [#46 choice backend](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/46)
+  retains explicit candidate choices against intact generated snapshots, separately
+  from grades. Product engineer independently ran 51 storage/API checks and
+  rereviewed the unchanged feature after integrating #51. Both final browser
+  workflows and all other final-head checks passed before merge.
+- [#50 label-free DKT](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/50)
+  adapts already-loaded checkpoints without adding Torch to generic API imports.
+  Model engineer independently ran 28 adapter/checkpoint checks and rereviewed
+  the unchanged feature after #51 integration. Final-head CI passed before merge.
+- [#52 inference profiling](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/52)
+  measures repeated loaded synthetic baseline batches and binds exact input/artifact
+  bytes. Product engineer independently ran 17 profile checks; all final-head CI
+  passed before merge. Local timing is distinct from predictive quality.
+- [#53 content forward](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/53)
+  merged after coordinator review, 34 independent content input/forward checks and
+  final-head CI. Masked packed history and candidate content condition untrained
+  logits; frozen vectors receive no gradients. A separate private smoke used actual
+  cached original-synthetic CodeBERT vectors and produced finite, label-invariant
+  untrained logits. No training or measured benefit is established.
+
+The integrated suite at encoder merge `25ae62b` passed 459 tests with three
+expected protocol skips. Later focused changes have their own final-head checks
+above; this historical total is not presented as the latest suite count.
+[The product choice UI #48](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/48)
+merged after final-head CI and coordinator review: seven independent mocked choice
+cases and both live choice/replay scenarios passed; the author ran all 32 browser
+scenarios and the build. The real endpoint acknowledged the exact displayed
+snapshot/problem while history/profile/attempts remained unchanged. Content checkpoint work
+is a separate model-engineer segment. Optional choice-to-attempt linkage is a
+separate coordinator/product contract, preserving grading as its own event.
+
+DataShop remains at sign-in. The browser tab was replaced; reconnecting to the
+observed login tab timed out twice on focus setup. No authentication was automated,
+no archive was acquired, and the release/catalog/real-training gates remain open.
+All project worktrees and private encoder artifacts remain inside the project root.
