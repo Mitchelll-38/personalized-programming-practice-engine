@@ -11,3 +11,18 @@ The returned artifact's `predict(examples)` preserves causal-history validation 
 Loaded inference also checks a deterministic tensor-content fingerprint before each prediction and rejects live weight mutations. This scans all parameter bytes, so each call has linear checkpoint-size overhead; batch calls amortize that cost. Only a checksum is retained, using transient views of contiguous CPU tensors rather than storing a second binary checkpoint. Metadata mutations are revalidated as well. The returned artifact is an inference boundary, not an editable training model.
 
 Metadata records train-only provenance, vocabulary, all model dimensions, versions, fallback counts and `calibrated=false`. The artifact retains synthetic/unverified declarations; creating or saving random weights is not evidence of a trained model or research quality. This module imports Torch only when explicitly used; generic baseline serving remains unchanged. Keep checkpoints in ignored `artifacts/`, never public git.
+
+## October 19 checkpoint context isolation
+
+Owner: model engineer. Purpose: keep checkpoint save/load from changing the
+caller's CPU initialization RNG and restore CPU checkpoints independently of the
+caller's default device. Reproduction before implementation: `_restore` advanced
+CPU RNG and failed with `Cannot copy out of meta tensor` under a meta-device
+context; content checkpoint reconstruction already scopes both boundaries.
+Acceptance: public save/load leave CPU RNG unchanged on success and validation
+failure, load on CPU under an alternate default device, preserve caller context,
+and retain prediction parity/unknown fallback. Dependencies: existing Torch DKT
+checkpoint contract and original synthetic fixtures. No trainer, architecture,
+provenance, data import or empirical run behavior changes are included.
+Plan recorded before code: scope only fresh model construction to CPU and a
+CPU-only RNG fork, then reuse the existing tensor-state validation/loading path.
