@@ -691,3 +691,31 @@ were evaluated. Outputs explicitly retain `research_results=false` and
 `test_evaluated=false`; this is packaging/software evidence, not research quality
 or a clean operating-system installation. Ignored evidence is retained under
 `artifacts/wheel-rehearsal/` and `.data/qa-wheel-runtime/`.
+
+Both reliability segments now merged after independent exact-head review and all
+ten applicable GitHub checks passed on each final head: DKT #86 at squash
+`78cdb5da40d0f11c07715518ddc72a4945ef4af2`, processing #87 at squash
+`0d9f1d7813f95652eb703280b08b5b5aaedb0cc1`. Checks covered Python, web, browser,
+CPU neural/encoder and containers on push and PR events. Main was advanced only
+by fast-forward after each remote squash. Integrated verification is in progress;
+no feature-head result is being substituted for integrated-main evidence.
+
+Integrated main `0d9f1d7813f95652eb703280b08b5b5aaedb0cc1` passed **880 tests,
+four expected Windows/platform skips**, in 80.34 seconds in the pinned offline
+CPU-neural/encoder environment. The ignored log is
+`artifacts/reliability-integrated.log`. A wheel rebuilt from that exact head was
+reinstalled in the isolated runtime-only environment and passed processing,
+rate fitting, validation calibration and saved-artifact reload. Reprocessing into
+the same bundle was rejected and every existing file hash remained unchanged.
+The aggregate check is retained in
+`artifacts/wheel-rehearsal/run/final-wheel-result.json`; no test evaluation or
+research result is represented. Both changed documentation files have resolving
+local links and pass whitespace checks.
+
+Documentation rollout is separately reviewed through
+[#88](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/88).
+Private release/catalog assets remain absent on HOME; authoritative timestamp
+semantics, reviewed provenance/order policy and empirical resource/selection gates
+still block real import/training and locked-test work. No private content,
+credentials, learned weights or student records were published, and no organizer
+contact occurred.

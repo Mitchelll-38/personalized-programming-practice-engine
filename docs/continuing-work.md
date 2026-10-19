@@ -181,3 +181,9 @@ final heads and keep independent PR scopes. Coordinator owns this plan and the
 chronological ledger. No chronology normalization, real-source support, real
 training or organizer contact is authorized by these fixes. Private release assets
 remain absent; acquired data is not redownloaded.
+
+The two reliability fixes merged separately as #86 (DKT caller context) and #87
+(immutable complete processing publication), after independent exact-head review
+and successful final-head CI. The installed-wheel rehearsal uses only original
+synthetic examples. The coordinator records integrated verification separately in
+progress.md; these fixes do not clear any real-source or empirical dependency.
