@@ -643,3 +643,79 @@ These checks establish integrated synthetic software behavior only. Real-source
 import/training, locked-test results, learning claims and organizer outreach remain
 unperformed. The private source/chronology/resource/selection dependencies above
 are the remaining research blockers, not unresolved GitHub authentication.
+
+## October 19, 2026 (UTC): renewed desktop reliability review
+
+Refreshed origin/main remains `1d172b2`; no open PRs or uncommitted checkout changes
+were found. Existing feature worktrees were preserved and new isolated branches
+created for a requested three-engineer reassessment. Two actual synthetic
+reproductions identify dependency-ready fixes: partial data-bundle overwrite on a
+failed CLI rerun, and DKT checkpoint restoration altering RNG/failing under an
+alternate default device. Purpose, owners, acceptance and dependencies are recorded
+in continuing-work and feature contracts before implementation. Neither issue
+requires private data or relaxation of the empirical gates.
+
+The coordinator is also rehearsing a wheel installation in a fresh runtime-only
+environment outside checkout imports. Wheel construction succeeded; initial
+cache-only dependency installation lacked a pinned public package and was retried
+from the normal public index. This is an installation smoke, not a real-data run.
+No private assets, weights, imports/training or outreach were used.
+
+## October 19, 2026 (UTC): reliability review and installed-wheel evidence
+
+The two reproduced fixes are published independently as initially draft
+[#86](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/86)
+and [#87](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/87).
+Platform engineer approved DKT exact head `70b24a0` with no findings; author and
+coordinator independently passed 47 checkpoint/training/serving tests (15.42 and
+15.30 seconds). Automatic review rejected the reviewer's execution command over
+its temporary-output ownership interpretation; coordinator-owned verification
+passed without changing the implementation. Model engineer approved processing
+exact head `b194d40` with no findings and independently reproduced 45 passed,
+four Windows platform skips (19.46 seconds); author also passed 76 downstream
+checks (51.39 seconds). Initial downstream failures came from Windows temporary
+path length and passed with contained extended-length paths. Both PRs require
+successful exact-final-head remote checks before merge.
+
+The coordinator built a wheel from `1d172b2` and installed it into a fresh
+runtime-only environment with the pinned runtime lock. From an artifact working
+directory, isolated Python (`-I`) imported the API and package from the installed
+wheel, with no Torch/Transformers/sklearn/NumPy imports. The installed CLI processed
+original synthetic examples, fitted a rate model, fitted validation-only
+calibration, and reloaded its saved artifact with identical predictions. Runtime
+dependency verification passed for all 14 installed packages. The first existing
+fixture correctly rejected calibration because its two validation observations
+had one class; a separate original 20-row/10-student fixture with both classes
+completed the rehearsal (16 train, two validation observations). No test examples
+were evaluated. Outputs explicitly retain `research_results=false` and
+`test_evaluated=false`; this is packaging/software evidence, not research quality
+or a clean operating-system installation. Ignored evidence is retained under
+`artifacts/wheel-rehearsal/` and `.data/qa-wheel-runtime/`.
+
+Both reliability segments now merged after independent exact-head review and all
+ten applicable GitHub checks passed on each final head: DKT #86 at squash
+`78cdb5da40d0f11c07715518ddc72a4945ef4af2`, processing #87 at squash
+`0d9f1d7813f95652eb703280b08b5b5aaedb0cc1`. Checks covered Python, web, browser,
+CPU neural/encoder and containers on push and PR events. Main was advanced only
+by fast-forward after each remote squash. Integrated verification is in progress;
+no feature-head result is being substituted for integrated-main evidence.
+
+Integrated main `0d9f1d7813f95652eb703280b08b5b5aaedb0cc1` passed **880 tests,
+four expected Windows/platform skips**, in 80.34 seconds in the pinned offline
+CPU-neural/encoder environment. The ignored log is
+`artifacts/reliability-integrated.log`. A wheel rebuilt from that exact head was
+reinstalled in the isolated runtime-only environment and passed processing,
+rate fitting, validation calibration and saved-artifact reload. Reprocessing into
+the same bundle was rejected and every existing file hash remained unchanged.
+The aggregate check is retained in
+`artifacts/wheel-rehearsal/run/final-wheel-result.json`; no test evaluation or
+research result is represented. Both changed documentation files have resolving
+local links and pass whitespace checks.
+
+Documentation rollout is separately reviewed through
+[#88](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/88).
+Private release/catalog assets remain absent on HOME; authoritative timestamp
+semantics, reviewed provenance/order policy and empirical resource/selection gates
+still block real import/training and locked-test work. No private content,
+credentials, learned weights or student records were published, and no organizer
+contact occurred.

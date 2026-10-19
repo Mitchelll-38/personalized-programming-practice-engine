@@ -162,3 +162,28 @@ specifies observation-weighted bins and explicit sparse/empty handling. Further
 real-source orchestration and locked-test work await authoritative chronology,
 private assets, reviewed source support and resource/selection decisions; do not
 expand speculative interfaces to stand in for those dependencies.
+
+## October 19, 2026 (UTC): concrete reliability reassessment
+
+The renewed continuation request prompted a fresh code/contract assessment rather
+than treating missing real data as a reason to stop software work. Origin/main
+was verified at `1d172b2`, no open PRs were found, and existing clean worktrees were
+preserved. New isolated assessment branches own these coherent segments:
+
+| Owner | Purpose / demonstrated problem | Acceptance | Dependencies |
+|---|---|---|---|
+| Platform engineer | A failed processing CLI rerun can overwrite audit bytes while leaving an old manifest | Reject existing outputs, stage the complete bundle, atomic publication, cleanup on failure, preserve previous bytes | Existing CLI/manifest; original synthetic reproduction |
+| Model engineer | DKT checkpoint restore consumes caller RNG and fails under alternate default device | Explicit CPU construction with isolated initialization RNG; preserve caller state on success/failure and prediction parity | Existing DKT checkpoint format and CPU Torch environment |
+| Coordinator | Verify installed-wheel reproduction and record actual rollout | Fresh runtime-only environment outside source imports; synthetic processing/rate/calibration/reload; honest local-vs-CI evidence | Existing wheel metadata, runtime lock and public original synthetic fixture |
+
+Feature owners record their contract before implementation, cross-review exact
+final heads and keep independent PR scopes. Coordinator owns this plan and the
+chronological ledger. No chronology normalization, real-source support, real
+training or organizer contact is authorized by these fixes. Private release assets
+remain absent; acquired data is not redownloaded.
+
+The two reliability fixes merged separately as #86 (DKT caller context) and #87
+(immutable complete processing publication), after independent exact-head review
+and successful final-head CI. The installed-wheel rehearsal uses only original
+synthetic examples. The coordinator records integrated verification separately in
+progress.md; these fixes do not clear any real-source or empirical dependency.
