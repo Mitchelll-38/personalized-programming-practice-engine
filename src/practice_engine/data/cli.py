@@ -3,7 +3,9 @@
 import argparse
 from hashlib import sha256
 import json
+import os
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 from .pipeline import audit, prediction_examples, student_split
 from .schema import Interaction
@@ -37,6 +39,8 @@ def main():
         parser.error("--family-map is required for --split-protocol family")
     if args.split_protocol == "student" and args.family_map is not None:
         parser.error("--family-map is only valid for --split-protocol family")
+    if args.output.exists() or args.output.is_symlink():
+        raise ValueError("Processing output must be a new directory")
     import_report = None
     if args.format == "codeworkout":
         if args.catalog is None:
@@ -83,13 +87,23 @@ def main():
                                   source_kind="synthetic" if args.synthetic else "unverified",
                                   source_sha256=report["source_sha256"], seed=args.seed,
                                   split_version=split["version"])
-    args.output.mkdir(parents=True, exist_ok=True)
-    for name, value in (("audit.json", report), ("split.json", split)):
-        (args.output / name).write_text(json.dumps(value, indent=2) + "\n", encoding="utf-8")
-    for group, selected in partitions.items():
-        (args.output / f"{group}.jsonl").write_text(
-            "".join(example.model_dump_json() + "\n" for example in selected), encoding="utf-8")
-    write_manifest(args.output, manifest)
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    lock = args.output.with_name(f".{args.output.name}.publish-lock")
+    lock.mkdir()
+    try:
+        with TemporaryDirectory(prefix=f".{args.output.name}.", dir=args.output.parent) as temporary:
+            staging = Path(temporary)
+            for name, value in (("audit.json", report), ("split.json", split)):
+                (staging / name).write_text(json.dumps(value, indent=2) + "\n", encoding="utf-8")
+            for group, selected in partitions.items():
+                (staging / f"{group}.jsonl").write_text(
+                    "".join(example.model_dump_json() + "\n" for example in selected), encoding="utf-8")
+            write_manifest(staging, manifest)
+            if args.output.exists() or args.output.is_symlink():
+                raise ValueError("Processing output must be a new directory")
+            os.rename(staging, args.output)
+    finally:
+        lock.rmdir()
     print(json.dumps({"output": str(args.output), "audit": report, "manifest_version": manifest.manifest_version}, indent=2))
 
 

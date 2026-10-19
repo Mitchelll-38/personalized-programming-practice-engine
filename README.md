@@ -53,6 +53,10 @@ The Vite development server proxies `/api` to port 8000. A production static bui
 .\.venv\Scripts\python.exe -m practice_engine.data.cli data/fixtures/synthetic.jsonl --output data/processed/day1 --seed 38 --synthetic --dataset-version synthetic-v1
 ```
 
+Use a new output directory for every processing run; existing paths are rejected.
+The complete bundle is published atomically after all artifacts and its manifest
+are written; failed writes leave no partial output. See [processing bundles](docs/processing-bundles.md).
+
 Writes `audit.json`, `split.json`, and partitioned `train.jsonl`, `validation.jsonl`, `test.jsonl`. Each prediction example contains only earlier first attempts and the candidate's text/concepts; its label is stored separately. Retry events and ambiguous sequence positions cannot silently become extra primary targets. Seeded student grouping is independent of outcomes, and manifests include a source hash.
 
 `manifest.json` records dataset, schema, feature and split versions plus content hashes of all five outputs. `--synthetic` is an explicit source declaration; absent it, provenance stays unverified. No trained model or verified redistribution terms are inferred. `practice_engine.data.manifest.verify_manifest(Path(...))` checks bundle integrity before reuse.

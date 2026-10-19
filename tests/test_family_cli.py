@@ -49,7 +49,7 @@ def test_family_cli_provenance_partition_boundaries_and_label_independence(input
             assert all(h["problem_id"] in split["problem_ids"]["train"] and h["sequence_index"] < example["target_sequence_index"]
                        for h in example["history"])
     first_bytes = {name: (output / name).read_bytes() for name in (*ARTIFACT_NAMES, "manifest.json")}
-    assert run_cli(source, output, *flags).returncode == 0
+    assert run_cli(source, output, *flags).returncode != 0
     assert first_bytes == {name: (output / name).read_bytes() for name in first_bytes}
     source.write_text("".join(row.model_copy(update={"correct": not row.correct}).model_dump_json() + "\n" for row in rows))
     changed = tmp_path / "changed"
