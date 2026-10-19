@@ -643,3 +643,20 @@ These checks establish integrated synthetic software behavior only. Real-source
 import/training, locked-test results, learning claims and organizer outreach remain
 unperformed. The private source/chronology/resource/selection dependencies above
 are the remaining research blockers, not unresolved GitHub authentication.
+
+## October 19, 2026 (UTC): renewed desktop reliability review
+
+Refreshed origin/main remains `1d172b2`; no open PRs or uncommitted checkout changes
+were found. Existing feature worktrees were preserved and new isolated branches
+created for a requested three-engineer reassessment. Two actual synthetic
+reproductions identify dependency-ready fixes: partial data-bundle overwrite on a
+failed CLI rerun, and DKT checkpoint restoration altering RNG/failing under an
+alternate default device. Purpose, owners, acceptance and dependencies are recorded
+in continuing-work and feature contracts before implementation. Neither issue
+requires private data or relaxation of the empirical gates.
+
+The coordinator is also rehearsing a wheel installation in a fresh runtime-only
+environment outside checkout imports. Wheel construction succeeded; initial
+cache-only dependency installation lacked a pinned public package and was retried
+from the normal public index. This is an installation smoke, not a real-data run.
+No private assets, weights, imports/training or outreach were used.
