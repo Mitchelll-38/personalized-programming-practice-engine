@@ -15,6 +15,7 @@ def run_cli(output, *flags):
 
 
 def test_import_cli_audits_sources_and_reuses_causal_processing(tmp_path):
+    tmp_path = tmp_path / "bundle"
     command = ("--format", "codeworkout", "--catalog", str(FIXTURE / "catalog.json"),
                "--synthetic", "--dataset-version", "codeworkout-synthetic-v1")
     result = run_cli(tmp_path, *command)
@@ -30,7 +31,7 @@ def test_import_cli_audits_sources_and_reuses_causal_processing(tmp_path):
                 for line in (tmp_path / f"{group}.jsonl").read_text().splitlines()]
     assert len(examples) == 5
     assert all("submitted_code" not in example["candidate"] for example in examples)
-    assert run_cli(tmp_path, *command).returncode == 0
+    assert run_cli(tmp_path, *command).returncode != 0
     assert manifest == verify_manifest(tmp_path / "manifest.json")
 
 

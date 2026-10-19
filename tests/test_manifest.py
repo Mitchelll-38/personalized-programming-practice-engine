@@ -17,17 +17,20 @@ def process(output, *flags):
 
 
 def test_manifest_reproduces_versions_and_hashes(tmp_path):
+    tmp_path = tmp_path / "bundle"
     process(tmp_path, "--synthetic", "--dataset-version", "synthetic-v1")
     first = verify_manifest(tmp_path / "manifest.json")
     assert first.source_kind == "synthetic" and first.dataset_version == "synthetic-v1"
     assert first.trained_model_version is None and first.release_verified is False
     split = json.loads((tmp_path / "split.json").read_text())
     assert first.source_sha256 == split["source_sha256"] and first.seed == split["seed"]
-    process(tmp_path, "--synthetic", "--dataset-version", "synthetic-v1")
+    process(tmp_path.parent / "repeat", "--synthetic", "--dataset-version", "synthetic-v1")
+    assert first == verify_manifest(tmp_path.parent / "repeat" / "manifest.json")
     assert first == verify_manifest(tmp_path / "manifest.json")
 
 
 def test_unknown_source_not_silently_labeled_synthetic(tmp_path):
+    tmp_path = tmp_path / "bundle"
     process(tmp_path)
     manifest = verify_manifest(tmp_path / "manifest.json")
     assert manifest.source_kind == "unverified"
@@ -35,6 +38,7 @@ def test_unknown_source_not_silently_labeled_synthetic(tmp_path):
 
 
 def test_tampering_and_path_injection_rejected(tmp_path):
+    tmp_path = tmp_path / "bundle"
     process(tmp_path)
     path = tmp_path / "manifest.json"
     (tmp_path / "train.jsonl").write_text("modified\n")
