@@ -145,3 +145,50 @@ def test_live_weights_mutation_rejected_and_existing_publisher_lock_preserved(sa
     with pytest.raises(FileExistsError):
         save_dkt_checkpoint(target, model, vocabulary, provenance, **kwargs)
     assert lock.is_dir() and not target.exists()
+
+
+def test_public_save_and_load_preserve_rng_under_alternate_default_device(saved, tmp_path):
+    path, model, vocabulary, provenance, row, kwargs = saved
+    expected = load_dkt_checkpoint(path).predict([row])
+    before = torch.random.get_rng_state().clone()
+    # Meta is a CPU-only test of default-device independence; no GPU is needed.
+    with torch.device("meta"):
+        destination = tmp_path / "context-checkpoint"
+        save_dkt_checkpoint(destination, model, vocabulary, provenance, **kwargs)
+        loaded = load_dkt_checkpoint(destination)
+        assert torch.empty(0).device.type == "meta"
+        assert all(parameter.device.type == "cpu" for parameter in loaded._model.parameters())
+    assert torch.empty(0).device.type == "cpu"
+    assert torch.equal(before, torch.random.get_rng_state())
+    assert loaded.predict([row]) == expected
+
+
+def test_failed_save_state_validation_preserves_rng_and_default_device(saved, tmp_path):
+    _, model, vocabulary, provenance, _, kwargs = saved
+    with torch.no_grad():
+        model.head.weight[0, 0] = float("nan")
+    before = torch.random.get_rng_state().clone()
+    destination = tmp_path / "invalid-save"
+    with torch.device("meta"):
+        with pytest.raises(ValueError, match="Invalid checkpoint tensor"):
+            save_dkt_checkpoint(destination, model, vocabulary, provenance, **kwargs)
+        assert torch.empty(0).device.type == "meta"
+    assert torch.equal(before, torch.random.get_rng_state())
+    assert not destination.exists()
+    assert not destination.with_name(".invalid-save.publish-lock").exists()
+
+
+def test_failed_load_state_validation_preserves_rng_and_default_device(saved):
+    path, *_ = saved
+    weights_path = path / "weights.pt"
+    state = torch.load(weights_path, map_location="cpu", weights_only=True)
+    del state["head.weight"]
+    torch.save(state, weights_path)
+    rewrite_metadata(path, lambda payload: payload.update(
+        weights_sha256=sha256(weights_path.read_bytes()).hexdigest()))
+    before = torch.random.get_rng_state().clone()
+    with torch.device("meta"):
+        with pytest.raises(ValueError, match="state keys"):
+            load_dkt_checkpoint(path)
+        assert torch.empty(0).device.type == "meta"
+    assert torch.equal(before, torch.random.get_rng_state())

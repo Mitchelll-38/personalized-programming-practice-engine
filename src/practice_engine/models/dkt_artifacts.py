@@ -54,7 +54,9 @@ class DKTMetadata(BaseModel):
 
 
 def _restore(metadata: DKTMetadata, state: dict) -> DKT:
-    model = DKT(**metadata.config.model_dump()).float().cpu()
+    # Rebuilding saved weights must not consume the caller's initialization RNG.
+    with torch.device("cpu"), torch.random.fork_rng(devices=[]):
+        model = DKT(**metadata.config.model_dump()).float().cpu()
     expected = model.state_dict()
     if not isinstance(state, dict) or set(state) != set(expected):
         raise ValueError("Checkpoint state keys do not match DKT")
