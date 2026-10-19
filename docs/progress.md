@@ -660,3 +660,34 @@ environment outside checkout imports. Wheel construction succeeded; initial
 cache-only dependency installation lacked a pinned public package and was retried
 from the normal public index. This is an installation smoke, not a real-data run.
 No private assets, weights, imports/training or outreach were used.
+
+## October 19, 2026 (UTC): reliability review and installed-wheel evidence
+
+The two reproduced fixes are published independently as initially draft
+[#86](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/86)
+and [#87](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/87).
+Platform engineer approved DKT exact head `70b24a0` with no findings; author and
+coordinator independently passed 47 checkpoint/training/serving tests (15.42 and
+15.30 seconds). Automatic review rejected the reviewer's execution command over
+its temporary-output ownership interpretation; coordinator-owned verification
+passed without changing the implementation. Model engineer approved processing
+exact head `b194d40` with no findings and independently reproduced 45 passed,
+four Windows platform skips (19.46 seconds); author also passed 76 downstream
+checks (51.39 seconds). Initial downstream failures came from Windows temporary
+path length and passed with contained extended-length paths. Both PRs require
+successful exact-final-head remote checks before merge.
+
+The coordinator built a wheel from `1d172b2` and installed it into a fresh
+runtime-only environment with the pinned runtime lock. From an artifact working
+directory, isolated Python (`-I`) imported the API and package from the installed
+wheel, with no Torch/Transformers/sklearn/NumPy imports. The installed CLI processed
+original synthetic examples, fitted a rate model, fitted validation-only
+calibration, and reloaded its saved artifact with identical predictions. Runtime
+dependency verification passed for all 14 installed packages. The first existing
+fixture correctly rejected calibration because its two validation observations
+had one class; a separate original 20-row/10-student fixture with both classes
+completed the rehearsal (16 train, two validation observations). No test examples
+were evaluated. Outputs explicitly retain `research_results=false` and
+`test_evaluated=false`; this is packaging/software evidence, not research quality
+or a clean operating-system installation. Ignored evidence is retained under
+`artifacts/wheel-rehearsal/` and `.data/qa-wheel-runtime/`.
