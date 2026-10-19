@@ -62,3 +62,21 @@ This tiny repeated synthetic batch is a software smoke, not production performan
 model accuracy or an encoder/API benchmark. Exact bytes/config and aggregate report
 remain under ignored `artifacts/inference-profile-smoke/`; see the
 [inference timing contract](../docs/inference-profile.md).
+
+HOME continuation, October 18: ranking uncertainty (#82) and bounded DKT
+validation/reload (#83) passed independent review and all exact-final-head GitHub
+checks before squash merge. They improve uncertainty arithmetic and validation
+memory boundaries; they do not complete real comparison, resource approval or
+locked-test acceptance. The private release/catalog/encoder weights acquired on
+the earlier machine are absent in this desktop clone. No replacement dataset,
+real import/training or organizer outreach was used. See the chronological ledger
+for exact reviews, commits and local checks.
+
+History-length summaries (#85) also passed independent exact-head review and all
+applicable CI before squash merge. They provide fixed-bin aggregate arithmetic,
+not a locked-test runner or empirical error report. The remaining real-source,
+resource and selection dependencies above still apply.
+
+Integrated code verification at `e4f4e84` passed 869 tests with three expected
+skips on this desktop. This is synthetic software evidence; it does not satisfy
+real-data comparison, calibration, locked-test or learning-effectiveness acceptance.

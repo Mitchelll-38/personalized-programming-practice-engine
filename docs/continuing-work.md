@@ -105,3 +105,60 @@ The day-nine [paired student bootstrap](student-bootstrap.md) (#80) is also merg
 as a pure probability-score utility, without a test loader. Its original synthetic
 checks and independent expanded-row oracle establish software arithmetic only;
 real selection, calibration, locked-test evaluation and publication remain pending.
+
+## October 18 HOME desktop preparation (historical local snapshot)
+
+Owner: coordinating engineer. Purpose: verify the handover on this desktop and
+record two dependency-ready, separately reviewed engineering segments.
+Acceptance: isolated branches, synthetic local checks, independent review, draft
+PRs, final-head CI and squash merges before calling either segment delivered.
+Dependencies: repository write authentication for publication; private release and
+authoritative chronology remain separate gates for empirical work.
+
+| Owner | Segment | Acceptance | Dependency |
+|---|---|---|---|
+| Platform engineer | Bound DKT validation and checkpoint replay batches | Existing batch size bounds model calls; ordered outputs, unknown fallback and aggregate validation selection preserved | Existing DKT trainer/checkpoint; synthetic verification |
+| Model engineer | Paired whole-student ranking intervals | ROC AUC and incorrect-positive AP; common cluster draws, ties, explicit one-class draw counts and conditional interval limits | Existing metric definitions/bootstrap; synthetic oracle |
+| Coordinator | HOME verification and chronological record | Distinguish local work from merged delivery, record review/check evidence and remaining gates | Both engineering reviews; repository write authentication |
+
+The corrected project directory was absent and was cloned without replacing any
+checkout. Main is clean at `72725ca`; GitHub confirms PRs #75-81 merged and no open
+PRs at inspection. CI, browser smoke and neural/encoder workflows succeeded on
+that exact main head. The private release directory is absent on this desktop;
+a clone does not transfer the archive, catalog, weights or private draft.
+No redownload, organizer outreach, real import or real training was performed.
+
+At preparation time, the GitHub credential had read access but lacked push access.
+Local implementation and independent review can proceed; PR publication, final-head
+CI and merging require a writer account. These segments are not merged deliveries.
+
+## October 18 resumed publication
+
+The user completed GitHub web authentication and explicitly resumed project work.
+Read-only permission verification confirms repository push access. Remote main
+still matches `72725ca`; no preexisting open PRs or checkout changes were found.
+The earlier authentication blocker is resolved. Private release assets remain
+absent on this desktop, and authoritative chronology/provenance still gate real
+import/training. Organizer outreach remains unauthorized.
+
+The reviewed ranking and DKT changes are published as separate draft PRs
+[#82](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/82)
+and [#83](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/83).
+Current local checks are being rerun, and GitHub workflows must pass on the exact
+final head before either change is marked delivered. The coordinator owns the
+rollout record; feature engineers retain their isolated branches and cross-review
+responsibility. No empirical result follows from this publication.
+
+The ranking and bounded-DKT segments merged separately through #82 and #83 after
+independent review and successful exact-final-head CI. The history-length report
+segment (#85) has its own purpose/acceptance/owner contract and draft-to-review
+workflow. Integrated verification and rollout evidence are maintained in the
+chronological ledger. These engineering changes do not approve real chronology,
+resource budgets, training, locked tests or publication of acquired content.
+
+History-length summaries (#85) are now merged after independent review and all
+applicable exact-final-head CI. The [history-length contract](history-length-evaluation.md)
+specifies observation-weighted bins and explicit sparse/empty handling. Further
+real-source orchestration and locked-test work await authoritative chronology,
+private assets, reviewed source support and resource/selection decisions; do not
+expand speculative interfaces to stand in for those dependencies.

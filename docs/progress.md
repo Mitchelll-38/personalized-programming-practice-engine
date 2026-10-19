@@ -538,3 +538,108 @@ Integrated checks at `7b8da45` passed 110 audit/adapter/bootstrap/metric cases i
 chronology and reviewed real-source support. The prepared organizer clarification
 email remains unsent pending explicit sending authorization; no contact or student
 data transmission occurred during these engineering PRs.
+
+## October 18 HOME desktop handover verification
+
+The corrected project directory was freshly cloned at clean main `72725ca`.
+Remote checks confirm PRs #75-81 merged, no open PRs at inspection, and successful
+CI/browser/neural-encoder workflows on that exact head. No local checkout was
+overwritten. The private CodeWorkout release directory is absent on this desktop;
+previous acquisition evidence describes the earlier machine, not files available
+in this clone. No archive/catalog was redownloaded and no outreach occurred.
+
+A three-engineer team is implementing bounded DKT validation/reload batches and
+pure paired ranking-metric bootstrap intervals in separate contained worktrees.
+Purpose, owners, acceptance and dependencies are recorded before implementation
+in the feature contracts and continuing-work plan. Current GitHub authentication
+is read-only for this repository, so publication and integration are blocked
+pending writer access. Local work must not be called merged or CI-verified.
+
+Local verification: the model engineer's ranking segment passed 61 focused
+ranking/bootstrap/metric checks, and the independent platform reviewer reran the
+same 61 checks with no blocking findings. The platform engineer's DKT segment
+passed 59 training/forward/checkpoint/serving checks; independent model-engineer
+source review found no blocking defects. These are original synthetic software
+checks. Final commit review and remote CI remain required before integration.
+
+The clean main baseline at `72725ca` passed **828 tests, three expected skips**
+in 92.50 seconds on this desktop with Python 3.12.13 and the pinned development,
+CPU neural and encoder dependencies. This verifies current main, not the new
+feature heads. The reviewed local commits are `3a21b0c` on
+`feat/paired-ranking-bootstrap` and `6f0e039` on `fix/dkt-validation-batches`.
+Both have focused local checks and saved draft PR descriptions. Neither is pushed
+or merged; final-head GitHub checks cannot run until write authentication is ready.
+
+The model engineer independently reran 52 DKT training/forward/checkpoint tests
+at final local head `6f0e039`: all passed in 14.27 seconds, with no review findings.
+The coordinator's local documentation diff was independently reviewed for factual
+accuracy, privacy and unmerged-work disclosure with no findings. This is agent
+review, not a human GitHub approval; remote final-head CI remains pending.
+
+## October 18 resumed HOME publication
+
+After the user completed GitHub login and resumed work, repository push access
+was verified without changing credentials. Refreshed origin/main remains
+`72725ca`; no preexisting open PRs or local checkout edits were found. The prior
+read-only authentication blocker is resolved. Private release assets remain
+absent here; no redownload, organizer outreach, real import or training occurred.
+
+The reviewed ranking and DKT branches were published initially as draft PRs
+[#82](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/82)
+and [#83](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/83).
+Exact final-head checks and current local reruns are pending before rollout.
+
+### Reviewed HOME code rollout
+
+[#82 ranking uncertainty](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/82)
+squash-merged as `4908aa1` after independent exact-head review and all ten
+applicable final-head checks succeeded. Current local replay passed 61 focused
+checks; the independent platform reviewer had also passed 61. The utility reports
+paired whole-student ROC AUC/incorrect-positive AP intervals with explicit one-class
+replicate counts and conditional-interval limits. It adds no evaluator or test access.
+
+[#83 bounded DKT validation](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/83)
+squash-merged as `ad08774` after independent exact-head model review and all ten
+applicable final-head checks succeeded. Current local verification passed 59
+focused cases; independent model execution passed 52. Validation and selected
+checkpoint reload respect the configured batch size while preserving ordered
+predictions, unknown-ID fallback and aggregate early-selection semantics. This
+bounds rows per padded tensor, not total data/history memory or run time.
+
+Main was fast-forwarded cleanly to `ad08774`. The next separate reviewed segment,
+[#85 history-length summaries](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/85),
+implements the protocol's fixed reporting strata without a loader. Author and
+independent platform reviewer each passed 33 focused checks at `791a059`; final-head
+GitHub checks remain pending before this segment can be called delivered.
+
+[#85 history-length summaries](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/85)
+squash-merged as `e4f4e84` after independent approval of exact head `791a059` and
+all ten applicable final-head checks succeeded. Both author and platform reviewer
+passed 33 focused cases. The pure utility uses existing observation-weighted
+metrics for history lengths 0, 1-4, 5-19 and 20+, validates all inputs before
+binning and reports explicit empty/one-class results without row or student IDs.
+It does not read files, certify causal histories or unlock test access.
+
+Main was fast-forwarded cleanly to `e4f4e84`; full integrated Python verification
+is running with pinned optional dependencies and offline encoder settings.
+The team assessed remaining work: private release/catalog/encoder assets are
+absent here; source-backed chronology, reviewed real-source manifests/loaders,
+resource pilot/ceilings and validation selection precede empirical calibration,
+locked-test evaluation, results and final research reproduction. No further
+independent feature is clearly needed without speculating about these contracts.
+
+Integrated verification at exact code head `e4f4e8420904bdf701a0b358304dea80d817c5cf`
+passed **869 tests, three expected skips**, in 87.14 seconds with the pinned
+Python 3.12.13 development/CPU-neural/encoder environment. The initial invocation
+specified a missing test-temp parent and failed fixture setup; rerunning with the
+corrected project-contained `.data/qa-final` directory passed without source edits.
+The successful output is retained in ignored local verification artifacts.
+All relative links across the four rollout documents resolve, and whitespace
+checks pass. Coordinator documentation is delivered separately through
+[#84](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/84),
+with independent final-head review and CI required before its squash merge.
+
+These checks establish integrated synthetic software behavior only. Real-source
+import/training, locked-test results, learning claims and organizer outreach remain
+unperformed. The private source/chronology/resource/selection dependencies above
+are the remaining research blockers, not unresolved GitHub authentication.
