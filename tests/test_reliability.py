@@ -79,3 +79,12 @@ def test_empty_and_misaligned_inputs_rejected():
     for examples, scores in [([], []), ([example(True)], []), ([], [.5])]:
         with pytest.raises(ValueError, match="aligned"):
             reliability_summary(examples, scores)
+
+
+@pytest.mark.parametrize("row", [None, {}, example(True).model_copy(update={"label": 1}),
+    example(True).model_copy(update={"label": 2}),
+    example(True).model_copy(update={"student_id": " "}),
+    example(True).model_copy(update={"history": ("invalid",)})])
+def test_malformed_rows_cannot_produce_calibration_report(row):
+    with pytest.raises(ValueError):
+        reliability_summary([row], [.5])
