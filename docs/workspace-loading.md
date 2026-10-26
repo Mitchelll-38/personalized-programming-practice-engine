@@ -21,3 +21,14 @@ Browser regressions hold the two initial batches independently, finish them in
 opposite orders and verify stale success/failure cannot replace current data,
 retrigger inspection or expose an incorrect ready state. Latest failures still
 produce the existing recoverable connection error. No assertion count is relaxed.
+
+## Coherent workspace client follow-up
+
+Owner: product/frontend engineer. Purpose: consume one server-computed workspace
+bundle so a replay refresh cannot combine history, profile, and ranking from
+different reads. Dependency: backend `GET /students/demo/workspace` returning the
+existing `{model, exercises, history, profile, ranking}` shape from one history
+read. Acceptance: `getSnapshot` issues one workspace GET; browser mocks preserve
+their history, choice, policy, and loading assertions against that bundle; the
+loading regression still resolves overlapping requests in both orders. Scope is
+the client request, its E2E fixtures, and this contract record.

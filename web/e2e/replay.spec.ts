@@ -3,12 +3,12 @@ import { expect, test, type Request } from "@playwright/test";
 test("live explicit choice binds the displayed generation without changing outcomes", async ({ page, request }) => {
   const before = await Promise.all(["history", "profile"].map(async (name) =>
     (await request.get(`/api/students/demo/${name}`)).json()));
-  const rankings: Request[] = [];
+  const workspaces: Request[] = [];
   const choices: Request[] = [];
   let attempts = 0;
   page.on("request", (call) => {
     const path = new URL(call.url()).pathname;
-    if (path === "/api/students/demo/recommendations") rankings.push(call);
+    if (path === "/api/students/demo/workspace") workspaces.push(call);
     if (path === "/api/recommendation-choices" && call.method() === "POST") choices.push(call);
     if (path === "/api/attempts" && call.method() === "POST") attempts += 1;
   });
@@ -19,8 +19,8 @@ test("live explicit choice binds the displayed generation without changing outco
   await expect(button).toBeEnabled();
   expect(choices).toHaveLength(0);
   // The latest workspace request owns the displayed snapshot, including when
-  // StrictMode has started multiple initial batches. Do not fetch a new ranking.
-  const displayed = await (await rankings.at(-1)!.response())!.json();
+  // StrictMode has started multiple initial requests. Do not fetch a new ranking.
+  const displayed = (await (await workspaces.at(-1)!.response())!.json()).ranking;
   expect(displayed.recommendations.some((row: { problem_id: string }) => row.problem_id === "java-count")).toBe(true);
   const responsePromise = page.waitForResponse((response) =>
     new URL(response.url()).pathname === "/api/recommendation-choices" && response.request().method() === "POST");

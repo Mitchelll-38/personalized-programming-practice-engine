@@ -1,26 +1,15 @@
 import { expect, test, type APIRequestContext, type Page, type Route } from "@playwright/test";
 
-const paths = ["/models/current", "/exercises", "/students/demo/history", "/students/demo/profile", "/students/demo/recommendations"];
-
 async function delayedWorkspace(page: Page, request: APIRequestContext) {
-  const payloads = new Map(await Promise.all(paths.map(async (path) =>
-    [path, await (await request.get(`/api${path}`)).json()] as const)));
-  const batches = [new Map<string, Route>(), new Map<string, Route>()];
-  const counts = new Map<string, number>();
-  await page.route("**/api/**", async (route) => {
-    const path = new URL(route.request().url()).pathname.replace(/^\/api/, "");
-    if (!payloads.has(path)) { await route.fallback(); return; }
-    const batch = counts.get(path) ?? 0;
-    counts.set(path, batch + 1);
-    batches[batch].set(path, route);
-  });
+  const payload = await (await request.get("/api/students/demo/workspace")).json();
+  const pending: Route[] = [];
+  await page.route("**/api/students/demo/workspace", (route) => { pending.push(route); });
   await page.goto("/");
-  await expect.poll(() => batches.map((batch) => batch.size)).toEqual([5, 5]);
+  await expect.poll(() => pending.length).toBe(2);
   return async (batch: 0 | 1, fail = false) => {
-    await Promise.all([...batches[batch]].map(([path, route]) => route.fulfill({
-      status: fail && path === "/models/current" ? 500 : 200,
-      json: path === "/models/current" ? { ...payloads.get(path), dataset_version: batch ? "synthetic-newer" : "synthetic-older" } : payloads.get(path),
-    })));
+    await pending[batch].fulfill({ status: fail ? 500 : 200,
+      json: { ...payload, model: { ...payload.model, dataset_version: batch ? "synthetic-newer" : "synthetic-older" } },
+    });
     // Flush response microtasks and their React commit/effects before asserting
     // absence of stale UI updates; no timing-dependent request-count relaxation.
     await page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));

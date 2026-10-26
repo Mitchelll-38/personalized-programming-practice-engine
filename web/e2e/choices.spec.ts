@@ -6,13 +6,12 @@ const acknowledgement = (body: { snapshot_id: string; problem_id: string }) => (
 const created = (route: Route) => route.fulfill({ status: 201, json: acknowledgement(route.request().postDataJSON()) });
 
 async function workspace(page: Page, request: APIRequestContext) {
-  const ranking = await (await request.get("/api/students/demo/recommendations")).json();
+  const bundle = await (await request.get("/api/students/demo/workspace")).json();
   let snapshot = "a".repeat(32);
   const history: { student_id: string; problem_id: string; sequence_index: number; correct: boolean; attempt_number: number }[] = [];
-  await page.route("**/api/students/demo/recommendations", (route) => route.fulfill({ json: {
-    ...ranking, snapshot_id: snapshot, history_sequence_index: history.length - 1,
+  await page.route("**/api/students/demo/workspace", (route) => route.fulfill({ json: {
+    ...bundle, history, ranking: { ...bundle.ranking, snapshot_id: snapshot, history_sequence_index: history.length - 1 },
   } }));
-  await page.route("**/api/students/demo/history", (route) => route.fulfill({ json: history }));
   await page.route("**/api/attempts", async (route) => {
     const body = route.request().postDataJSON();
     const row = { student_id: body.student_id, problem_id: body.problem_id, correct: body.correct,

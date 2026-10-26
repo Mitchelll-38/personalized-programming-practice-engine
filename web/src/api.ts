@@ -76,16 +76,7 @@ async function request<T>(path: string, options?: RequestInit, errors?: Partial<
   return response.json() as Promise<T>;
 }
 
-export async function getSnapshot(): Promise<Snapshot> {
-  const [model, exercises, history, profile, ranking] = await Promise.all([
-    request<Model>("/models/current"),
-    request<Exercise[]>("/exercises"),
-    request<Interaction[]>("/students/demo/history"),
-    request<Profile>("/students/demo/profile"),
-    request<Ranking>("/students/demo/recommendations"),
-  ]);
-  return { model, exercises, history, profile, ranking };
-}
+export const getSnapshot = () => request<Snapshot>("/students/demo/workspace");
 
 export function recordOutcome(problem_id: string, correct: boolean, choice_id?: string) {
   return request<Interaction>("/attempts", {
