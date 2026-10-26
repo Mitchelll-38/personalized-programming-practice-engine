@@ -6,7 +6,7 @@ from contextlib import contextmanager
 from pathlib import Path
 import sqlite3
 
-from api.catalog import SEED_HISTORY
+from api.catalog import BY_ID, SEED_HISTORY
 
 
 @contextmanager
@@ -46,6 +46,41 @@ class ChoiceConflictError(ValueError):
     """A recorded choice already has a different simulated outcome."""
 
 
+class AttemptRequestConflictError(ValueError):
+    """A request ID already identifies a different simulated outcome."""
+
+
+class UnknownExerciseError(ValueError):
+    """The requested exercise is absent from the synthetic catalog."""
+
+
+def _request_receipt(db, request_id, problem_id, correct, choice_id):
+    if request_id is None:
+        return None
+    db.execute("CREATE TABLE IF NOT EXISTS attempt_request_receipts ("
+               "request_id TEXT PRIMARY KEY, problem_id TEXT NOT NULL, "
+               "correct INTEGER NOT NULL CHECK(correct IN (0,1)), choice_id TEXT, "
+               "student_id TEXT NOT NULL, sequence_index INTEGER NOT NULL, "
+               "FOREIGN KEY(student_id, sequence_index) REFERENCES interactions(student_id, sequence_index))")
+    receipt = db.execute("SELECT * FROM attempt_request_receipts WHERE request_id = ?", (request_id,)).fetchone()
+    if receipt is None:
+        return None
+    if (receipt["student_id"] != "demo" or receipt["problem_id"] != problem_id
+            or bool(receipt["correct"]) != correct or receipt["choice_id"] != choice_id):
+        raise AttemptRequestConflictError("attempt_request_conflict")
+    row = db.execute("SELECT * FROM interactions WHERE student_id = ? AND sequence_index = ?",
+                     (receipt["student_id"], receipt["sequence_index"])).fetchone()
+    if row is None or row["problem_id"] != problem_id or bool(row["correct"]) != correct:
+        raise ValueError("invalid_attempt_request_receipt")
+    return canonical(row)
+
+
+def _store_request_receipt(db, request_id, problem_id, correct, choice_id, sequence_index):
+    if request_id is not None:
+        db.execute("INSERT INTO attempt_request_receipts VALUES (?, ?, ?, ?, 'demo', ?)",
+                   (request_id, problem_id, int(correct), choice_id, sequence_index))
+
+
 def _choice_attempt(db, choice_id, problem_id, correct):
     if choice_id is None:
         return None
@@ -74,20 +109,30 @@ def _choice_attempt(db, choice_id, problem_id, correct):
     return canonical(row)
 
 
-def record(problem_id: str, correct: bool, *, choice_id: str | None = None) -> dict:
+def record(problem_id: str, correct: bool, *, choice_id: str | None = None,
+           request_id: str | None = None) -> dict:
     if choice_id is not None and (not isinstance(choice_id, str) or not re.fullmatch(r"[a-f0-9]{32}", choice_id)):
         raise ValueError("Invalid choice ID")
+    if request_id is not None and (not isinstance(request_id, str) or not re.fullmatch(r"[a-f0-9]{32}", request_id)):
+        raise ValueError("Invalid request ID")
     initialize()
     with connect() as db:
         # Context validation, numbering, interaction and link share one transaction.
         db.execute("PRAGMA foreign_keys = ON")
         db.execute("BEGIN IMMEDIATE")
+        existing = _request_receipt(db, request_id, problem_id, correct, choice_id)
+        if existing is not None:
+            return existing
+        if problem_id not in BY_ID:
+            raise UnknownExerciseError("unknown_exercise")
         existing = _choice_attempt(db, choice_id, problem_id, correct)
         if existing is not None:
+            _store_request_receipt(db, request_id, problem_id, correct, choice_id, existing["sequence_index"])
             return existing
         sequence = db.execute("SELECT COALESCE(MAX(sequence_index), -1) + 1 FROM interactions WHERE student_id = 'demo'").fetchone()[0]
         attempt = db.execute("SELECT COALESCE(MAX(attempt_number), 0) + 1 FROM interactions WHERE student_id = 'demo' AND problem_id = ?", (problem_id,)).fetchone()[0]
         db.execute("INSERT INTO interactions VALUES ('demo', ?, ?, ?, ?)", (problem_id, sequence, int(correct), attempt))
         if choice_id is not None:
             db.execute("INSERT INTO recommendation_choice_attempts VALUES (?, 'demo', ?)", (choice_id, sequence))
+        _store_request_receipt(db, request_id, problem_id, correct, choice_id, sequence)
     return {"student_id": "demo", "problem_id": problem_id, "sequence_index": sequence, "correct": correct, "attempt_number": attempt}
