@@ -37,6 +37,25 @@ def _groups(value) -> dict[str, set[str]]:
     return groups
 
 
+def _check_scored_history_consistency(examples: dict[str, list[PredictionExample]]) -> None:
+    """Match observed prefixes to scored first attempts available outside test."""
+    scored = [row for partition in ("train", "validation") for row in examples[partition]]
+    by_position = {(row.student_id, row.target_sequence_index): row for row in scored}
+    by_problem = {(row.student_id, row.candidate.problem_id): row for row in scored}
+    for example in scored:
+        for observed in example.history:
+            position = by_position.get((observed.student_id, observed.sequence_index))
+            problem = by_problem.get((observed.student_id, observed.problem_id))
+            if position is not None and (
+                    position.candidate.problem_id != observed.problem_id
+                    or position.candidate.problem_text != observed.problem_text
+                    or position.candidate.concept_ids != observed.concept_ids
+                    or position.label != observed.correct):
+                raise ValueError("History contradicts a scored target at its sequence position")
+            if problem is not None and problem.target_sequence_index != observed.sequence_index:
+                raise ValueError("History contradicts a scored target's problem position")
+
+
 def load_training_bundle(directory: Path) -> TrainingBundle:
     manifest = verify_manifest(directory / "manifest.json")
     if manifest.source_kind != "synthetic":
@@ -84,6 +103,7 @@ def load_training_bundle(directory: Path) -> TrainingBundle:
         if family and any(h.problem_id not in groups["train"] for row in rows for h in row.history):
             raise ValueError("Family histories must contain only training exercises")
         examples[name] = rows
+    _check_scored_history_consistency(examples)
     provenance = ArtifactProvenance(dataset_version=manifest.dataset_version,
         source_kind=manifest.source_kind, source_sha256=manifest.source_sha256,
         split_version=manifest.split_version, split_sha256=sha256(serialized).hexdigest())

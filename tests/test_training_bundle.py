@@ -82,6 +82,25 @@ def test_future_history_fails(bundle):
         load_training_bundle(bundle)
 
 
+@pytest.mark.parametrize("change", [
+    lambda observed: observed.update(correct=not observed["correct"]),
+    lambda observed: observed.update(problem_text="Contradictory synthetic statement"),
+    lambda observed: observed.update(concept_ids=["different-synthetic-concept"]),
+])
+def test_history_must_match_earlier_scored_target(bundle, change):
+    def contradict(rows):
+        targets = {(row["student_id"], row["target_sequence_index"]): row for row in rows}
+        later = next(row for row in rows if any(
+            (row["student_id"], observed["sequence_index"]) in targets
+            for observed in row["history"]))
+        observed = next(observed for observed in later["history"] if
+                        (later["student_id"], observed["sequence_index"]) in targets)
+        change(observed)
+    mutate(bundle, "train.jsonl", contradict)
+    with pytest.raises(ValueError, match="History contradicts a scored target"):
+        load_training_bundle(bundle)
+
+
 def test_duplicate_targets_fail(bundle):
     mutate(bundle, "train.jsonl", lambda rows: rows.append(rows[0]))
     with pytest.raises(ValueError, match="Duplicate"):

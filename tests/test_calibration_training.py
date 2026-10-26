@@ -128,6 +128,11 @@ def test_one_class_validation_fails_before_publication(prepared, tmp_path):
     rows = [json.loads(line) for line in (bundle / "validation.jsonl").read_text().splitlines()]
     for row in rows:
         row["label"] = True
+    validation_targets = {(row["student_id"], row["target_sequence_index"]) for row in rows}
+    for row in rows:
+        for observed in row["history"]:
+            if (row["student_id"], observed["sequence_index"]) in validation_targets:
+                observed["correct"] = True
     (bundle / "validation.jsonl").write_text("".join(json.dumps(row) + "\n" for row in rows))
     rehash(bundle)
     with pytest.raises(ValueError, match="both validation classes"):
