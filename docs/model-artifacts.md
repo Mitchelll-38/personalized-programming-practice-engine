@@ -21,3 +21,15 @@ envelope with the same provenance, payload hashing, live-mutation rejection and
 atomic writer. `load_baseline_artifact` dispatches only known envelope versions;
 model/feature versions must match the fixed internal registry. Inference imports
 no optional training library. Rate artifacts remain backward compatible.
+
+## Duplicate JSON field validation
+
+Owner: data/ML engineer. Purpose: reject ambiguous artifacts whose JSON repeats a
+field, even when the final occurrence satisfies existing checksums. Acceptance:
+rate, portable baseline, calibrated baseline and DKT checkpoint readers reject
+duplicate object keys at any nesting level; ordinary saved artifacts retain
+reload and prediction parity. The research API and offline profiler use the same
+strict dispatch when reading calibrated or baseline artifacts. Dependencies:
+existing readers and original synthetic fixtures only. This changes parsing
+before the existing schema/hash checks; it does not grant data access or
+authenticate artifact authors.

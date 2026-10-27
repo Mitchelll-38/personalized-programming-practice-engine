@@ -50,3 +50,20 @@ def test_generic_loader_keeps_rate_artifact_compatibility(tmp_path):
     path = tmp_path / "model.json"
     saved = save_rate_artifact(path, RateBaseline.fit([row]), provenance)
     assert load_baseline_artifact(path).predict([row]) == saved.predict([row])
+
+
+@pytest.mark.parametrize("model_class", [LogisticBaseline, BKTBaseline])
+def test_generic_loader_rejects_duplicate_nested_fields(tmp_path, model_class):
+    rows = [PredictionExample(student_id="s", target_sequence_index=i, history=(), label=bool(i),
+        candidate=Candidate(problem_id=f"p{i}", problem_text="Synthetic", concept_ids=("loops",)))
+        for i in range(2)]
+    provenance = ArtifactProvenance(dataset_version="synthetic-v1", source_kind="synthetic",
+        source_sha256="a" * 64, split_version="student-split-v1", split_sha256="b" * 64)
+    path = tmp_path / "model.json"
+    save_baseline_artifact(path, model_class.fit(rows), provenance)
+    serialized = path.read_text()
+    old = '"source_kind": "synthetic"'
+    assert old in serialized
+    path.write_text(serialized.replace(old, '"source_kind": "unverified", ' + old, 1))
+    with pytest.raises(ValueError, match="Duplicate artifact JSON field"):
+        load_baseline_artifact(path)
