@@ -106,10 +106,15 @@ def test_default_sized_replay_scopes_threads_and_determinism(prepared, tmp_path,
     first = json.loads((bundle / "validation.jsonl").read_text().splitlines()[0])
     rows = []
     for index in range(32):
-        row = {**first, "target_sequence_index": 100 + index,
+        row = {**first, "student_id": f"synthetic-validation-{index}", "history": [],
+               "target_sequence_index": 100 + index,
                "candidate": {**first["candidate"], "problem_id": f"heldout-{index}"}}
         rows.append(json.dumps(row))
     (bundle / "validation.jsonl").write_text("\n".join(rows) + "\n")
+    split_path = bundle / "split.json"
+    split = json.loads(split_path.read_text())
+    split["student_ids"]["validation"] = [f"synthetic-validation-{index}" for index in range(32)]
+    split_path.write_text(json.dumps(split))
     refresh(bundle)
     original = content_run.load_content_checkpoint
     observed_batches = []
