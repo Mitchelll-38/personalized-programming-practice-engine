@@ -23,6 +23,14 @@ def _unique_mapping(pairs):
     return result
 
 
+def _codeworkout_source_hashes(release: Path, catalog: Path) -> dict[str, str]:
+    paths = {"MainTable.csv": release / "MainTable.csv", "catalog.json": catalog}
+    code_path = release / "CodeStates/CodeStates.csv"
+    if code_path.exists():
+        paths["CodeStates/CodeStates.csv"] = code_path
+    return {name: sha256(path.read_bytes()).hexdigest() for name, path in paths.items()}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("input", type=Path, help="Canonical JSONL, or release directory with --format codeworkout")
@@ -45,15 +53,13 @@ def main():
     if args.format == "codeworkout":
         if args.catalog is None:
             parser.error("--catalog is required for --format codeworkout")
+        source_hashes = _codeworkout_source_hashes(args.input, args.catalog)
         imported = import_codeworkout(args.input, args.catalog)
+        if _codeworkout_source_hashes(args.input, args.catalog) != source_hashes:
+            raise ValueError("CodeWorkout source files changed during processing")
         rows = imported.rows
         source_bytes = "".join(row.model_dump_json() + "\n" for row in rows).encode("utf-8")
-        paths = {"MainTable.csv": args.input / "MainTable.csv", "catalog.json": args.catalog}
-        code_path = args.input / "CodeStates/CodeStates.csv"
-        if code_path.exists():
-            paths["CodeStates/CodeStates.csv"] = code_path
-        import_report = {**imported.audit,
-                         "source_sha256": {name: sha256(path.read_bytes()).hexdigest() for name, path in paths.items()}}
+        import_report = {**imported.audit, "source_sha256": source_hashes}
     else:
         if args.catalog is not None:
             parser.error("--catalog is only valid for --format codeworkout")
@@ -99,6 +105,8 @@ def main():
                 (staging / f"{group}.jsonl").write_text(
                     "".join(example.model_dump_json() + "\n" for example in selected), encoding="utf-8")
             write_manifest(staging, manifest)
+            if args.format == "codeworkout" and _codeworkout_source_hashes(args.input, args.catalog) != source_hashes:
+                raise ValueError("CodeWorkout source files changed during processing")
             if args.output.exists() or args.output.is_symlink():
                 raise ValueError("Processing output must be a new directory")
             os.rename(staging, args.output)
