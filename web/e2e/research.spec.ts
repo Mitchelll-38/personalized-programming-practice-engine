@@ -137,6 +137,35 @@ for (const [name, change] of [
   });
 }
 
+for (const [name, change] of [
+  ["unverified source", { source_kind: "unverified" }],
+  ["validation fit", { fit_partition: "validation" }],
+  ["different dataset", { dataset_version: "other" }],
+  ["invalid source digest", { source_sha256: "bad" }],
+  ["missing split digest", { split_sha256: undefined }],
+  ["blank split version", { split_version: "" }],
+] as const) {
+  test(`uncalibrated response rejects ${name} and recovers on retry`, async ({ page }) => {
+    const pane = await workspace(page);
+    let malformed = true;
+    await page.route("**/api/research/predict", (route) => json(route, {
+      ...prediction("java-count"), model: malformed ? {
+        ...model, provenance: { ...model.provenance, ...change },
+      } : model,
+    }));
+    await pane.getByRole("button", { name: "Inspect fitted baseline", exact: true }).click();
+    await expect(pane.getByRole("alert")).toContainText("Unexpected research response");
+    await expect(pane).not.toContainText("73%");
+    await expect(pane).not.toContainText("Synthetic fitted estimate");
+    await expect(page.getByRole("button", { name: "Simulate correct", exact: true })).toBeEnabled();
+
+    malformed = false;
+    await pane.getByRole("button", { name: "Retry inspection" }).click();
+    await expect(pane.getByRole("heading", { name: "Synthetic fitted estimate · Uncalibrated" })).toBeVisible();
+    await expect(pane).toContainText("73%");
+  });
+}
+
 test("calibrated inspection labels scaling and fitting limits without changing replay", async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 390, height: 844 });
   const pane = await workspace(page);

@@ -56,3 +56,14 @@ fitting is not independent calibration evidence. The existing uncalibrated label
 request timing/cancellation, error recovery and heuristic replay remain unchanged.
 Browser fixtures check valid mobile presentation and malformed metadata rejection;
 their displayed probabilities remain synthetic UI test data.
+
+## Uncalibrated provenance presentation boundary
+
+Owner: product/frontend engineer. Purpose: a malformed successful research response
+can declare a synthetic model at the top level while its nested provenance declares
+an unverified source, yet the inspector displays a synthetic fitted estimate.
+Acceptance: require uncalibrated nested source kind, dataset identity, train fit
+partition and source/split digest shapes before presenting the estimate; surface
+the existing recoverable inspection error for contradictory metadata. Preserve
+valid uncalibrated and calibrated synthetic responses. Dependency: the existing
+research response and inspector contracts; synthetic route fixtures only.

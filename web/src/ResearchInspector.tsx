@@ -2,7 +2,17 @@ import { useEffect, useState } from "react";
 import { getResearchModel, predictResearch, type Exercise, type ResearchInput, type ResearchModel, type ResearchPrediction, type Snapshot } from "./api";
 
 const digest = (value: unknown) => typeof value === "string" && /^[a-f0-9]{64}$/.test(value);
+function validBaseProvenance(model: ResearchModel): boolean {
+  const provenance = model.provenance;
+  return !!provenance && provenance.source_kind === "synthetic" &&
+    provenance.fit_partition === "train" &&
+    typeof model.dataset_version === "string" && model.dataset_version.length > 0 &&
+    provenance.dataset_version === model.dataset_version &&
+    typeof provenance.split_version === "string" && provenance.split_version.length > 0 &&
+    digest(provenance.source_sha256) && digest(provenance.split_sha256);
+}
 function validCalibration(model: ResearchModel): boolean {
+  if (!validBaseProvenance(model)) return false;
   if (model.calibrated === false) return model.artifact_version !== "temperature-baseline-artifact-v1";
   if (model.calibrated !== true) return false;
   const calibration = model.calibration;
