@@ -70,6 +70,18 @@ def test_invalid_validation_and_payload_rejected():
             TemperatureScaler.from_dict(payload)
 
 
+@pytest.mark.parametrize("row", [None, {},
+    example(True).model_copy(update={"label": 1}),
+    example(True).model_copy(update={"label": 2}),
+    example(True).model_copy(update={"label": "yes"}),
+    example(True).model_copy(update={"label": None}),
+    example(True).model_copy(update={"student_id": " "}),
+    example(True).model_copy(update={"history": ("invalid",)})])
+def test_malformed_validation_row_cannot_fit_temperature(row):
+    with pytest.raises(ValueError):
+        TemperatureScaler.fit_validation([row, example(False)], [.8, .2])
+
+
 def test_subnormal_temperature_has_stable_limits_and_rejects_infinite_fit_loss():
     tiny = math.nextafter(0, 1)
     assert TemperatureScaler(tiny).predict([.1, .5, .9]) == [0, .5, 1]
