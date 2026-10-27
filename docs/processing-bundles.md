@@ -1,5 +1,20 @@
 # Atomic processing bundles
 
+October 27 CodeWorkout source consistency plan — Owner: data engineer. Purpose:
+prevent an imported label from being published with a source hash taken from
+different table bytes. Acceptance: hash the required MainTable/catalog and the
+presence/content of optional CodeStates before and after import and before
+publication; reject any observed change without publishing an output. A synthetic
+after-parse score mutation must fail, while an unchanged synthetic import retains
+its source hashes. Dependencies: existing CodeWorkout adapter, processing CLI and
+atomic publication. This adds no real-source permission or chronology decision.
+
+The CodeWorkout CLI now compares the MainTable, catalog and optional CodeStates
+file set and SHA-256 values before/after parsing and again before publication.
+The import receipt retains the initial source hashes only when those checks agree;
+an observed source change discards staging. These checks detect changes at their
+read points but do not create an atomic filesystem snapshot.
+
 October 27 canonical ID fix plan — Owner: data engineer. Purpose: prevent the
 processing CLI from publishing a hash-valid bundle that the training loader
 rejects because a student ID contains only whitespace. Acceptance: canonical

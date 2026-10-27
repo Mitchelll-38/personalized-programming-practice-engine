@@ -1,9 +1,13 @@
 from hashlib import sha256
 import json
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 
+import pytest
+
+from practice_engine.data import cli
 from practice_engine.data.manifest import verify_manifest
 
 FIXTURE = Path(__file__).resolve().parents[1] / "data/fixtures/codeworkout"
@@ -43,3 +47,48 @@ def test_invalid_catalog_arguments_write_no_artifacts(tmp_path):
     result = run_cli(missing, "--catalog", str(FIXTURE / "catalog.json"))
     assert result.returncode != 0 and "only valid" in result.stderr
     assert not missing.exists()
+
+
+@pytest.mark.parametrize("change", ["score", "remove-optional-code-table"])
+def test_source_change_after_import_cannot_publish_mismatched_receipt(tmp_path, monkeypatch, change):
+    release = tmp_path / "release"
+    shutil.copytree(FIXTURE, release)
+    output = tmp_path / "bundle"
+    original_import = cli.import_codeworkout
+
+    def import_then_change(directory, catalog):
+        imported = original_import(directory, catalog)
+        if change == "score":
+            table = directory / "MainTable.csv"
+            table.write_text(table.read_text().replace(
+                "e6,synthetic-b,1,1,2026-01-01T12:00:00Z,Run.Program,0,,99",
+                "e6,synthetic-b,1,1,2026-01-01T12:00:00Z,Run.Program,1,,99"))
+        else:
+            (directory / "CodeStates/CodeStates.csv").unlink()
+        return imported
+
+    monkeypatch.setattr(cli, "import_codeworkout", import_then_change)
+    monkeypatch.setattr(sys, "argv", ["practice-data", str(release), "--format", "codeworkout",
+        "--catalog", str(release / "catalog.json"), "--synthetic", "--output", str(output)])
+    with pytest.raises(ValueError, match="source files changed"):
+        cli.main()
+    assert not output.exists() and not (output / "manifest.json").exists()
+
+
+def test_source_change_during_staging_cleans_unpublished_bundle(tmp_path, monkeypatch):
+    release = tmp_path / "release"
+    shutil.copytree(FIXTURE, release)
+    output = tmp_path / "bundle"
+    original_write = cli.write_manifest
+
+    def write_then_change(directory, manifest):
+        original_write(directory, manifest)
+        catalog = release / "catalog.json"
+        catalog.write_text(catalog.read_text() + "\n")
+
+    monkeypatch.setattr(cli, "write_manifest", write_then_change)
+    monkeypatch.setattr(sys, "argv", ["practice-data", str(release), "--format", "codeworkout",
+        "--catalog", str(release / "catalog.json"), "--synthetic", "--output", str(output)])
+    with pytest.raises(ValueError, match="source files changed"):
+        cli.main()
+    assert not output.exists() and not list(tmp_path.glob(".bundle*"))
