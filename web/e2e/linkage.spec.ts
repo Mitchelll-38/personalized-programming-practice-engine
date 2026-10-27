@@ -117,6 +117,40 @@ test("transient server failure retains the exact linked request for retry", asyn
   expect(history).toHaveLength(1);
 });
 
+for (const [field, mismatch] of [
+  ["student", { student_id: "other" }],
+  ["problem", { problem_id: "java-find" }],
+  ["outcome", { correct: false }],
+  ["sequence index", { sequence_index: 0.5 }],
+  ["attempt number", { attempt_number: 0 }],
+] as const) {
+  test(`mismatched ${field} receipt retains the exact linked request`, async ({ page, request }) => {
+    const { attempts, history } = await workspace(page, request);
+    const saved = { student_id: "demo", problem_id: "java-count", correct: true, sequence_index: 0, attempt_number: 1 };
+    let servedBadReceipt = false;
+    await page.route("**/api/attempts", (route) => {
+      if (!servedBadReceipt) {
+        servedBadReceipt = true;
+        history.push(saved);
+        return route.fulfill({ status: 201, json: { ...saved, ...mismatch } });
+      }
+      return route.fulfill({ status: 201, json: saved });
+    });
+    await choose(page);
+    await page.getByRole("button", { name: "Simulate correct", exact: true }).click();
+    await expect(page.getByRole("alert")).toContainText("Unexpected attempt receipt");
+    await expect(page.getByText(/Simulated correct outcome recorded/)).toHaveCount(0);
+    await expect(page.getByText(/The next simulated outcome will link/)).toBeVisible();
+    expect(attempts).toHaveLength(1);
+    await page.getByRole("button", { name: "Simulate correct", exact: true }).click();
+    await expect(page.getByText("Simulated correct outcome recorded as interaction 0.")).toBeVisible();
+    expect(attempts).toHaveLength(2);
+    expect(attempts[1]).toEqual(attempts[0]);
+    expect(attempts[1].choice_id).toBe(choiceId);
+    expect(history).toHaveLength(1);
+  });
+}
+
 for (const [status, message] of [[404, "Recorded choice or exercise was not found"], [422, "Recorded choice does not match"], [409, "Recorded choice already has a different simulated outcome"]] as const) {
   test(`linked outcome ${status} rejects its intent and allows a fresh explicit simulation`, async ({ page, request }) => {
     const { attempts, history } = await workspace(page, request);

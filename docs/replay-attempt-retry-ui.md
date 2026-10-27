@@ -33,3 +33,19 @@ The client does not send a replacement choice or attempt automatically. A new
 button click records a new choice ID, and the next explicit simulated outcome
 links only that new ID. Network and 5xx failures keep the original linked request
 for exact retry. Browser checks cover each definitive status and these boundaries.
+
+## Attempt receipt validation
+
+Owner: product frontend engineer. Purpose: avoid announcing a saved outcome or
+discarding its retry ID when a successful HTTP response contains the wrong
+interaction. Dependency: existing `/attempts` request receipts and explicit
+choice linkage; synthetic replay only.
+
+Acceptance: before treating HTTP 201 as confirmed, verify that its JSON receipt
+has student `demo`, the submitted problem and correctness, a nonnegative integer
+sequence index and a positive integer attempt number. An invalid or mismatched
+receipt is an ambiguous result: show an error, retain the exact pending request
+including its choice ID, and send nothing until the learner explicitly retries.
+A valid receipt confirms the intent and clears it before workspace refresh.
+Browser checks supply a bad receipt followed by a valid one and verify identical
+POST bodies and no premature success notice.

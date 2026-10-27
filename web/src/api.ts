@@ -100,8 +100,8 @@ export type AttemptIntent = {
   request_id: string;
 };
 
-export function recordOutcome(intent: AttemptIntent) {
-  return request<Interaction>("/attempts", {
+export async function recordOutcome(intent: AttemptIntent): Promise<Interaction> {
+  const receipt = await request<unknown>("/attempts", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ student_id: "demo", ...intent }),
@@ -110,6 +110,14 @@ export function recordOutcome(intent: AttemptIntent) {
     422: "Recorded choice does not match this exercise. The rejected link was cleared; choose again to start a new simulation.",
     409: "Recorded choice already has a different simulated outcome. The rejected link was cleared; choose again to start a new simulation.",
   } : { 409: "This simulation request already has a different outcome. Choose a new result to start a new simulation." });
+  if (!receipt || typeof receipt !== "object" || Array.isArray(receipt))
+    throw new Error("Unexpected attempt receipt. The outcome may already be saved; retry the same result to check its receipt.");
+  const row = receipt as Record<string, unknown>;
+  if (row.student_id !== "demo" || row.problem_id !== intent.problem_id || row.correct !== intent.correct ||
+      !Number.isSafeInteger(row.sequence_index) || (row.sequence_index as number) < 0 ||
+      !Number.isSafeInteger(row.attempt_number) || (row.attempt_number as number) < 1)
+    throw new Error("Unexpected attempt receipt. The outcome may already be saved; retry the same result to check its receipt.");
+  return receipt as Interaction;
 }
 
 export type RecommendationChoice = {
