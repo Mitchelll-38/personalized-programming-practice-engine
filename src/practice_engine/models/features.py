@@ -2,7 +2,7 @@
 
 import math
 
-from practice_engine.data.schema import Interaction, PredictionExample
+from practice_engine.data.schema import Candidate, Interaction, PredictionExample
 
 FEATURE_VERSION = "historical-numeric-v1"
 FEATURE_NAMES = (
@@ -22,9 +22,24 @@ def validate_training_examples(examples: list[PredictionExample]) -> None:
 
 
 def _validate_history(example: PredictionExample) -> None:
+    if (type(example) is not PredictionExample or type(example.student_id) is not str
+            or not example.student_id.strip() or type(example.target_sequence_index) is not int
+            or type(example.history) is not tuple or type(example.candidate) is not Candidate
+            or type(example.candidate.problem_id) is not str
+            or type(example.candidate.concept_ids) is not tuple
+            or any(type(tag) is not str for tag in example.candidate.concept_ids)):
+        raise ValueError("Valid prediction metadata and history are required")
     previous_index = -1
     problems = set()
     for row in example.history:
+        if (type(row) is not Interaction or type(row.student_id) is not str
+                or not row.student_id.strip() or type(row.problem_id) is not str
+                or not row.problem_id or type(row.sequence_index) is not int
+                or type(row.attempt_number) is not int or type(row.correct) is not bool
+                or type(row.concept_ids) is not tuple or not row.concept_ids
+                or any(type(tag) is not str or not tag.strip() for tag in row.concept_ids)
+                or len(set(row.concept_ids)) != len(row.concept_ids)):
+            raise ValueError("Valid historical interactions are required")
         if row.student_id != example.student_id:
             raise ValueError("history must belong to the target student")
         if row.sequence_index <= previous_index or row.sequence_index >= example.target_sequence_index:
@@ -53,10 +68,6 @@ def historical_features(examples: list[PredictionExample]) -> list[list[float]]:
     """
     features = []
     for example in examples:
-        if (type(example) is not PredictionExample or type(example.student_id) is not str
-                or not example.student_id.strip()):
-            raise ValueError("Valid prediction examples with student IDs are required")
-        PredictionExample.model_validate(example.model_dump(warnings=False))
         _validate_history(example)
         concepts = set(example.candidate.concept_ids)
         overlap = [row for row in example.history if concepts.intersection(row.concept_ids)]

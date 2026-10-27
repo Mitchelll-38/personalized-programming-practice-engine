@@ -132,3 +132,4 @@ def test_direct_prediction_rejects_unchecked_prior_outcome():
     copied = row.model_copy(update={"history": (row.history[0].model_copy(update={"correct": 2}),)})
     with pytest.raises(ValueError):
         model().predict([copied])
+    assert model().predict([row.model_copy(update={"label": 2})]) == model().predict([row])
