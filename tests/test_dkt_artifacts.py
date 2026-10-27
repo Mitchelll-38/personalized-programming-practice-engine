@@ -158,6 +158,36 @@ def test_live_weights_mutation_rejected_and_existing_publisher_lock_preserved(sa
     assert lock.is_dir() and not target.exists()
 
 
+@pytest.mark.parametrize("mutate", [
+    lambda model: setattr(model.embedding, "max_norm", 1e-6),
+    lambda model: setattr(model.embedding, "norm_type", 1.0),
+    lambda model: setattr(model.lstm, "batch_first", False),
+    lambda model: setattr(model.head, "in_features", 99),
+])
+def test_live_architecture_change_rejected_on_first_prediction(saved, mutate):
+    path, _, _, _, row, _ = saved
+    loaded = load_dkt_checkpoint(path)
+    assert len(loaded.predict([row])) == 1
+    mutate(loaded._model)
+    with pytest.raises(ValueError, match="architecture|semantics"):
+        loaded.predict([row])
+
+
+@pytest.mark.parametrize("mutate", [
+    lambda model: setattr(model.embedding, "max_norm", 1e-6),
+    lambda model: setattr(model.lstm, "batch_first", False),
+    lambda model: setattr(model.head, "in_features", 99),
+])
+def test_save_rejects_noncanonical_architecture_before_publication(saved, mutate):
+    path, model, vocabulary, provenance, _, kwargs = saved
+    destination = path.with_name("changed-semantics")
+    mutate(model)
+    with pytest.raises(ValueError, match="architecture semantics"):
+        save_dkt_checkpoint(destination, model, vocabulary, provenance, **kwargs)
+    assert not destination.exists()
+    assert not destination.with_name(".changed-semantics.publish-lock").exists()
+
+
 def test_public_save_and_load_preserve_rng_under_alternate_default_device(saved, tmp_path):
     path, model, vocabulary, provenance, row, kwargs = saved
     expected = load_dkt_checkpoint(path).predict([row])

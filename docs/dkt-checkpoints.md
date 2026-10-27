@@ -26,3 +26,19 @@ checkpoint contract and original synthetic fixtures. No trainer, architecture,
 provenance, data import or empirical run behavior changes are included.
 Plan recorded before code: scope only fresh model construction to CPU and a
 CPU-only RNG fork, then reuse the existing tensor-state validation/loading path.
+
+## October 27 live architecture integrity
+
+Owner: model engineer. Purpose: reject DKT module changes that alter inference
+without changing the saved tensor bytes. A loaded embedding's `max_norm` can be
+changed after loading; the current pre-inference tensor fingerprint then passes,
+while the next embedding call renormalizes weights and returns an altered score.
+The checkpoint writer likewise must not serialize a model whose live module
+behavior differs from the fixed architecture reconstructed by the reader.
+
+Acceptance: saving a model with changed embedding or LSTM/head semantics fails
+before publication; a loaded checkpoint rejects a live semantic change on the
+first prediction; unchanged checkpoints retain known/unknown prediction parity.
+Keep architecture checks distinct from tensor-content fingerprinting. Dependencies:
+the existing DKT forward/checkpoint contracts and synthetic fixture only. This
+fix does not change training, input causality, provenance or empirical results.
