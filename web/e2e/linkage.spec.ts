@@ -1,7 +1,7 @@
 import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
 
 const choiceId = "c".repeat(32);
-type Attempt = { student_id: string; problem_id: string; correct: boolean; choice_id?: string };
+type Attempt = { student_id: string; problem_id: string; correct: boolean; choice_id?: string; request_id: string };
 type Interaction = { student_id: string; problem_id: string; correct: boolean; sequence_index: number; attempt_number: number };
 async function workspace(page: Page, request: APIRequestContext) {
   const ranking = await (await request.get("/api/students/demo/recommendations")).json();
@@ -40,11 +40,14 @@ test("acknowledged same-context choice links once and refresh clears the next at
   expect(attempts).toHaveLength(0);
   await page.getByRole("button", { name: "Simulate correct", exact: true }).click();
   await expect(page.getByText("Simulated correct outcome recorded as interaction 0.")).toBeVisible();
-  expect(attempts).toEqual([{ student_id: "demo", problem_id: "java-count", correct: true, choice_id: choiceId }]);
+  expect(attempts[0]).toMatchObject({ student_id: "demo", problem_id: "java-count", correct: true, choice_id: choiceId });
+  expect(attempts[0].request_id).toMatch(/^[a-f0-9]{32}$/);
   await expect(page.getByText(/The next simulated outcome will link/)).toHaveCount(0);
   await page.getByRole("button", { name: "Simulate correct", exact: true }).click();
   await expect(page.getByText("Simulated correct outcome recorded as interaction 1.")).toBeVisible();
-  expect(attempts[1]).toEqual({ student_id: "demo", problem_id: "java-count", correct: true });
+  expect(attempts[1]).toMatchObject({ student_id: "demo", problem_id: "java-count", correct: true });
+  expect(attempts[1].request_id).toMatch(/^[a-f0-9]{32}$/);
+  expect(attempts[1].request_id).not.toBe(attempts[0].request_id);
 });
 
 test("pending choice never blocks or retroactively links an unlinked simulation", async ({ page, request }) => {
@@ -56,7 +59,9 @@ test("pending choice never blocks or retroactively links an unlinked simulation"
   await page.getByRole("button", { name: "Simulate incorrect", exact: true }).click();
   await expect(page.getByText("Simulated incorrect outcome recorded as interaction 0.")).toBeVisible();
   await pending!.fulfill({ status: 201, json: { ...pending!.request().postDataJSON(), choice_id: choiceId, created_at: "2026-10-17T21:00:00Z" } }).catch(() => {});
-  expect(attempts).toEqual([{ student_id: "demo", problem_id: "java-count", correct: false }]);
+  expect(attempts).toHaveLength(1);
+  expect(attempts[0]).toMatchObject({ student_id: "demo", problem_id: "java-count", correct: false });
+  expect(attempts[0].request_id).toMatch(/^[a-f0-9]{32}$/);
   await expect(page.getByText(/The next simulated outcome will link/)).toHaveCount(0);
 });
 
@@ -67,7 +72,9 @@ test("selection changes discard an acknowledged link", async ({ page, request })
   await expect(page.getByText(/The next simulated outcome will link/)).toHaveCount(0);
   await page.getByRole("button", { name: "Simulate correct", exact: true }).click();
   await expect(page.getByText("Simulated correct outcome recorded as interaction 0.")).toBeVisible();
-  expect(attempts).toEqual([{ student_id: "demo", problem_id: "java-find", correct: true }]);
+  expect(attempts).toHaveLength(1);
+  expect(attempts[0]).toMatchObject({ student_id: "demo", problem_id: "java-find", correct: true });
+  expect(attempts[0].request_id).toMatch(/^[a-f0-9]{32}$/);
 });
 
 test("ambiguous attempt failure retains the same choice for an identical receipt retry", async ({ page, request }) => {

@@ -96,7 +96,8 @@ test("live acknowledged choice links one outcome and identical retry returns its
   const attemptResponse = await attemptPromise;
   expect(attemptResponse.status()).toBe(201);
   const payload = attemptResponse.request().postDataJSON();
-  expect(payload).toEqual({ student_id: "demo", problem_id: "java-count", correct: true, choice_id: choice.choice_id });
+  expect(payload).toMatchObject({ student_id: "demo", problem_id: "java-count", correct: true, choice_id: choice.choice_id });
+  expect(payload.request_id).toMatch(/^[a-f0-9]{32}$/);
   const saved = await attemptResponse.json();
   expect(saved.sequence_index).toBe(before.at(-1).sequence_index + 1);
   await expect(page.getByRole("button", { name: "Simulate correct", exact: true })).toBeEnabled();
@@ -111,4 +112,71 @@ test("live acknowledged choice links one outcome and identical retry returns its
   expect(await retry.json()).toEqual(saved);
   expect(await (await request.get("/api/students/demo/history")).json()).toEqual(after);
   expect(await (await request.get("/api/students/demo/profile")).json()).toEqual(afterProfile);
+});
+
+test("lost unlinked response retries one committed outcome after selection changes", async ({ page, request }) => {
+  const before = await (await request.get("/api/students/demo/history")).json();
+  const attempts: { problem_id: string; correct: boolean; request_id: string }[] = [];
+  let lost = false;
+  page.on("request", (call) => {
+    if (new URL(call.url()).pathname === "/api/attempts" && call.method() === "POST")
+      attempts.push(call.postDataJSON());
+  });
+  await page.route("**/api/attempts", async (route) => {
+    if (!lost) {
+      lost = true;
+      const committed = await route.fetch();
+      expect(committed.status()).toBe(201);
+      await route.abort("failed");
+    } else {
+      await route.continue();
+    }
+  });
+  await page.goto("/");
+  await page.getByLabel("Exercise library").selectOption("java-count");
+  await page.getByRole("button", { name: "Simulate correct", exact: true }).click();
+  await expect(page.getByRole("alert")).toBeVisible();
+  await page.getByRole("button", { name: "Retry connection" }).click();
+  await expect(page.getByRole("alert")).toHaveCount(0);
+  await page.getByLabel("Exercise library").selectOption("java-find");
+  await page.getByLabel("Exercise library").selectOption("java-count");
+  await expect(page.getByText(/The previous outcome may already be saved/)).toBeVisible();
+  await page.getByRole("button", { name: "Simulate correct", exact: true }).click();
+  await expect(page.getByText(`Simulated correct outcome recorded as interaction ${before.length}.`)).toBeVisible();
+  expect(attempts).toHaveLength(2);
+  expect(attempts[0]).toEqual(attempts[1]);
+  expect(attempts[0].request_id).toMatch(/^[a-f0-9]{32}$/);
+  expect(await (await request.get("/api/students/demo/history")).json()).toHaveLength(before.length + 1);
+
+  await page.getByRole("button", { name: "Simulate incorrect", exact: true }).click();
+  await expect(page.getByText(`Simulated incorrect outcome recorded as interaction ${before.length + 1}.`)).toBeVisible();
+  expect(attempts[2]).toMatchObject({ problem_id: "java-count", correct: false });
+  expect(attempts[2].request_id).not.toBe(attempts[0].request_id);
+  expect(await (await request.get("/api/students/demo/history")).json()).toHaveLength(before.length + 2);
+});
+
+test("changed exercise after an ambiguous failure starts a new request", async ({ page, request }) => {
+  const before = await (await request.get("/api/students/demo/history")).json();
+  const attempts: { problem_id: string; correct: boolean; request_id: string }[] = [];
+  page.on("request", (call) => {
+    if (new URL(call.url()).pathname === "/api/attempts" && call.method() === "POST")
+      attempts.push(call.postDataJSON());
+  });
+  let failed = false;
+  await page.route("**/api/attempts", async (route) => {
+    if (!failed) { failed = true; await route.abort("failed"); }
+    else await route.continue();
+  });
+  await page.goto("/");
+  await page.getByLabel("Exercise library").selectOption("java-count");
+  await page.getByRole("button", { name: "Simulate correct", exact: true }).click();
+  await expect(page.getByRole("alert")).toBeVisible();
+  await page.getByLabel("Exercise library").selectOption("java-find");
+  await page.getByRole("button", { name: "Simulate incorrect", exact: true }).click();
+  await expect(page.getByText(`Simulated incorrect outcome recorded as interaction ${before.length}.`)).toBeVisible();
+  expect(attempts).toHaveLength(2);
+  expect(attempts[0]).toMatchObject({ problem_id: "java-count", correct: true });
+  expect(attempts[1]).toMatchObject({ problem_id: "java-find", correct: false });
+  expect(attempts[1].request_id).not.toBe(attempts[0].request_id);
+  expect(await (await request.get("/api/students/demo/history")).json()).toHaveLength(before.length + 1);
 });
