@@ -76,15 +76,21 @@ def test_poisoned_test_examples_never_parsed_and_validation_labels_not_training_
     assert first["checkpoint_weights_sha256"] == second["checkpoint_weights_sha256"]
     validation_path = bundle / "validation.jsonl"
     rows = [json.loads(line) for line in validation_path.read_text().splitlines()]
-    for row in rows:
-        row["label"] = not row["label"]
+    def flip_validation_labels():
+        labels = {(row["student_id"], row["target_sequence_index"]): not row["label"] for row in rows}
+        for row in rows:
+            row["label"] = labels[row["student_id"], row["target_sequence_index"]]
+            for observed in row["history"]:
+                key = (row["student_id"], observed["sequence_index"])
+                if key in labels:
+                    observed["correct"] = labels[key]
+    flip_validation_labels()
     validation_path.write_text("".join(json.dumps(row) + "\n" for row in rows))
     refresh(bundle)
     # Exactly one epoch isolates fitting from validation-based selection.
     config = DKTTrainingConfig(max_epochs=1, embedding_size=4, hidden_size=5, batch_size=3)
     changed = train_dkt(bundle, tmp_path / "changed", config=config)
-    for row in rows:
-        row["label"] = not row["label"]
+    flip_validation_labels()
     validation_path.write_text("".join(json.dumps(row) + "\n" for row in rows))
     refresh(bundle)
     original = train_dkt(bundle, tmp_path / "original", config=config)

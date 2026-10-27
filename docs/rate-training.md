@@ -1,5 +1,14 @@
 # Reproducible baseline smoke runs
 
+October 26 bundle consistency fix plan — Owner: data engineer. Purpose: reject
+processed examples whose later observed histories contradict an earlier scored
+first attempt. Acceptance: check train/validation scored target identity, position,
+statement, concepts and outcome wherever that target appears in a supplied prior
+history; reject a rehashed contradictory synthetic bundle under both student and
+family protocols, while leaving test examples unread. Dependencies: existing
+processing manifest, split and causal-history validation. This check does not
+reconstruct the source or establish real-data provenance.
+
 Owner: platform engineer. This change extracts a shared synthetic training-bundle
 boundary and extends rate runs to reviewed family splits. Acceptance: verify
 partition provenance, reject malformed or leaking histories before fitting,
@@ -34,3 +43,11 @@ test bytes are checked for integrity without consuming labels. Student histories
 remain student-specific causal prefixes. Train/validation target sequence positions
 must be unique per student, including across the two partitions. Hashes do not
 certify usage rights.
+
+The loader also checks available train/validation targets against their appearances
+in later observed histories. A prior response must retain the scored target's
+sequence position, problem identity, statement, concepts and outcome. Family
+histories are checked against the same available scored targets after their
+training-exercise-only rule; test examples remain unread. This catches internally
+contradictory processed bundles, but cannot prove that histories faithfully
+represent the original source rows.
