@@ -100,3 +100,18 @@ def test_batch_and_forward_reject_invalid_boundaries():
         model(replace(inputs, candidate_ids=torch.tensor([0])))
     with pytest.raises(ValueError, match="binary"):
         model(replace(inputs, history_correct=torch.tensor([[2, 0]])))
+
+
+@pytest.mark.parametrize("row", [None, {},
+    example().model_copy(update={"label": 1}),
+    example().model_copy(update={"label": 2}),
+    example().model_copy(update={"label": "yes"}),
+    example().model_copy(update={"label": None}),
+    example().model_copy(update={"student_id": " "}),
+    example().model_copy(update={"history": ("invalid",)})])
+def test_unchecked_rows_cannot_fit_vocabulary_or_create_bce_targets(row):
+    vocabulary = ExerciseVocabulary.fit([example()])
+    with pytest.raises(ValueError):
+        ExerciseVocabulary.fit([row])
+    with pytest.raises(ValueError):
+        make_batch([row], vocabulary)

@@ -77,3 +77,13 @@ partitions and scalar probabilities still occupy memory for the full dataset.
 Changing batch size may produce ordinary floating-point differences and is not a
 promise of bitwise equivalence across configurations. Checkpoint inference outside
 this training workflow retains its caller-supplied batch interface.
+
+## Direct DKT input validation fix
+
+Owner: data/ML engineer. Purpose: reject unchecked copied outcomes before DKT
+vocabulary fitting, training counts or BCE batches can use them. Acceptance:
+direct vocabulary fitting and batch construction reject noncanonical examples,
+non-Boolean labels and invalid copied nested fields; direct training fails before
+model construction, while valid synthetic training and label-free forward parity
+remain unchanged. Dependencies: the canonical schema and existing DKT path only.
+No private data, test-partition access or empirical claim is involved.
