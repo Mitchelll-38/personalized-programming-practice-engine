@@ -86,7 +86,10 @@ def history():
 
 @app.get("/students/demo/profile")
 def profile():
-    observed = storage.history()
+    return _profile_for(storage.history())
+
+
+def _profile_for(observed: list[dict]):
     return {
         "student_id": "demo", "is_demo": True,
         "total_interactions": len(observed),
@@ -99,7 +102,10 @@ def profile():
 @app.get("/students/demo/recommendations")
 def recommendations():
     policy = configured_policy()
-    observed = storage.history()
+    return _recommendations_for(storage.history(), policy)
+
+
+def _recommendations_for(observed: list[dict], policy):
     ranked = recommend(observed, policy)
     metadata = current_model()
     position = max((row["sequence_index"] for row in observed), default=-1)
@@ -114,6 +120,15 @@ def recommendations():
             "snapshot_id": stored.snapshot_id, "history_sequence_index": position,
             "policy_config": stored.snapshot.policy_config.model_dump(), "policy_sha256": stored.snapshot.policy_sha256,
             "recommendations": ranked}
+
+
+@app.get("/students/demo/workspace")
+def workspace():
+    policy = configured_policy()
+    observed = storage.history()
+    return {"model": current_model(), "exercises": exercises(), "history": observed,
+            "profile": _profile_for(observed),
+            "ranking": _recommendations_for(observed, policy)}
 
 
 @app.post("/predict")
