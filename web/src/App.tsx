@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getSnapshot, recordOutcome, type Snapshot, type RecommendationChoice as ChoiceAcknowledgement } from "./api";
+import { ApiHttpError, getSnapshot, recordOutcome, type AttemptIntent, type Snapshot, type RecommendationChoice as ChoiceAcknowledgement } from "./api";
 import ResearchInspector from "./ResearchInspector";
 import RecommendationChoice from "./RecommendationChoice";
 import PolicyInspection from "./PolicyInspection";
@@ -16,6 +16,8 @@ export default function App() {
   const [notice, setNotice] = useState("");
   const [refreshPending, setRefreshPending] = useState(false);
   const [acknowledgedChoice, setAcknowledgedChoice] = useState<ChoiceAcknowledgement | null>(null);
+  const [retryPending, setRetryPending] = useState(false);
+  const pendingAttempt = useRef<AttemptIntent | null>(null);
   const loadGeneration = useRef(0);
 
   const load = useCallback(async () => {
@@ -55,13 +57,21 @@ export default function App() {
 
   async function simulate(correct: boolean) {
     if (!selectedId || saving) return;
+    // A retry uses the original body even if the ranking or choice state changed.
+    // Changing the exercise or outcome is an explicit new simulation intent.
+    const previous = pendingAttempt.current;
+    const intent = previous?.problem_id === selectedId && previous.correct === correct
+      ? previous
+      : { problem_id: selectedId, correct, ...(activeChoice ? { choice_id: activeChoice.choice_id } : {}),
+          request_id: crypto.randomUUID().replace(/-/g, "") };
+    pendingAttempt.current = intent;
+    setRetryPending(false);
     setSaving(true);
     setError("");
     setNotice("");
     try {
-      // Capture only a choice already acknowledged at this click. A pending
-      // choice cannot retroactively attach to the outcome being submitted.
-      const stored = await recordOutcome(selectedId, correct, activeChoice?.choice_id);
+      const stored = await recordOutcome(intent);
+      pendingAttempt.current = null;
       setAcknowledgedChoice(null);
       setNotice(
         `Simulated ${correct ? "correct" : "incorrect"} outcome recorded as interaction ${stored.sequence_index}.`,
@@ -69,6 +79,12 @@ export default function App() {
       setRefreshPending(true);
       await load();
     } catch (err) {
+      const rejected = err instanceof ApiHttpError && [404, 409, 422].includes(err.status);
+      if (rejected) {
+        pendingAttempt.current = null;
+        setAcknowledgedChoice(null);
+      }
+      setRetryPending(!rejected);
       setError(
         err instanceof Error
           ? err.message
@@ -303,6 +319,8 @@ export default function App() {
                     <div className="simulation">
                       <h3>Replay a simulated outcome</h3>
                       {activeChoice && <p role="status">The next simulated outcome will link to your recorded choice. Choosing alone does not grade code.</p>}
+                      {retryPending && pendingAttempt.current?.problem_id === selectedId &&
+                        <p role="status">The previous outcome may already be saved. Repeat the same result to check its receipt; a different result starts a new simulation.</p>}
                       <p>
                         Record a synthetic result to recalculate the concept
                         profile{snapshot.ranking ? " and recommendations" : ""}. This does not grade code.

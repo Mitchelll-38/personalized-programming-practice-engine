@@ -59,3 +59,12 @@ copies, nested metadata and live checkpoint weights, including empty batches.
 The legacy checkpoint interface receives the same fixed internal false-label
 sentinel used by baseline serving; it never accepts a client outcome. This
 optional import requires Torch, while generic API/serving imports do not.
+
+## Query container integrity fix
+
+Owner: data/ML engineer. Purpose: prevent one-shot query iterators from being
+consumed during type checks and silently returning no predictions. Acceptance:
+baseline and DKT adapters accept list/tuple batches, reject other containers
+before consuming them, and preserve ordered and empty-batch behavior. Dependencies:
+existing serving adapters and original synthetic artifacts only. No private data
+or model fitting is involved.

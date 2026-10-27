@@ -29,6 +29,16 @@ class _VocabularyPayload(BaseModel):
         return self
 
 
+def _validate_examples(examples: list[PredictionExample]) -> None:
+    """Check copied rows before fitting IDs or exporting BCE targets."""
+    for row in examples:
+        if (type(row) is not PredictionExample or type(row.label) is not bool
+                or type(row.student_id) is not str or not row.student_id.strip()):
+            raise ValueError("Valid DKT prediction examples are required")
+        PredictionExample.model_validate(row.model_dump(warnings=False))
+    historical_features(examples)
+
+
 class ExerciseVocabulary:
     """Training-only IDs. Callers, not this class, determine partition membership."""
 
@@ -39,7 +49,7 @@ class ExerciseVocabulary:
     def fit(cls, train_examples: list[PredictionExample]) -> "ExerciseVocabulary":
         if not train_examples:
             raise ValueError("training examples must be nonempty")
-        historical_features(train_examples)  # Reuse canonical causal validation.
+        _validate_examples(train_examples)
         names = {example.candidate.problem_id for example in train_examples}
         names.update(row.problem_id for example in train_examples for row in example.history)
         return cls.from_dict({"version": "dkt-exercise-v1", "problem_ids": {
@@ -79,7 +89,7 @@ def make_batch(examples: list[PredictionExample], vocabulary: ExerciseVocabulary
     """Right-pad validated prefixes; target labels are kept outside forward inputs."""
     if not examples:
         raise ValueError("batch must be nonempty")
-    historical_features(examples)
+    _validate_examples(examples)
     lengths = torch.tensor([len(example.history) for example in examples], dtype=torch.long)
     width = max(1, int(lengths.max()))
     ids = torch.zeros((len(examples), width), dtype=torch.long)

@@ -5,11 +5,11 @@ from .serving import PredictionInput, PredictionScore
 
 
 def predict_dkt_inputs(checkpoint: DKTCheckpoint,
-                       inputs: list[PredictionInput]) -> list[PredictionScore]:
+                       inputs: list[PredictionInput] | tuple[PredictionInput, ...]) -> list[PredictionScore]:
     if not isinstance(checkpoint, DKTCheckpoint):
         raise ValueError("A reviewed DKTCheckpoint is required")
-    if any(not isinstance(row, PredictionInput) for row in inputs):
-        raise ValueError("Queries must be PredictionInput objects")
+    if not isinstance(inputs, (list, tuple)) or any(not isinstance(row, PredictionInput) for row in inputs):
+        raise ValueError("Queries must be a list or tuple of PredictionInput objects")
     queries = [PredictionInput.model_validate(row.model_dump()) for row in inputs]
     # The legacy model interface consumes a fixed internal label sentinel, never
     # a request label; forward inputs retain only the observed prefix/candidate.
