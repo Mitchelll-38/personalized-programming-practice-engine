@@ -91,3 +91,33 @@ def test_blank_student_id_cannot_publish_processing_bundle(tmp_path):
     command[-1] = str(tmp_path / "valid")
     subprocess.run(command, capture_output=True, check=True)
     assert load_training_bundle(tmp_path / "valid").train
+
+
+@pytest.mark.parametrize("field,value", [
+    ("problem_text", "Return the product of all integers in an array."),
+    ("concept_ids", ["multiplication"]),
+])
+def test_conflicting_problem_metadata_cannot_publish_processing_bundle(tmp_path, field, value):
+    rows = [json.loads(line) for line in FIXTURE.read_text().splitlines() if line.strip()]
+    target = next(row for row in rows if row["student_id"] == "synthetic-b" and row["problem_id"] == "sum")
+    target[field] = value
+    source = tmp_path / "conflicting.jsonl"
+    source.write_text("".join(json.dumps(record) + "\n" for record in rows))
+    output = tmp_path / "invalid"
+    result = subprocess.run([sys.executable, "-m", "practice_engine.data.cli", str(source),
+                             "--synthetic", "--output", str(output)], capture_output=True, text=True)
+    assert result.returncode != 0
+    assert "inconsistent statement or concepts" in result.stderr
+    assert not output.exists()
+
+
+def test_problem_concept_order_does_not_change_identity():
+    original = row(student="s1").model_copy(update={"concept_ids": ("loops", "arrays")})
+    reordered = row(student="s2").model_copy(update={"concept_ids": ("arrays", "loops")})
+    assert len(first_attempts([original, reordered])) == 2
+
+
+def test_retry_metadata_conflict_fails_before_first_attempt_selection():
+    retry = row(index=1, attempt=2).model_copy(update={"problem_text": "Different synthetic statement"})
+    with pytest.raises(ValueError, match="inconsistent statement or concepts"):
+        first_attempts([row(), retry])

@@ -128,6 +128,28 @@ def test_history_must_match_earlier_scored_target(bundle, change):
         load_training_bundle(bundle)
 
 
+@pytest.mark.parametrize("field,value", [
+    ("problem_text", "Different synthetic statement"),
+    ("concept_ids", ["different-synthetic-concept"]),
+])
+def test_hash_valid_cross_student_problem_metadata_conflict_fails(bundle, field, value):
+    def conflict(rows):
+        selected = rows[0]
+        student = selected["student_id"]
+        problem = selected["candidate"]["problem_id"]
+        for example in rows:
+            if example["student_id"] != student:
+                continue
+            if example["candidate"]["problem_id"] == problem:
+                example["candidate"][field] = value
+            for observed in example["history"]:
+                if observed["problem_id"] == problem:
+                    observed[field] = value
+    mutate(bundle, "validation.jsonl", conflict)
+    with pytest.raises(ValueError, match="inconsistent statement or concepts"):
+        load_training_bundle(bundle)
+
+
 def test_duplicate_targets_fail(bundle):
     mutate(bundle, "train.jsonl", lambda rows: rows.append(rows[0]))
     with pytest.raises(ValueError, match="Duplicate"):

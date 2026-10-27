@@ -1,14 +1,26 @@
 """First-attempt task construction and deterministic student-group partitions."""
 
 from collections import defaultdict
+from collections.abc import Iterable
 from hashlib import sha256
 import random
 
 from .schema import Candidate, Interaction, PredictionExample
 
 
+def validate_problem_metadata(entries: Iterable[tuple[str, str, tuple[str, ...]]]) -> None:
+    """Require one statement and concept set for each canonical problem ID."""
+    metadata = {}
+    for problem_id, problem_text, concept_ids in entries:
+        identity = (problem_text, frozenset(concept_ids))
+        if problem_id in metadata and metadata[problem_id] != identity:
+            raise ValueError(f"Problem {problem_id!r} has inconsistent statement or concepts")
+        metadata[problem_id] = identity
+
+
 def first_attempts(rows: list[Interaction]) -> list[Interaction]:
-    """Require an explicit trustworthy ordering; fail rather than guess at ties."""
+    """Require stable problem metadata and an explicit trustworthy ordering."""
+    validate_problem_metadata((row.problem_id, row.problem_text, row.concept_ids) for row in rows)
     by_student: dict[str, list[Interaction]] = defaultdict(list)
     seen_positions: set[tuple[str, int]] = set()
     for row in rows:
