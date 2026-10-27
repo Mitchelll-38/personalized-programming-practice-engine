@@ -8,6 +8,7 @@ from pathlib import Path
 
 from practice_engine.data.manifest import ProcessingManifest, verify_manifest
 from practice_engine.data.jsonl import parse_unique_json
+from practice_engine.data.pipeline import validate_problem_metadata
 from practice_engine.data.schema import PredictionExample
 from practice_engine.models.artifacts import ArtifactProvenance
 from practice_engine.models.features import historical_features
@@ -66,6 +67,11 @@ def _check_scored_history_consistency(examples: dict[str, list[PredictionExample
         expected = positions[:bisect_left(positions, example.target_sequence_index)]
         if [row.sequence_index for row in example.history] != expected:
             raise ValueError("History must contain the complete permitted first-attempt prefix")
+    validate_problem_metadata(
+        (row.problem_id, row.problem_text, row.concept_ids)
+        for example in scored
+        for row in (example.candidate, *example.history)
+    )
 
 
 def _verified_artifact_bytes(directory: Path, name: str, manifest: ProcessingManifest) -> bytes:

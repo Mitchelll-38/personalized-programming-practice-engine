@@ -61,6 +61,19 @@ Canonical `Interaction.student_id` now requires at least one nonwhitespace
 character. The synthetic CLI regression rejects a blank-ID source without an
 output directory and confirms the original fixture still loads for training.
 
+October 27 problem metadata consistency plan — Owner: data engineer. Purpose:
+prevent one canonical problem ID from naming different statements or concept
+sets across students. Acceptance: reject conflicts across every source
+interaction, including retries, before publication; reject conflicts across
+hash-valid train/validation targets and their permitted histories at training
+load; keep test rows unread. Dependencies: existing canonical processing and
+training-bundle contracts. Problem text must match exactly. Concept order may
+vary because the research models use concept membership or an unordered mean.
+The training loader verifies test artifact bytes through the manifest but does
+not parse test examples, so it cannot compare metadata present only in test.
+Candidate concept IDs must remain nonblank and unique before set comparison;
+duplicates would otherwise change the content model's concept mean.
+
 Owner: platform engineer. Purpose: preserve processing-bundle integrity when a
 write fails or a command is repeated. Dependencies: existing data CLI, processing
 manifest and synthetic fixtures; no source or chronology policy changes.
