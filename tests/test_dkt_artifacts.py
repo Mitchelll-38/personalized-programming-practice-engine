@@ -9,6 +9,7 @@ from practice_engine.data.schema import Candidate, Interaction, PredictionExampl
 from practice_engine.models.artifacts import ArtifactProvenance, payload_hash
 from practice_engine.models.dkt import DKT, ExerciseVocabulary, make_batch
 from practice_engine.models.dkt_artifacts import load_dkt_checkpoint, save_dkt_checkpoint
+from torch.nn.modules import module as torch_module
 
 
 @pytest.fixture
@@ -156,6 +157,81 @@ def test_live_weights_mutation_rejected_and_existing_publisher_lock_preserved(sa
     with pytest.raises(FileExistsError):
         save_dkt_checkpoint(target, model, vocabulary, provenance, **kwargs)
     assert lock.is_dir() and not target.exists()
+
+
+@pytest.mark.parametrize("mutate", [
+    lambda model: setattr(model.embedding, "max_norm", 1e-6),
+    lambda model: setattr(model.embedding, "norm_type", 1.0),
+    lambda model: setattr(model.lstm, "batch_first", False),
+    lambda model: setattr(model.head, "in_features", 99),
+])
+def test_live_architecture_change_rejected_on_first_prediction(saved, mutate):
+    path, _, _, _, row, _ = saved
+    loaded = load_dkt_checkpoint(path)
+    assert len(loaded.predict([row])) == 1
+    mutate(loaded._model)
+    with pytest.raises(ValueError, match="architecture|semantics"):
+        loaded.predict([row])
+
+
+@pytest.mark.parametrize("mutate", [
+    lambda model: setattr(model.embedding, "max_norm", 1e-6),
+    lambda model: setattr(model.lstm, "batch_first", False),
+    lambda model: setattr(model.head, "in_features", 99),
+])
+def test_save_rejects_noncanonical_architecture_before_publication(saved, mutate):
+    path, model, vocabulary, provenance, _, kwargs = saved
+    destination = path.with_name("changed-semantics")
+    mutate(model)
+    with pytest.raises(ValueError, match="architecture semantics"):
+        save_dkt_checkpoint(destination, model, vocabulary, provenance, **kwargs)
+    assert not destination.exists()
+    assert not destination.with_name(".changed-semantics.publish-lock").exists()
+
+
+@pytest.mark.parametrize("part", ["model", "embedding", "lstm", "head"])
+@pytest.mark.parametrize("kind", ["forward", "pre"])
+def test_registered_local_forward_hooks_rejected_on_save_and_predict(saved, part, kind):
+    path, model, vocabulary, provenance, row, kwargs = saved
+    loaded = load_dkt_checkpoint(path)
+    baseline = loaded.predict([row])
+    destination = path.with_name("hooked")
+
+    def attach(target):
+        module = target if part == "model" else getattr(target, part)
+        if kind == "forward":
+            return module.register_forward_hook(lambda _module, _inputs, output: output)
+        return module.register_forward_pre_hook(lambda _module, inputs: inputs)
+
+    with attach(loaded._model):
+        with pytest.raises(ValueError, match="forward hooks"):
+            loaded.predict([row])
+    assert loaded.predict([row]) == baseline
+    with attach(model):
+        with pytest.raises(ValueError, match="forward hooks"):
+            save_dkt_checkpoint(destination, model, vocabulary, provenance, **kwargs)
+    assert not destination.exists()
+
+
+@pytest.mark.parametrize("kind", ["forward", "pre"])
+def test_registered_global_forward_hooks_rejected_on_save_and_predict(saved, kind):
+    path, model, vocabulary, provenance, row, kwargs = saved
+    loaded = load_dkt_checkpoint(path)
+    baseline = loaded.predict([row])
+    destination = path.with_name("globally-hooked")
+    hook = (torch_module.register_module_forward_hook(
+        lambda _module, _inputs, output: output) if kind == "forward" else
+        torch_module.register_module_forward_pre_hook(
+            lambda _module, inputs: inputs))
+    try:
+        with pytest.raises(ValueError, match="forward hooks"):
+            loaded.predict([row])
+        with pytest.raises(ValueError, match="forward hooks"):
+            save_dkt_checkpoint(destination, model, vocabulary, provenance, **kwargs)
+    finally:
+        hook.remove()
+    assert loaded.predict([row]) == baseline
+    assert not destination.exists()
 
 
 def test_public_save_and_load_preserve_rng_under_alternate_default_device(saved, tmp_path):
