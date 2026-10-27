@@ -10,7 +10,7 @@ torch = pytest.importorskip("torch")
 from practice_engine.data.manifest import artifact_hashes
 from practice_engine.models.dkt_artifacts import load_dkt_checkpoint
 from practice_engine.training.bundle import load_training_bundle
-from practice_engine.training.dkt import DKTTrainingConfig, train_dkt
+from practice_engine.training.dkt import DKTTrainingConfig, _fit, train_dkt
 
 FIXTURE = Path(__file__).resolve().parents[1] / "data/fixtures/synthetic.jsonl"
 
@@ -33,6 +33,19 @@ def refresh(bundle):
 def small_config(**kwargs):
     return DKTTrainingConfig(max_epochs=4, patience=2, embedding_size=4, hidden_size=5,
                              batch_size=3, **kwargs)
+
+
+def test_direct_fit_rejects_copied_label_before_model_initialization(monkeypatch):
+    from practice_engine.data.schema import Candidate, PredictionExample
+
+    candidate = Candidate(problem_id="synthetic", problem_text="Synthetic", concept_ids=("loops",))
+    rows = [PredictionExample(student_id=f"s{i}", target_sequence_index=0, history=(),
+        candidate=candidate, label=label) for i, label in enumerate((True, False))]
+    malformed = [rows[0].model_copy(update={"label": 2}), rows[1]]
+    monkeypatch.setattr("practice_engine.training.dkt.DKT",
+                        lambda *args: pytest.fail("Invalid labels reached model initialization"))
+    with pytest.raises(ValueError, match="Valid DKT prediction examples"):
+        _fit(malformed, rows, small_config())
 
 
 def test_repeated_runs_selected_checkpoint_parity_and_restored_torch_state(bundle, tmp_path):
