@@ -22,12 +22,15 @@ class ImportResult:
 
 def _table(path: Path, required: set[str]) -> list[dict[str, str]]:
     with path.open(encoding="utf-8-sig", newline="") as stream:
-        reader = csv.DictReader(stream)
-        if len(reader.fieldnames or []) != len(set(reader.fieldnames or [])):
-            raise ValueError(f"{path.name}: duplicate column names")
-        if not required.issubset(reader.fieldnames or []):
-            raise ValueError(f"{path.name}: missing columns {sorted(required - set(reader.fieldnames or []))}")
-        rows = list(reader)
+        try:
+            reader = csv.DictReader(stream, strict=True)
+            if len(reader.fieldnames or []) != len(set(reader.fieldnames or [])):
+                raise ValueError(f"{path.name}: duplicate column names")
+            if not required.issubset(reader.fieldnames or []):
+                raise ValueError(f"{path.name}: missing columns {sorted(required - set(reader.fieldnames or []))}")
+            rows = list(reader)
+        except csv.Error as error:
+            raise ValueError(f"{path.name}: malformed CSV") from error
     if any(None in row or any(value is None for value in row.values()) for row in rows):
         raise ValueError(f"{path.name}: malformed CSV row")
     return rows

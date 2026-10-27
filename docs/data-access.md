@@ -91,6 +91,19 @@ investigation. The empty files are not dataset receipts or research evidence.
 
 ## Narrow format adapter and label definition
 
+October 27 strict CSV parsing segment — Owner: data engineer. Purpose: reject
+malformed quoting in CodeWorkout tables before it can silently change a parsed
+student ID or historical code. Acceptance: malformed quoted fields in either
+`MainTable.csv` or `CodeStates.csv` fail import and publish no processing bundle;
+the unchanged synthetic fixture still imports. Dependencies: the existing
+CodeWorkout adapter and atomic processing CLI. This synthetic format check does
+not resolve release permissions, labels or chronology for real data.
+
+The adapter now uses strict CSV quoting for both event and optional code-state
+tables. The synthetic CLI checks reject a malformed quoted student ID or code
+cell before publication; the unchanged fixture still imports. Focused importer
+and CLI checks passed 28 tests on Windows. No real release was imported.
+
 The [organizer preprocessing notebook](https://github.com/YangAzure/CSEDMDataChallenge/blob/main/preprocess.ipynb) identifies scored submissions as `Run.Program`, treats score 1 as correct, and discards the supplied `Attempt` column as incorrectly calculated. The challenge's eventual-success/struggle labels differ from this project's first-scored-attempt task; no challenge benchmark comparison is claimed.
 
 The adapter reconstructs only `Run.Program` events; compilation/test rows are excluded, not additional attempts. Every scored event needs a finite score in [0,1]; missing grades abort conversion instead of promoting a later retry. Partial scores are incorrect. Attempts are recomputed chronologically for each student/problem. This defines **first scored run**, which may differ from first authored submission when compilation fails; validating that distinction is a real-data label gate.
