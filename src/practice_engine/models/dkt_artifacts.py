@@ -12,7 +12,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, model_validator
 import torch
 
-from .artifacts import ArtifactProvenance, payload_hash
+from .artifacts import ArtifactProvenance, parse_unique_json, payload_hash
 from .dkt import DKT, UNK, ExerciseVocabulary, make_batch
 
 
@@ -139,7 +139,9 @@ def save_dkt_checkpoint(directory: Path, model: DKT, vocabulary: ExerciseVocabul
 
 def load_dkt_checkpoint(directory: Path) -> DKTCheckpoint:
     directory = Path(directory)
-    metadata = DKTMetadata.model_validate_json((directory / "metadata.json").read_bytes())
+    serialized_metadata = (directory / "metadata.json").read_bytes()
+    parse_unique_json(serialized_metadata)
+    metadata = DKTMetadata.model_validate_json(serialized_metadata)
     serialized = (directory / "weights.pt").read_bytes()
     if sha256(serialized).hexdigest() != metadata.weights_sha256:
         raise ValueError("Weights hash mismatch")

@@ -95,6 +95,18 @@ def test_calibrated_errors_fail_closed(client, tmp_path, monkeypatch, mutation):
         assert str(path) not in response.text
 
 
+def test_duplicate_nested_calibrated_field_fails_closed_on_public_routes(client, tmp_path, monkeypatch):
+    path, _, _ = prepared(tmp_path, monkeypatch)
+    serialized = path.read_text()
+    old = '"source_kind": "synthetic"'
+    assert old in serialized
+    path.write_text(serialized.replace(old, '"source_kind": "unverified", ' + old, 1))
+    for response in (client.get("/research/model"), client.post("/research/predict", json={"inputs": [query()]})):
+        assert response.status_code == 503
+        assert response.json() == {"detail": "research_model_unavailable"}
+        assert str(path) not in response.text
+
+
 def test_public_accessor_is_detached_validated_and_adapter_rechecks_live_integrity(tmp_path, monkeypatch):
     _, base, wrapper = prepared(tmp_path, monkeypatch)
     detached = wrapper.baseline()

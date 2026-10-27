@@ -6,7 +6,7 @@ import warnings
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, model_validator
 
 from practice_engine.data.schema import PredictionExample
-from .features import FEATURE_NAMES, FEATURE_VERSION, historical_features
+from .features import FEATURE_NAMES, FEATURE_VERSION, historical_features, validate_training_examples
 
 
 class _Payload(BaseModel):
@@ -58,6 +58,7 @@ class LogisticBaseline:
             raise ValueError("max_iter must be a positive integer")
         if isinstance(seed, bool) or not isinstance(seed, int) or not 0 <= seed < 2**32:
             raise ValueError("seed must be an integer in [0, 2**32)")
+        validate_training_examples(examples)
         if not examples or len({e.label for e in examples}) != 2:
             raise ValueError("training examples must contain both outcome classes")
         # Import optional training dependencies only when fitting.

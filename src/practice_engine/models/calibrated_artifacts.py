@@ -6,9 +6,9 @@ from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, model_validator
 
-from .artifacts import ArtifactProvenance, RateArtifact, _write_json_atomically, payload_hash
+from .artifacts import ArtifactProvenance, RateArtifact, _write_json_atomically, parse_unique_json, payload_hash
 from .calibration import TemperatureScaler
-from .portable import PortableBaselineArtifact
+from .portable import PortableBaselineArtifact, parse_baseline_artifact
 
 Digest = Annotated[str, Field(pattern=r"^[a-f0-9]{64}$")]
 PositiveFloat = Annotated[StrictFloat, Field(gt=0, allow_inf_nan=False)]
@@ -96,4 +96,14 @@ def save_calibrated_artifact(path: Path, base: RateArtifact | PortableBaselineAr
 
 
 def load_calibrated_artifact(path: Path) -> CalibratedBaselineArtifact:
-    return CalibratedBaselineArtifact.model_validate_json(path.read_bytes())
+    serialized = path.read_bytes()
+    parse_unique_json(serialized)
+    return CalibratedBaselineArtifact.model_validate_json(serialized)
+
+
+def parse_research_artifact(serialized: str | bytes) -> CalibratedBaselineArtifact | RateArtifact | PortableBaselineArtifact:
+    """Dispatch already-read research JSON after rejecting ambiguous fields."""
+    payload = parse_unique_json(serialized)
+    if isinstance(payload, dict) and payload.get("artifact_version") == "temperature-baseline-artifact-v1":
+        return CalibratedBaselineArtifact.model_validate_json(serialized)
+    return parse_baseline_artifact(serialized)

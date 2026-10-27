@@ -6,7 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, model_
 class Interaction(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    student_id: str = Field(min_length=1)
+    student_id: str = Field(min_length=1, pattern=r"\S")
     problem_id: str = Field(min_length=1)
     sequence_index: StrictInt = Field(ge=0)
     problem_text: str = Field(min_length=1)

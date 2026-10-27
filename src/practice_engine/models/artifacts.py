@@ -17,6 +17,19 @@ def payload_hash(payload: dict) -> str:
     return sha256(encoded).hexdigest()
 
 
+def parse_unique_json(serialized: str | bytes) -> Any:
+    """Parse an artifact without accepting ambiguous keys in any JSON object."""
+    def unique_object(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError(f"Duplicate artifact JSON field: {key}")
+            result[key] = value
+        return result
+
+    return json.loads(serialized, object_pairs_hook=unique_object)
+
+
 class ArtifactProvenance(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True, strict=True)
 
@@ -78,4 +91,6 @@ def _write_json_atomically(path: Path, serialized: str) -> None:
 
 
 def load_rate_artifact(path: Path) -> RateArtifact:
-    return RateArtifact.model_validate_json(path.read_bytes())
+    serialized = path.read_bytes()
+    parse_unique_json(serialized)
+    return RateArtifact.model_validate_json(serialized)

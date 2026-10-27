@@ -15,6 +15,19 @@ The import receipt retains the initial source hashes only when those checks agre
 an observed source change discards staging. These checks detect changes at their
 read points but do not create an atomic filesystem snapshot.
 
+October 27 canonical ID fix plan — Owner: data engineer. Purpose: prevent the
+processing CLI from publishing a hash-valid bundle that the training loader
+rejects because a student ID contains only whitespace. Acceptance: canonical
+`Interaction` validation rejects whitespace-only student IDs before the CLI
+creates an output directory or manifest; the unchanged synthetic fixture still
+processes and loads. Dependencies: existing canonical schema, processing CLI and
+synthetic fixture. This check does not infer whether distinct nonblank IDs name
+the same learner.
+
+Canonical `Interaction.student_id` now requires at least one nonwhitespace
+character. The synthetic CLI regression rejects a blank-ID source without an
+output directory and confirms the original fixture still loads for training.
+
 Owner: platform engineer. Purpose: preserve processing-bundle integrity when a
 write fails or a command is repeated. Dependencies: existing data CLI, processing
 manifest and synthetic fixtures; no source or chronology policy changes.

@@ -59,6 +59,20 @@ def test_live_payload_mutation_cannot_change_predictions_under_old_hash(tmp_path
         loaded.predict(examples())
 
 
+@pytest.mark.parametrize("old,new", [
+    ('"variant": "problem"', '"variant": "global", "variant": "problem"'),
+    ('"source_kind": "synthetic"', '"source_kind": "unverified", "source_kind": "synthetic"'),
+])
+def test_duplicate_artifact_fields_rejected_even_when_effective_values_match(tmp_path, old, new):
+    path = tmp_path / "model.json"
+    save_rate_artifact(path, RateBaseline.fit(examples()), provenance())
+    serialized = path.read_text()
+    assert old in serialized
+    path.write_text(serialized.replace(old, new, 1))
+    with pytest.raises(ValueError, match="Duplicate artifact JSON field"):
+        load_rate_artifact(path)
+
+
 def test_failed_atomic_replace_preserves_previous_artifact_and_cleans_temp(tmp_path, monkeypatch):
     path = tmp_path / "model.json"
     save_rate_artifact(path, RateBaseline.fit(examples()), provenance())

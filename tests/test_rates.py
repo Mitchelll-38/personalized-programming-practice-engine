@@ -59,6 +59,17 @@ def test_empty_training_and_large_finite_smoothing():
     assert RateBaseline.fit([example()], 1e308).predict([example()]) == [0.5]
 
 
+@pytest.mark.parametrize("row", [None, {}, example().model_copy(update={"label": 1}),
+    example().model_copy(update={"label": 2}),
+    example().model_copy(update={"label": "yes"}),
+    example().model_copy(update={"label": None}),
+    example().model_copy(update={"student_id": " "}),
+    example().model_copy(update={"history": ("invalid",)})])
+def test_invalid_copied_training_row_cannot_change_rate_counts(row):
+    with pytest.raises(ValueError):
+        RateBaseline.fit([row, example(label=False)])
+
+
 @pytest.mark.parametrize("mutate", [
     lambda p: p.update(extra="untrusted"),
     lambda p: p.update(alpha=True),
