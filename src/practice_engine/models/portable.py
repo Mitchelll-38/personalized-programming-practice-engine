@@ -5,7 +5,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, model_validator
 
-from .artifacts import ArtifactProvenance, RateArtifact, _write_json_atomically, payload_hash
+from .artifacts import ArtifactProvenance, RateArtifact, _write_json_atomically, parse_unique_json, payload_hash
 from .bkt import BKTBaseline
 from .features import FEATURE_VERSION
 from .logistic import LogisticBaseline
@@ -63,8 +63,7 @@ def load_baseline_artifact(path: Path) -> RateArtifact | PortableBaselineArtifac
 
 def parse_baseline_artifact(serialized: str | bytes) -> RateArtifact | PortableBaselineArtifact:
     """Validate a known uncalibrated baseline from already-read JSON bytes."""
-    import json
-    payload = json.loads(serialized)
+    payload = parse_unique_json(serialized)
     if not isinstance(payload, dict):
         raise ValueError("Baseline artifact must be a JSON object")
     version = payload.get("artifact_version")

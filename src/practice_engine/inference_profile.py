@@ -11,8 +11,7 @@ from time import perf_counter_ns
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from practice_engine.models.calibrated_artifacts import CalibratedBaselineArtifact
-from practice_engine.models.portable import parse_baseline_artifact
+from practice_engine.models.calibrated_artifacts import CalibratedBaselineArtifact, parse_research_artifact
 from practice_engine.models.serving import PredictionInput, predict_inputs
 
 
@@ -45,11 +44,8 @@ def profile_inference(model: Path, queries: Path, *, repeats: int = 20, warmups:
         raise ValueError("warmups must be an integer in [0, 100]")
     started = perf_counter_ns()
     serialized = Path(model).read_bytes()
-    payload = json.loads(serialized)
-    calibrated = isinstance(payload, dict) and payload.get("artifact_version") == "temperature-baseline-artifact-v1"
-    artifact = (CalibratedBaselineArtifact.model_validate_json(serialized) if calibrated
-                else parse_baseline_artifact(serialized))
-    base = artifact.baseline() if calibrated else artifact
+    artifact = parse_research_artifact(serialized)
+    base = artifact.baseline() if isinstance(artifact, CalibratedBaselineArtifact) else artifact
     if base.provenance.source_kind != "synthetic":
         raise ValueError("Profiling currently requires a declared synthetic artifact")
     load_ns = perf_counter_ns() - started

@@ -56,6 +56,20 @@ def test_calibrated_envelope_and_cli_profile_without_outputs(prepared, tmp_path)
     assert json.loads(result.stdout)["batch_size"] == 1
 
 
+def test_profiler_rejects_duplicate_nested_calibrated_field(prepared, tmp_path):
+    _, queries, base = prepared
+    record = ValidationCalibrationRecord(provenance=base.provenance, validation_sha256="c" * 64,
+        probabilities_sha256="d" * 64, n_examples=2, temperature_grid=(1., 2.))
+    calibrated = tmp_path / "calibrated.json"
+    save_calibrated_artifact(calibrated, base, TemperatureScaler(2.), record)
+    serialized = calibrated.read_text()
+    old = '"source_kind": "synthetic"'
+    assert old in serialized
+    calibrated.write_text(serialized.replace(old, '"source_kind": "unverified", ' + old, 1))
+    with pytest.raises(ValueError, match="Duplicate artifact JSON field"):
+        profile_inference(calibrated, queries, repeats=1, warmups=0)
+
+
 @pytest.mark.parametrize("updates", [{"repeats": True}, {"repeats": 0}, {"repeats": 1001},
     {"warmups": True}, {"warmups": -1}, {"warmups": 101}])
 def test_invalid_run_bounds_fail_before_file_reads(updates):

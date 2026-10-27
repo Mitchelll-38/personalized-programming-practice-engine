@@ -79,6 +79,17 @@ def test_corruption_hashes_and_weights_only_cpu_load(saved, monkeypatch):
         load_dkt_checkpoint(path)
 
 
+def test_duplicate_nested_metadata_field_rejected(saved):
+    path, *_ = saved
+    metadata = path / "metadata.json"
+    serialized = metadata.read_text()
+    old = '"source_kind": "synthetic"'
+    assert old in serialized
+    metadata.write_text(serialized.replace(old, '"source_kind": "unverified", ' + old, 1))
+    with pytest.raises(ValueError, match="Duplicate artifact JSON field"):
+        load_dkt_checkpoint(path)
+
+
 @pytest.mark.parametrize("mutation", [
     lambda payload: payload.update(training_total=True), lambda payload: payload.update(training_total=0),
     lambda payload: payload.update(training_correct=9), lambda payload: payload.update(calibrated=True),

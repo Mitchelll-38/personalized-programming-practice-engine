@@ -74,6 +74,18 @@ def test_corruption_and_unsupported_versions_rejected(fitted, tmp_path):
         saved.predict([])
 
 
+def test_duplicate_nested_calibration_field_rejected(fitted, tmp_path):
+    base, _, record = fitted
+    path = tmp_path / "calibrated.json"
+    save_calibrated_artifact(path, base, TemperatureScaler(2.), record)
+    serialized = path.read_text()
+    old = '"source_kind": "synthetic"'
+    assert old in serialized
+    path.write_text(serialized.replace(old, '"source_kind": "unverified", ' + old, 1))
+    with pytest.raises(ValueError, match="Duplicate artifact JSON field"):
+        load_calibrated_artifact(path)
+
+
 @pytest.mark.parametrize("change", [
     {"temperature_grid": ()}, {"temperature_grid": (1., 1.)}, {"temperature_grid": (True,)},
     {"temperature_grid": (float("inf"),)}, {"n_examples": True}, {"n_examples": 0},

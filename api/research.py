@@ -1,6 +1,5 @@
 """Opt-in stateless serving for declared synthetic portable baseline artifacts."""
 
-import json
 import os
 from pathlib import Path
 
@@ -8,8 +7,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from practice_engine.models.artifacts import RateArtifact
-from practice_engine.models.calibrated_artifacts import CalibratedBaselineArtifact
-from practice_engine.models.portable import parse_baseline_artifact
+from practice_engine.models.calibrated_artifacts import CalibratedBaselineArtifact, parse_research_artifact
 from practice_engine.models.serving import PredictionInput, predict_inputs
 
 router = APIRouter(prefix="/research", tags=["synthetic research"])
@@ -41,11 +39,8 @@ def _artifact():
         raise HTTPException(status_code=503, detail="research_model_not_configured")
     try:
         serialized = Path(configured).read_bytes()
-        payload = json.loads(serialized)
-        calibrated = isinstance(payload, dict) and payload.get("artifact_version") == "temperature-baseline-artifact-v1"
-        artifact = (CalibratedBaselineArtifact.model_validate_json(serialized) if calibrated
-                    else parse_baseline_artifact(serialized))
-        base = artifact.baseline() if calibrated else artifact
+        artifact = parse_research_artifact(serialized)
+        base = artifact.baseline() if isinstance(artifact, CalibratedBaselineArtifact) else artifact
         if base.provenance.source_kind != "synthetic":
             raise ValueError("Real-data provenance gate remains unmet")
         return artifact
