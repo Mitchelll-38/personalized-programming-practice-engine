@@ -49,6 +49,27 @@ def test_invalid_catalog_arguments_write_no_artifacts(tmp_path):
     assert not missing.exists()
 
 
+@pytest.mark.parametrize("table,original,malformed", [
+    ("MainTable.csv", "e6,synthetic-b,", 'e6,"synthetic-b"x,'),
+    ("CodeStates/CodeStates.csv", "c2,return 1;", 'c2,"return 1;"x'),
+])
+def test_malformed_csv_quoting_cannot_publish_bundle(tmp_path, table, original, malformed):
+    release = tmp_path / "release"
+    shutil.copytree(FIXTURE, release)
+    path = release / table
+    content = path.read_text(encoding="utf-8")
+    assert content.count(original) == 1
+    path.write_text(content.replace(original, malformed), encoding="utf-8")
+    output = tmp_path / "bundle"
+    command = [sys.executable, "-m", "practice_engine.data.cli", str(release),
+               "--format", "codeworkout", "--catalog", str(release / "catalog.json"),
+               "--synthetic", "--output", str(output)]
+    result = subprocess.run(command, capture_output=True, text=True)
+    assert result.returncode != 0
+    assert "malformed CSV" in result.stderr
+    assert not output.exists()
+
+
 @pytest.mark.parametrize("change", ["score", "remove-optional-code-table"])
 def test_source_change_after_import_cannot_publish_mismatched_receipt(tmp_path, monkeypatch, change):
     release = tmp_path / "release"
