@@ -59,13 +59,16 @@ export type Model = {
   is_demo: boolean;
   calibrated: boolean;
 };
-export type Snapshot = {
+type WorkspaceCore = {
   model: Model;
   exercises: Exercise[];
   history: Interaction[];
   profile: Profile;
-  ranking: Ranking;
 };
+export type Snapshot = WorkspaceCore & (
+  { ranking: Ranking; ranking_error?: never } |
+  { ranking: null; ranking_error: "practice_policy_unavailable" }
+);
 
 export class ApiHttpError extends Error {
   constructor(readonly status: number, message: string) {
@@ -83,7 +86,12 @@ async function request<T>(path: string, options?: RequestInit, errors?: Partial<
   return response.json() as Promise<T>;
 }
 
-export const getSnapshot = () => request<Snapshot>("/students/demo/workspace");
+export async function getSnapshot(): Promise<Snapshot> {
+  const view = await request<Snapshot>("/students/demo/workspace");
+  if (view.ranking == null && view.ranking_error !== "practice_policy_unavailable")
+    throw new Error("Unexpected workspace response. Refresh the workspace before replaying.");
+  return view;
+}
 
 export type AttemptIntent = {
   problem_id: string;
