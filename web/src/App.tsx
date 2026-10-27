@@ -16,6 +16,7 @@ export default function App() {
   const [notice, setNotice] = useState("");
   const [refreshPending, setRefreshPending] = useState(false);
   const [acknowledgedChoice, setAcknowledgedChoice] = useState<ChoiceAcknowledgement | null>(null);
+  const [choiceResetGeneration, setChoiceResetGeneration] = useState(0);
   const [retryPending, setRetryPending] = useState(false);
   const pendingAttempt = useRef<AttemptIntent | null>(null);
   const loadGeneration = useRef(0);
@@ -83,6 +84,7 @@ export default function App() {
       if (rejected) {
         pendingAttempt.current = null;
         setAcknowledgedChoice(null);
+        if (intent.choice_id) setChoiceResetGeneration((generation) => generation + 1);
       }
       setRetryPending(!rejected);
       setError(
@@ -314,7 +316,7 @@ export default function App() {
                         </p>
                       </div>
                     )}
-                      {selectedRanking && snapshot.ranking && <RecommendationChoice key={`${snapshot.ranking.snapshot_id}:${selectedId}`} snapshotId={snapshot.ranking.snapshot_id} problemId={selectedId} busy={saving || loading || refreshPending} onRecorded={setAcknowledgedChoice} />}
+                      {selectedRanking && snapshot.ranking && <RecommendationChoice key={`${snapshot.ranking.snapshot_id}:${selectedId}:${choiceResetGeneration}`} snapshotId={snapshot.ranking.snapshot_id} problemId={selectedId} busy={saving || loading || refreshPending} onRecorded={setAcknowledgedChoice} />}
                     <ResearchInspector key={`${selectedId}:${JSON.stringify(snapshot.history)}`} snapshot={snapshot} candidate={selected} busy={saving || loading || refreshPending} />
                     <div className="simulation">
                       <h3>Replay a simulated outcome</h3>
