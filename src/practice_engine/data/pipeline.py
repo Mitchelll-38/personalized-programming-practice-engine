@@ -12,6 +12,9 @@ def validate_problem_metadata(entries: Iterable[tuple[str, str, tuple[str, ...]]
     """Require one statement and concept set for each canonical problem ID."""
     metadata = {}
     for problem_id, problem_text, concept_ids in entries:
+        if (not concept_ids or any(type(tag) is not str or not tag.strip() for tag in concept_ids)
+                or len(set(concept_ids)) != len(concept_ids)):
+            raise ValueError("Problem metadata requires unique nonempty concept IDs")
         identity = (problem_text, frozenset(concept_ids))
         if problem_id in metadata and metadata[problem_id] != identity:
             raise ValueError(f"Problem {problem_id!r} has inconsistent statement or concepts")

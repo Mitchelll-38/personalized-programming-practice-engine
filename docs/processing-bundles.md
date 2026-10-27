@@ -60,6 +60,8 @@ training-bundle contracts. Problem text must match exactly. Concept order may
 vary because the research models use concept membership or an unordered mean.
 The training loader verifies test artifact bytes through the manifest but does
 not parse test examples, so it cannot compare metadata present only in test.
+Candidate concept IDs must remain nonblank and unique before set comparison;
+duplicates would otherwise change the content model's concept mean.
 
 Owner: platform engineer. Purpose: preserve processing-bundle integrity when a
 write fails or a command is repeated. Dependencies: existing data CLI, processing

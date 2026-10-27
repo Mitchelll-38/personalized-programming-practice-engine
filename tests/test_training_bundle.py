@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 import subprocess
 import sys
 
@@ -148,6 +149,26 @@ def test_hash_valid_cross_student_problem_metadata_conflict_fails(bundle, field,
     mutate(bundle, "validation.jsonl", conflict)
     with pytest.raises(ValueError, match="inconsistent statement or concepts"):
         load_training_bundle(bundle)
+
+
+def test_duplicate_candidate_tags_cannot_hide_behind_set_equivalence(tmp_path):
+    fixture = Path(__file__).resolve().parents[1] / "data/fixtures/synthetic.jsonl"
+    source = tmp_path / "two-tag-exercises.jsonl"
+    source.write_text("".join(line + "\n" for line in fixture.read_text().splitlines()
+                              if json.loads(line)["problem_id"] == "sum"))
+    directory = tmp_path / "bundle"
+    subprocess.run([sys.executable, "-m", "practice_engine.data.cli", str(source),
+                    "--synthetic", "--output", str(directory)], capture_output=True, check=True)
+    assert load_training_bundle(directory).validation
+
+    def duplicate(rows):
+        target = next(row for row in rows if row["candidate"]["problem_id"] == "sum")
+        assert target["candidate"]["concept_ids"] == ["loops", "arrays"]
+        target["candidate"]["concept_ids"] = ["loops", "loops", "arrays"]
+
+    mutate(directory, "validation.jsonl", duplicate)
+    with pytest.raises(ValueError, match="unique nonempty concept IDs"):
+        load_training_bundle(directory)
 
 
 def test_duplicate_targets_fail(bundle):
