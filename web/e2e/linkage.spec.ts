@@ -145,4 +145,44 @@ for (const [status, message] of [[404, "Recorded choice or exercise was not foun
     expect(attempts[1].request_id).not.toBe(attempts[0].request_id);
     expect(history).toHaveLength(1);
   });
+
+  test(`linked outcome ${status} permits a new explicit choice after rejection`, async ({ page, request }) => {
+    const { attempts, history, choice } = await workspace(page, request);
+    const replacementChoiceId = "d".repeat(32);
+    let choices = 0;
+    await page.route("**/api/recommendation-choices", (route) => {
+      choices += 1;
+      return route.fulfill({ status: 201, json: {
+        ...route.request().postDataJSON(),
+        choice_id: choices === 1 ? choiceId : replacementChoiceId,
+        created_at: "2026-10-17T21:00:00Z",
+      } });
+    });
+    let rejected = false;
+    await page.route("**/api/attempts", (route) => {
+      if (!rejected) {
+        rejected = true;
+        return route.fulfill({ status, json: { detail: "synthetic link error" } });
+      }
+      return route.fallback();
+    });
+
+    await choose(page);
+    await page.getByRole("button", { name: "Simulate correct", exact: true }).click();
+    await expect(page.getByRole("alert")).toContainText(message);
+    await expect(choice.getByRole("button", { name: "Choose this recommendation", exact: true })).toBeEnabled();
+    expect(choices).toBe(1);
+    expect(attempts).toHaveLength(1);
+    expect(history).toHaveLength(0);
+
+    await choose(page);
+    expect(choices).toBe(2);
+    await page.getByRole("button", { name: "Simulate correct", exact: true }).click();
+    await expect(page.getByText("Simulated correct outcome recorded as interaction 0.")).toBeVisible();
+    expect(attempts).toHaveLength(2);
+    expect(attempts[0].choice_id).toBe(choiceId);
+    expect(attempts[1].choice_id).toBe(replacementChoiceId);
+    expect(attempts[1].request_id).not.toBe(attempts[0].request_id);
+    expect(history).toHaveLength(1);
+  });
 }

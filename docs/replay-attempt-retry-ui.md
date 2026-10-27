@@ -15,6 +15,21 @@ failed refresh keeps the existing save guard. A choice acknowledged after an
 unlinked submission never attaches retroactively to that retry. Browser checks
 cover lost responses, exact retries, new intents and choice linkage. HTTP 404,
 409 and 422 definitively reject the submitted intent: the client clears that
-request and its choice link, explains the rejection, and sends nothing else
-until the learner explicitly clicks a simulation button again. Network and 5xx
-failures retain the original request for exact retry.
+request and its choice link, explains the rejection, and sends no replacement
+request automatically. The learner may explicitly choose again or click a
+simulation button. Network and 5xx failures retain the original request for
+exact retry.
+
+## Rejected linked choice recovery
+
+Owner: product frontend engineer. Purpose: let the learner make a new explicit
+recommendation choice after a linked outcome is definitively rejected. Dependency:
+the existing choice acknowledgement and attempt rejection contracts; no real data
+or research model is involved.
+
+Acceptance: HTTP 404, 409 or 422 on a linked attempt clears its request and choice
+link and re-enables **Choose this recommendation** for the displayed exercise.
+The client does not send a replacement choice or attempt automatically. A new
+button click records a new choice ID, and the next explicit simulated outcome
+links only that new ID. Network and 5xx failures keep the original linked request
+for exact retry. Browser checks cover each definitive status and these boundaries.
