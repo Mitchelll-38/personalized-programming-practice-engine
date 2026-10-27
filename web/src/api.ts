@@ -115,6 +115,7 @@ function validWorkspace(value: unknown): value is Snapshot {
     return false;
   if (ranking === null) return value.ranking_error === "practice_policy_unavailable";
   return value.ranking_error === undefined && object(ranking) &&
+    ranking.student_id === "demo" && ranking.is_demo === true &&
     text(ranking.policy_version) && typeof ranking.snapshot_id === "string" &&
     /^[a-f0-9]{32}$/.test(ranking.snapshot_id) &&
     Number.isSafeInteger(ranking.history_sequence_index) && (ranking.history_sequence_index as number) >= -1 &&

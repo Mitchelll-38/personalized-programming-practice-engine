@@ -197,3 +197,8 @@ workspace before installing a snapshot; malformed synthetic responses surface a
 recoverable error, while valid ranking and policy-unavailable responses keep their
 current replay behavior. Dependency: the merged coherent workspace endpoint; no
 recommendation-choice persistence or empirical-data change.
+
+Ranking learner identity is part of this workspace boundary: only a ranking for
+the synthetic `demo` learner may enable recommendation choices. Unrecognized or
+malformed policy configuration within a demo ranking remains an inspector-level
+disclosure failure and does not block manual replay.
