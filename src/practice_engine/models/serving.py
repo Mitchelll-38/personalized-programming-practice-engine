@@ -44,7 +44,7 @@ class PredictionScore(BaseModel):
 
 
 def predict_inputs(artifact: RateArtifact | PortableBaselineArtifact | CalibratedBaselineArtifact,
-                   inputs: list[PredictionInput]) -> list[PredictionScore]:
+                   inputs: list[PredictionInput] | tuple[PredictionInput, ...]) -> list[PredictionScore]:
     """Preserve query order and revalidate causal boundaries before prediction.
 
     Supported artifacts recheck their payload integrity during prediction. This
@@ -52,8 +52,8 @@ def predict_inputs(artifact: RateArtifact | PortableBaselineArtifact | Calibrate
     """
     if not isinstance(artifact, (RateArtifact, PortableBaselineArtifact, CalibratedBaselineArtifact)):
         raise ValueError("Only reviewed portable baseline artifacts are supported")
-    if any(not isinstance(row, PredictionInput) for row in inputs):
-        raise ValueError("Queries must be PredictionInput objects")
+    if not isinstance(inputs, (list, tuple)) or any(not isinstance(row, PredictionInput) for row in inputs):
+        raise ValueError("Queries must be a list or tuple of PredictionInput objects")
     # Recheck direct model_copy updates and mutable nested objects at the boundary.
     queries = [PredictionInput.model_validate(row.model_dump()) for row in inputs]
     probabilities = artifact.predict([row._example() for row in queries])

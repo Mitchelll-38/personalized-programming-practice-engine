@@ -88,3 +88,14 @@ def test_unsupported_artifact_and_query_types_rejected():
     # Rejected before invoking any model or interpreting response fields.
     with pytest.raises(ValueError):
         predict_inputs(object(), [{"label": True}])
+
+
+def test_query_generator_rejected_before_consumption_and_tuple_preserves_order(tmp_path, provenance):
+    artifact = save_rate_artifact(tmp_path / "model.json", RateBaseline.fit([training(True)]), provenance)
+    rows = (query("first"), query("second"))
+    assert [score.problem_id for score in predict_inputs(artifact, rows)] == ["first", "second"]
+    assert predict_inputs(artifact, ()) == []
+    one_shot = iter(rows)
+    with pytest.raises(ValueError, match="list or tuple"):
+        predict_inputs(artifact, one_shot)
+    assert next(one_shot) is rows[0]
