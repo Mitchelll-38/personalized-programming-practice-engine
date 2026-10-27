@@ -188,6 +188,20 @@ and successful final-head CI. The installed-wheel rehearsal uses only original
 synthetic examples. The coordinator records integrated verification separately in
 progress.md; these fixes do not clear any real-source or empirical dependency.
 
+## October 27, 2026 (UTC): canonical problem identity check
+
+Owner: data engineer. Purpose: a canonical input can reuse one problem ID with
+different statements or concept sets across students, and the verified training
+bundle currently accepts that conflict. Acceptance: reject conflicting metadata
+before processing publication and when loading hash-valid train/validation
+examples; permit concept tag reordering; keep test examples unread during
+training. Dependency: existing canonical first-attempt and training-bundle
+contracts. This synthetic integrity fix does not resolve real release provenance,
+chronology, or catalog review. Problem text is compared exactly; concept IDs are
+compared as a set because numeric features, BKT and the content model use
+membership or an unordered mean. Test rows remain hash-checked but unparsed by
+the training loader, so this check cannot attest their metadata.
+
 ## October 27 synthetic workspace response boundary
 
 Owner: product engineer. Purpose: a malformed HTTP 200 workspace response can

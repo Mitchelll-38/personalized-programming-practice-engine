@@ -12,6 +12,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, model_validator
 import torch
+from torch.nn.modules import module as torch_module
 
 from .artifacts import ArtifactProvenance, payload_hash
 from .content_inputs import ConceptVocabulary, ContentInputs
@@ -58,6 +59,10 @@ class ContentMetadata(BaseModel):
 def _configuration(model):
     if type(model) is not ContentLSTM:
         raise ValueError("Canonical ContentLSTM required")
+    if (torch_module._global_forward_hooks or torch_module._global_forward_pre_hooks
+            or any(module._forward_hooks or module._forward_pre_hooks
+                   for module in model.modules())):
+        raise ValueError("Unsupported content forward hooks")
     if (type(model.problem) is not torch.nn.Linear or type(model.code) is not torch.nn.Linear
             or type(model.head) is not torch.nn.Linear or type(model.concepts) is not torch.nn.Embedding
             or type(model.correctness) is not torch.nn.Embedding or type(model.lstm) is not torch.nn.LSTM

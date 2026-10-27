@@ -4,6 +4,7 @@ import json
 import pytest
 
 torch = pytest.importorskip("torch")
+from torch.nn.modules import module as torch_module
 
 from practice_engine.models.artifacts import ArtifactProvenance, payload_hash
 from practice_engine.models.content_artifacts import load_content_checkpoint, save_content_checkpoint
@@ -180,6 +181,51 @@ def test_duplicate_json_and_live_mutations_rejected(saved):
     (path / "metadata.json").write_text(text.replace('"calibrated": false', '"calibrated": false, "calibrated": false'))
     with pytest.raises(ValueError, match="Duplicate"):
         load_content_checkpoint(path)
+
+
+@pytest.mark.parametrize("part", ["model", "problem", "code", "concepts", "correctness", "lstm", "head"])
+@pytest.mark.parametrize("kind", ["forward", "pre"])
+def test_local_forward_hooks_rejected_on_save_and_loaded_inference(saved, part, kind):
+    path, model, vocabulary, encoder, provenance, inputs = saved
+    loaded = load_content_checkpoint(path)
+    baseline = loaded.logits(inputs)
+    destination = path.with_name("hooked")
+
+    def attach(target):
+        module = target if part == "model" else getattr(target, part)
+        if kind == "forward":
+            return module.register_forward_hook(lambda _module, _inputs, output: output)
+        return module.register_forward_pre_hook(lambda _module, arguments: arguments)
+
+    with attach(loaded._model):
+        with pytest.raises(ValueError, match="forward hooks"):
+            loaded.logits(inputs)
+    assert torch.equal(loaded.logits(inputs), baseline)
+    with attach(model):
+        with pytest.raises(ValueError, match="forward hooks"):
+            save_content_checkpoint(destination, model, vocabulary, encoder, provenance)
+    assert not destination.exists()
+
+
+@pytest.mark.parametrize("kind", ["forward", "pre"])
+def test_global_forward_hooks_rejected_on_save_and_loaded_inference(saved, kind):
+    path, model, vocabulary, encoder, provenance, inputs = saved
+    loaded = load_content_checkpoint(path)
+    baseline = loaded.logits(inputs)
+    destination = path.with_name("global-hooked")
+    hook = (torch_module.register_module_forward_hook(
+        lambda _module, _inputs, output: output) if kind == "forward" else
+        torch_module.register_module_forward_pre_hook(
+            lambda _module, arguments: arguments))
+    try:
+        with pytest.raises(ValueError, match="forward hooks"):
+            loaded.logits(inputs)
+        with pytest.raises(ValueError, match="forward hooks"):
+            save_content_checkpoint(destination, model, vocabulary, encoder, provenance)
+    finally:
+        hook.remove()
+    assert torch.equal(loaded.logits(inputs), baseline)
+    assert not destination.exists()
 
 
 @pytest.mark.parametrize("change", [lambda m: m.double(), lambda m: m.to("meta"),

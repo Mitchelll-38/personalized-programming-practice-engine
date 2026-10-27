@@ -99,6 +99,15 @@ def test_live_integrity_checked_even_for_empty_queries(prepared, mutation):
         predict_content_inputs(checkpoint, [], entries)
 
 
+def test_forward_hook_cannot_change_served_content_score(prepared):
+    checkpoint, row, entries, *_ = prepared
+    baseline = predict_content_inputs(checkpoint, [query(row)], entries)
+    with checkpoint._model.head.register_forward_hook(lambda _module, _inputs, output: output + 5):
+        with pytest.raises(ValueError, match="forward hooks"):
+            predict_content_inputs(checkpoint, [query(row)], entries)
+    assert predict_content_inputs(checkpoint, [query(row)], entries) == baseline
+
+
 @pytest.mark.parametrize("size", [True, 0, 257])
 def test_bounded_batch_size(prepared, size):
     checkpoint, row, entries, *_ = prepared
