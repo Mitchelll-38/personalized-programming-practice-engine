@@ -67,10 +67,17 @@ export type Snapshot = {
   ranking: Ranking;
 };
 
+export class ApiHttpError extends Error {
+  constructor(readonly status: number, message: string) {
+    super(message);
+    this.name = "ApiHttpError";
+  }
+}
+
 async function request<T>(path: string, options?: RequestInit, errors?: Partial<Record<number, string>>): Promise<T> {
   const response = await fetch(`/api${path}`, options);
   if (!response.ok)
-    throw new Error(
+    throw new ApiHttpError(response.status,
       errors?.[response.status] ?? `API request failed (${response.status}). Check that the local API is running, then retry.`,
     );
   return response.json() as Promise<T>;
@@ -78,16 +85,23 @@ async function request<T>(path: string, options?: RequestInit, errors?: Partial<
 
 export const getSnapshot = () => request<Snapshot>("/students/demo/workspace");
 
-export function recordOutcome(problem_id: string, correct: boolean, choice_id?: string) {
+export type AttemptIntent = {
+  problem_id: string;
+  correct: boolean;
+  choice_id?: string;
+  request_id: string;
+};
+
+export function recordOutcome(intent: AttemptIntent) {
   return request<Interaction>("/attempts", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ student_id: "demo", problem_id, correct, ...(choice_id !== undefined ? { choice_id } : {}) }),
-  }, choice_id !== undefined ? {
-    404: "Recorded choice or exercise was not found. Refresh the workspace before retrying.",
-    422: "Recorded choice does not match this exercise. Refresh the workspace before retrying.",
-    409: "Recorded choice already has a different simulated outcome. Refresh before recording another outcome.",
-  } : undefined);
+    body: JSON.stringify({ student_id: "demo", ...intent }),
+  }, intent.choice_id !== undefined ? {
+    404: "Recorded choice or exercise was not found. The rejected link was cleared; choose again to start a new simulation.",
+    422: "Recorded choice does not match this exercise. The rejected link was cleared; choose again to start a new simulation.",
+    409: "Recorded choice already has a different simulated outcome. The rejected link was cleared; choose again to start a new simulation.",
+  } : { 409: "This simulation request already has a different outcome. Choose a new result to start a new simulation." });
 }
 
 export type RecommendationChoice = {
