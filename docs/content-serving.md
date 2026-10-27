@@ -29,7 +29,8 @@ Candidate IDs have no learned identity embeddings; unseen exercises retain exact
 candidate content. Unknown concepts contribute zero, and cold history uses the
 model's zero state. Missing/wrong-role/wrong-encoder/corrupt used entries fail through
 the strict producer. Unused entries may remain in a larger supplied map. Live
-metadata/weights/architecture integrity is checked even when queries are empty.
+metadata/weights/architecture integrity and registered forward/pre-hook absence
+are checked even when queries are empty.
 Only required entries are consumed; no encoder is constructed or data fetched.
 
 Mini-batches are bounded to 1–256. History/query inventory size remains a trusted
@@ -44,3 +45,13 @@ The caller owns provenance and permission gates and must supply trusted loaded
 artifacts/entries; checksums are content integrity rather than origin proof. Scores
 are uncalibrated and inherit the checkpoint's documented training status. Synthetic
 software checks establish no predictive quality, proven mastery or learning benefit.
+
+## Content checkpoint forward-hook integrity repair
+
+Owner: model platform engineer. Purpose: reject registered PyTorch forward and
+forward-pre hooks that can change content checkpoint predictions without changing
+metadata or tensor checksums. Acceptance: saving a hooked content model fails
+before publication; a hooked loaded checkpoint fails integrity checks and serving;
+unmodified models still save, reload and predict. Dependencies: existing strict
+content checkpoint format and label-free content serving adapter. This repair does
+not change checkpoint files, model architecture or inference inputs.
