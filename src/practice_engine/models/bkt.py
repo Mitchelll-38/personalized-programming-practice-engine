@@ -7,7 +7,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from practice_engine.data.schema import PredictionExample
-from .features import historical_features
+from .features import historical_features, validate_training_examples
 
 
 class _Parameters(BaseModel):
@@ -76,6 +76,7 @@ class BKTBaseline:
         """Choose conditional maximum likelihood on supplied training examples only."""
         if not examples:
             raise ValueError("Training examples must be nonempty")
+        validate_training_examples(examples)
         _validate_examples(examples)
         if parameter_grid is None:
             parameter_grid = [dict(zip(("initial", "learn", "guess", "slip"), values))

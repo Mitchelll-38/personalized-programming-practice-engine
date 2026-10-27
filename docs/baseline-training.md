@@ -41,3 +41,12 @@ are explicitly synthetic, uncalibrated, validation-only software checks, with
 proven mastery or evidence of improved learning. Saved artifacts do not activate
 the replay API. Real-data permission/catalog gates, DKT and calibration are separate
 work units.
+
+## Baseline fit input integrity fix
+
+Owner: data/ML engineer. Purpose: prevent unchecked copied labels from changing
+rate counts or logistic/BKT fitting targets. Acceptance: all three baseline
+fitters reject noncanonical `PredictionExample` rows, non-Boolean labels and
+invalid copied nested fields before fitting; valid synthetic fits and predictions
+retain their existing values. Dependencies: the canonical schema and existing
+baseline fitters only. This does not access private data or change partition gates.

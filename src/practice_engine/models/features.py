@@ -12,6 +12,15 @@ FEATURE_NAMES = (
 )
 
 
+def validate_training_examples(examples: list[PredictionExample]) -> None:
+    """Reject unchecked copies before fitting any labels or features."""
+    for row in examples:
+        if (type(row) is not PredictionExample or type(row.label) is not bool
+                or type(row.student_id) is not str or not row.student_id.strip()):
+            raise ValueError("Valid training prediction examples are required")
+        PredictionExample.model_validate(row.model_dump(warnings=False))
+
+
 def _validate_history(example: PredictionExample) -> None:
     previous_index = -1
     problems = set()

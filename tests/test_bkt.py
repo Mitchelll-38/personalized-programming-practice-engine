@@ -114,3 +114,14 @@ def test_empty_training_grid_concepts_and_unknown_payload_rejected():
         BKTBaseline.from_dict({"version": "unknown", "parameters": PARAMS})
     with pytest.raises(ValueError):
         BKTBaseline.from_dict({**model().to_dict(), "extra": "untrusted"})
+
+
+@pytest.mark.parametrize("row", [None, {}, example().model_copy(update={"label": 1}),
+    example().model_copy(update={"label": 2}),
+    example().model_copy(update={"label": "yes"}),
+    example().model_copy(update={"label": None}),
+    example().model_copy(update={"student_id": " "}),
+    example().model_copy(update={"history": ("invalid",)})])
+def test_invalid_copied_training_row_cannot_fit_bkt(row):
+    with pytest.raises(ValueError):
+        BKTBaseline.fit([row, example(False)], [PARAMS])
