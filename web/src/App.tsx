@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getSnapshot, recordOutcome, type AttemptIntent, type Snapshot, type RecommendationChoice as ChoiceAcknowledgement } from "./api";
+import { ApiHttpError, getSnapshot, recordOutcome, type AttemptIntent, type Snapshot, type RecommendationChoice as ChoiceAcknowledgement } from "./api";
 import ResearchInspector from "./ResearchInspector";
 import RecommendationChoice from "./RecommendationChoice";
 import PolicyInspection from "./PolicyInspection";
@@ -79,7 +79,12 @@ export default function App() {
       setRefreshPending(true);
       await load();
     } catch (err) {
-      setRetryPending(true);
+      const rejected = err instanceof ApiHttpError && [404, 409, 422].includes(err.status);
+      if (rejected) {
+        pendingAttempt.current = null;
+        setAcknowledgedChoice(null);
+      }
+      setRetryPending(!rejected);
       setError(
         err instanceof Error
           ? err.message

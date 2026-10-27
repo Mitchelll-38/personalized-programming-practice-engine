@@ -13,4 +13,8 @@ the workspace. A different exercise or outcome is a new explicit intent with a
 new ID. A confirmed response clears the pending intent before workspace refresh;
 failed refresh keeps the existing save guard. A choice acknowledged after an
 unlinked submission never attaches retroactively to that retry. Browser checks
-cover lost responses, exact retries, new intents and choice linkage.
+cover lost responses, exact retries, new intents and choice linkage. HTTP 404,
+409 and 422 definitively reject the submitted intent: the client clears that
+request and its choice link, explains the rejection, and sends nothing else
+until the learner explicitly clicks a simulation button again. Network and 5xx
+failures retain the original request for exact retry.

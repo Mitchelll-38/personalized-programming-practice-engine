@@ -96,18 +96,53 @@ test("ambiguous attempt failure retains the same choice for an identical receipt
   await expect(page.locator("tbody tr")).toHaveCount(1);
 });
 
+test("transient server failure retains the exact linked request for retry", async ({ page, request }) => {
+  const { attempts, history } = await workspace(page, request);
+  let failed = false;
+  await page.route("**/api/attempts", (route) => {
+    if (!failed) {
+      failed = true;
+      return route.fulfill({ status: 503, json: { detail: "temporary failure" } });
+    }
+    return route.fallback();
+  });
+  await choose(page);
+  await page.getByRole("button", { name: "Simulate correct", exact: true }).click();
+  await expect(page.getByRole("alert")).toBeVisible();
+  await page.getByRole("button", { name: "Simulate correct", exact: true }).click();
+  await expect(page.getByText("Simulated correct outcome recorded as interaction 0.")).toBeVisible();
+  expect(attempts).toHaveLength(2);
+  expect(attempts[1]).toEqual(attempts[0]);
+  expect(attempts[0].choice_id).toBe(choiceId);
+  expect(history).toHaveLength(1);
+});
+
 for (const [status, message] of [[404, "Recorded choice or exercise was not found"], [422, "Recorded choice does not match"], [409, "Recorded choice already has a different simulated outcome"]] as const) {
-  test(`linked outcome ${status} is explicit and never falls back unlinked`, async ({ page, request }) => {
-    const { attempts } = await workspace(page, request);
-    await page.route("**/api/attempts", (route) => route.fulfill({ status, json: { detail: "synthetic link error" } }));
+  test(`linked outcome ${status} rejects its intent and allows a fresh explicit simulation`, async ({ page, request }) => {
+    const { attempts, history } = await workspace(page, request);
+    let rejected = false;
+    await page.route("**/api/attempts", (route) => {
+      if (!rejected) {
+        rejected = true;
+        return route.fulfill({ status, json: { detail: "synthetic link error" } });
+      }
+      return route.fallback();
+    });
     await choose(page);
     await page.getByRole("button", { name: "Simulate correct", exact: true }).click();
     await expect(page.getByRole("alert")).toContainText(message);
     expect(attempts).toHaveLength(1);
     expect(attempts[0].choice_id).toBe(choiceId);
+    await expect(page.getByText(/The next simulated outcome will link/)).toHaveCount(0);
+    await page.getByRole("button", { name: "Retry connection" }).click();
+    expect(attempts).toHaveLength(1);
     await page.getByRole("button", { name: "Simulate correct", exact: true }).click();
-    await expect(page.getByRole("alert")).toContainText(message);
+    await expect(page.getByText("Simulated correct outcome recorded as interaction 0.")).toBeVisible();
     expect(attempts).toHaveLength(2);
-    expect(attempts[1]).toEqual(attempts[0]);
+    expect(attempts[1]).toMatchObject({ student_id: "demo", problem_id: "java-count", correct: true });
+    expect(attempts[1].choice_id).toBeUndefined();
+    expect(attempts[1].request_id).toMatch(/^[a-f0-9]{32}$/);
+    expect(attempts[1].request_id).not.toBe(attempts[0].request_id);
+    expect(history).toHaveLength(1);
   });
 }
