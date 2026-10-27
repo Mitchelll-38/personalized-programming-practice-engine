@@ -21,3 +21,12 @@ direct examples fail. Features represent available observed evidence, not proven
 mastery. Held-out-student and exercise-family protocols supply different allowed
 histories; this function does not choose a partition or certify dataset provenance.
 Train-only scaling and logistic fitting belong to the next independent model PR.
+
+## Direct prediction input integrity fix
+
+Owner: data/ML engineer. Purpose: reject unchecked copied historical outcomes
+before they change logistic features or BKT predictions. Acceptance: feature
+extraction and both direct model prediction paths reject noncanonical examples
+and invalid nested interactions, while valid synthetic features and predictions
+retain their existing values. Dependency: the canonical schema only; no bundle,
+policy, private data or partition behavior changes are involved.

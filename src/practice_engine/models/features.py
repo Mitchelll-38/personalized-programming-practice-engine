@@ -53,6 +53,10 @@ def historical_features(examples: list[PredictionExample]) -> list[list[float]]:
     """
     features = []
     for example in examples:
+        if (type(example) is not PredictionExample or type(example.student_id) is not str
+                or not example.student_id.strip()):
+            raise ValueError("Valid prediction examples with student IDs are required")
+        PredictionExample.model_validate(example.model_dump(warnings=False))
         _validate_history(example)
         concepts = set(example.candidate.concept_ids)
         overlap = [row for row in example.history if concepts.intersection(row.concept_ids)]

@@ -66,3 +66,18 @@ def test_changing_candidate_concepts_only_changes_overlap_features():
 def test_corrupt_direct_history_rejected(rows, message):
     with pytest.raises(ValueError, match=message):
         historical_features([example(rows)])
+
+
+@pytest.mark.parametrize("correct", [1, 2, "yes", None])
+def test_unchecked_nested_outcome_cannot_change_history_rates(correct):
+    row = example([history(0, False)])
+    copied = row.model_copy(update={"history": (row.history[0].model_copy(update={"correct": correct}),)})
+    with pytest.raises(ValueError):
+        historical_features([copied])
+
+
+def test_noncanonical_direct_examples_rejected():
+    with pytest.raises(ValueError):
+        historical_features([{}])
+    with pytest.raises(ValueError):
+        historical_features([example().model_copy(update={"student_id": " "})])

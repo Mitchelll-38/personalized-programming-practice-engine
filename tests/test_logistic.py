@@ -99,3 +99,12 @@ def test_extreme_finite_score_has_stable_sigmoid():
     assert LogisticBaseline.from_dict(payload).predict(examples()) == [1.0] * 16
     payload["intercept"] = -1000.0
     assert LogisticBaseline.from_dict(payload).predict(examples()) == [0.0] * 16
+
+
+def test_direct_prediction_rejects_unchecked_prior_outcome():
+    rows = examples()
+    model = LogisticBaseline.fit(rows)
+    row = rows[1]
+    copied = row.model_copy(update={"history": (row.history[0].model_copy(update={"correct": 2}),)})
+    with pytest.raises(ValueError):
+        model.predict([copied])
