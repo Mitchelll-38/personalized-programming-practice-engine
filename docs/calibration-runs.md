@@ -1,5 +1,16 @@
 # Validation-only calibration runs
 
+October 27 receipt integrity segment — Owner: data engineer. Purpose: bind the
+calibration validation digest to the exact verified bytes consumed for fitting.
+Acceptance: a synthetic validation-file mutation after bundle loading cannot
+change the published fitting digest; ordinary calibration and artifact reload
+still succeed. Dependency: the shared bundle loader's verified artifact hashes.
+This check does not authenticate the source data or establish empirical quality.
+The fitting record now uses the manifest digest checked against the same
+validation bytes the bundle loader parsed. A synthetic regression changes the
+file during fitting and confirms the artifact retains the consumed digest.
+Focused calibration checks passed 16 tests on Windows; no real data was used.
+
 Owner: coordinator. Purpose: reproduce scalar calibration on a fixed fitted
 baseline without refitting the base model or touching locked test examples.
 Dependencies: shared synthetic bundle boundary, portable baselines, temperature

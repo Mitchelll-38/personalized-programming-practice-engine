@@ -76,6 +76,28 @@ def test_fitting_receipts_reload_and_test_is_never_parsed(prepared, tmp_path, ki
     assert {p.name for p in (tmp_path / "before").iterdir()} == {"model.json", "run.json", "validation.json", "reliability.json"}
 
 
+def test_calibration_receipt_hashes_consumed_validation_bytes(prepared, tmp_path, monkeypatch):
+    bundle, verified = prepared
+    path, base = base_model(tmp_path, verified)
+    original_digest = verified.manifest.artifact_sha256["validation.jsonl"]
+    original_fit = calibration.TemperatureScaler.fit_validation
+
+    def fit_then_change_file(cls, examples, probabilities, *, temperatures):
+        fitted = original_fit(examples, probabilities, temperatures=temperatures)
+        validation_path = bundle / "validation.jsonl"
+        validation_path.write_bytes(validation_path.read_bytes() + b"\n")
+        return fitted
+
+    monkeypatch.setattr(calibration.TemperatureScaler, "fit_validation", classmethod(fit_then_change_file))
+    calibration.calibrate_baseline(bundle, path, tmp_path / "calibrated")
+    artifact = load_calibrated_artifact(tmp_path / "calibrated/model.json")
+    assert artifact.validation_record.validation_sha256 == original_digest
+    assert artifact.validation_record.validation_sha256 != sha256((bundle / "validation.jsonl").read_bytes()).hexdigest()
+    assert artifact.validation_record.probabilities_sha256 == payload_hash(
+        {"probabilities": base.predict(verified.validation)})
+    assert artifact.predict(verified.validation)
+
+
 def test_mismatched_model_and_unverified_bundle_rejected(prepared, tmp_path):
     bundle, verified = prepared
     path, base = base_model(tmp_path, verified)
