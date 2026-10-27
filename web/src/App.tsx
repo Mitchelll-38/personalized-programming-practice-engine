@@ -29,7 +29,7 @@ export default function App() {
       setSelectedId((current) =>
         next.exercises.some((item) => item.problem_id === current)
           ? current
-          : (next.ranking.recommendations[0]?.problem_id ??
+          : (next.ranking?.recommendations[0]?.problem_id ??
             next.exercises[0]?.problem_id ??
             ""),
       );
@@ -51,7 +51,7 @@ export default function App() {
     return () => { loadGeneration.current += 1; };
   }, [load]);
 
-  useEffect(() => { setAcknowledgedChoice(null); }, [selectedId, snapshot?.ranking.snapshot_id]);
+  useEffect(() => { setAcknowledgedChoice(null); }, [selectedId, snapshot?.ranking?.snapshot_id]);
 
   async function simulate(correct: boolean) {
     if (!selectedId || saving) return;
@@ -82,10 +82,10 @@ export default function App() {
   const selected = snapshot?.exercises.find(
     (item) => item.problem_id === selectedId,
   );
-  const selectedRanking = snapshot?.ranking.recommendations.find(
+  const selectedRanking = snapshot?.ranking?.recommendations.find(
     (item) => item.problem_id === selectedId,
   );
-  const activeChoice = acknowledgedChoice?.problem_id === selectedId && acknowledgedChoice.snapshot_id === snapshot?.ranking.snapshot_id
+  const activeChoice = acknowledgedChoice?.problem_id === selectedId && acknowledgedChoice.snapshot_id === snapshot?.ranking?.snapshot_id
     ? acknowledgedChoice : null;
   const correctCount =
     snapshot?.history.filter((item) => item.correct).length ?? 0;
@@ -183,9 +183,9 @@ export default function App() {
               <div>
                 <span className="eyebrow">RECOMMENDATION POLICY</span>
                 <strong className="policy">
-                  {snapshot.ranking.policy_version}
+                  {snapshot.ranking?.policy_version ?? "Unavailable"}
                 </strong>
-                <p>Ranked by a transparent heuristic</p>
+                <p>{snapshot.ranking ? "Ranked by a transparent heuristic" : "Optional policy configuration could not load"}</p>
               </div>
             </section>
             <div className="main-grid">
@@ -195,13 +195,18 @@ export default function App() {
                     <p className="eyebrow">01 / NEXT EXERCISES</p>
                     <h2>Recommended practice</h2>
                   </div>
-                  <span className="small-tag">Demo ranking</span>
+                  <span className="small-tag">{snapshot.ranking ? "Demo ranking" : "Ranking unavailable"}</span>
                 </div>
                 <p className="section-note">
-                  Select an exercise to inspect its prompt and ranking reasons.
+                  {snapshot.ranking ? "Select an exercise to inspect its prompt and ranking reasons."
+                    : "Select an exercise from the library to inspect its prompt and replay a simulated outcome."}
                 </p>
-                <PolicyInspection ranking={snapshot.ranking} />
-                {snapshot.ranking.recommendations.length ? (
+                {snapshot.ranking ? <PolicyInspection ranking={snapshot.ranking} /> :
+                  <aside className="reason-box policy-inspection" aria-label="Practice policy inspection">
+                    <h3>Configured heuristic policy</h3>
+                    <p role="status">Policy configuration unavailable. Recommendations and choice recording are paused; manual replay remains available.</p>
+                  </aside>}
+                {snapshot.ranking?.recommendations.length ? (
                   <ol className="recommendation-list">
                     {snapshot.ranking.recommendations.map((item, index) => (
                       <li key={item.problem_id}>
@@ -231,8 +236,8 @@ export default function App() {
                   </ol>
                 ) : (
                   <p className="empty compact">
-                    No recommendations yet. Choose an exercise from the library
-                    below.
+                    {snapshot.ranking ? "No recommendations yet. Choose an exercise from the library below."
+                      : "Recommendations are unavailable. Choose an exercise from the library below."}
                   </p>
                 )}
                 <div className="library">
@@ -293,14 +298,14 @@ export default function App() {
                         </p>
                       </div>
                     )}
-                      {selectedRanking && <RecommendationChoice key={`${snapshot.ranking.snapshot_id}:${selectedId}`} snapshotId={snapshot.ranking.snapshot_id} problemId={selectedId} busy={saving || loading || refreshPending} onRecorded={setAcknowledgedChoice} />}
+                      {selectedRanking && snapshot.ranking && <RecommendationChoice key={`${snapshot.ranking.snapshot_id}:${selectedId}`} snapshotId={snapshot.ranking.snapshot_id} problemId={selectedId} busy={saving || loading || refreshPending} onRecorded={setAcknowledgedChoice} />}
                     <ResearchInspector key={`${selectedId}:${JSON.stringify(snapshot.history)}`} snapshot={snapshot} candidate={selected} busy={saving || loading || refreshPending} />
                     <div className="simulation">
                       <h3>Replay a simulated outcome</h3>
                       {activeChoice && <p role="status">The next simulated outcome will link to your recorded choice. Choosing alone does not grade code.</p>}
                       <p>
                         Record a synthetic result to recalculate the concept
-                        profile and recommendations. This does not grade code.
+                        profile{snapshot.ranking ? " and recommendations" : ""}. This does not grade code.
                       </p>
                       <div className="actions">
                         <button

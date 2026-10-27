@@ -1,11 +1,12 @@
 """A workspace response binds every history-dependent view to one read."""
 
 from fastapi.testclient import TestClient
+from fastapi import HTTPException
 import pytest
 
 from api import storage
 from api.main import app
-from api.recommendation_records import get_snapshot
+from api.recommendation_records import get_snapshot, list_snapshots
 
 
 @pytest.fixture
@@ -76,3 +77,39 @@ def test_outcome_interleaved_after_history_read_cannot_mix_workspace_views(clien
     old_predictions = {row["problem_id"]: row["predicted_correctness"] for row in view["ranking"]["recommendations"]}
     new_predictions = {row["problem_id"]: row["predicted_correctness"] for row in refreshed["ranking"]["recommendations"]}
     assert old_predictions["java-reverse"] != new_predictions["java-reverse"]
+
+
+def test_invalid_optional_policy_keeps_coherent_replay_without_a_ranking(client, tmp_path, monkeypatch):
+    policy_path = tmp_path / "policy.json"
+    monkeypatch.setenv("PRACTICE_POLICY_CONFIG", str(policy_path))
+    response = client.get("/students/demo/workspace")
+    assert response.status_code == 200
+    view = response.json()
+    assert set(view) == {"model", "exercises", "history", "profile", "ranking", "ranking_error"}
+    assert view["ranking"] is None and view["ranking_error"] == "practice_policy_unavailable"
+    assert view["profile"]["total_interactions"] == len(view["history"]) == 4
+    assert view["model"]["is_demo"] is True and len(view["exercises"]) == 8
+    assert list_snapshots() == []
+    assert client.get("/students/demo/recommendations").status_code == 503
+
+    saved = client.post("/attempts", json={"student_id": "demo", "problem_id": "java-reverse", "correct": False})
+    assert saved.status_code == 201
+    refreshed = client.get("/students/demo/workspace").json()
+    assert refreshed["ranking"] is None and refreshed["history"][-1] == saved.json()
+    assert refreshed["profile"]["total_interactions"] == 5
+    assert list_snapshots() == []
+
+    policy_path.write_text('{"challenge_lower": 0.3, "challenge_upper": 0.5}')
+    restored = client.get("/students/demo/workspace").json()
+    assert "ranking_error" not in restored
+    assert restored["ranking"]["history_sequence_index"] == saved.json()["sequence_index"]
+    assert get_snapshot(restored["ranking"]["snapshot_id"]) is not None
+
+
+def test_other_policy_failures_still_fail_workspace(client, monkeypatch):
+    def unavailable():
+        raise HTTPException(status_code=503, detail="different_failure")
+    monkeypatch.setattr("api.main.configured_policy", unavailable)
+    response = client.get("/students/demo/workspace")
+    assert response.status_code == 503 and response.json() == {"detail": "different_failure"}
+    assert list_snapshots() == []

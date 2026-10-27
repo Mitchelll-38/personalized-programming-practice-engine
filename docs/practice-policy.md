@@ -42,6 +42,17 @@ and returns private503 `practice_policy_unavailable` on missing/bad files. Brows
 history/profile and manual replay remain available. There is no client path or
 policy override. Configuration changes are observed on the next generation.
 
+Policy workspace fallback segment: owner product/platform engineer. Purpose:
+preserve the synthetic learner dashboard and manual replay when this optional
+server configuration cannot load. Dependency: coherent workspace endpoint #90
+and dashboard consumer #91. Acceptance: the known
+`practice_policy_unavailable` condition returns one coherent workspace history/profile
+with `ranking: null` and `ranking_error: "practice_policy_unavailable"`; no
+recommendation snapshot or choice is fabricated. The dashboard explains that
+rankings and choices are unavailable while retaining exercise inspection,
+history, concept estimates and manual simulation. A corrected configuration
+restores ordinary ranking on refresh. Other workspace failures remain errors.
+
 Responses add full normalized `policy_config` and canonical `policy_sha256`; the
 snapshot retains that same immutable configuration/hash and matching v2 version.
 No original configuration-file path is returned. Historical v1 records lacking

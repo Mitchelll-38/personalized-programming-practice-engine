@@ -79,3 +79,52 @@ test("live v2 policy disclosure matches the displayed generation metadata", asyn
   await expect(pane).toContainText("Learning benefits of this range have not been measured");
   await expect(page.getByRole("button", { name: "Simulate correct", exact: true })).toBeEnabled();
 });
+
+test("known policy failure keeps exercise inspection and manual replay usable", async ({ page, request }) => {
+  const bundle = await (await request.get("/api/students/demo/workspace")).json();
+  const history = [...bundle.history];
+  const attempts: { problem_id: string; correct: boolean }[] = [];
+  const choiceRequests: import("@playwright/test").Request[] = [];
+  page.on("request", (call) => {
+    if (new URL(call.url()).pathname === "/api/recommendation-choices") choiceRequests.push(call);
+  });
+  await page.route("**/api/students/demo/workspace", (route) => route.fulfill({ json: {
+    ...bundle, history, profile: { ...bundle.profile, total_interactions: history.length },
+    ranking: null, ranking_error: "practice_policy_unavailable",
+  } }));
+  await page.route("**/api/attempts", (route) => {
+    const body = route.request().postDataJSON();
+    attempts.push(body);
+    const row = { student_id: "demo", problem_id: body.problem_id, correct: body.correct,
+      sequence_index: history.length, attempt_number: history.filter((item: { problem_id: string }) => item.problem_id === body.problem_id).length + 1 };
+    history.push(row);
+    return route.fulfill({ status: 201, json: row });
+  });
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: "Workspace unavailable" })).toHaveCount(0);
+  await expect(page.getByRole("complementary", { name: "Practice policy inspection" }))
+    .toContainText("Recommendations and choice recording are paused; manual replay remains available");
+  await expect(page.getByRole("region", { name: "Recommendation choice" })).toHaveCount(0);
+  await expect(page.locator(".recommendation-list li")).toHaveCount(0);
+  await page.getByLabel("Exercise library").selectOption("java-reverse");
+  await expect(page.getByRole("heading", { name: "Reverse a string" })).toBeVisible();
+  await page.getByRole("button", { name: "Simulate incorrect", exact: true }).click();
+  await expect(page.getByText(`Simulated incorrect outcome recorded as interaction ${bundle.history.length}.`)).toBeVisible();
+  await expect(page.locator("tbody tr").first()).toContainText("Reverse a string");
+  expect(history).toHaveLength(bundle.history.length + 1);
+  expect(attempts).toHaveLength(1);
+  expect(attempts[0]).toMatchObject({ problem_id: "java-reverse", correct: false });
+  expect(choiceRequests).toHaveLength(0);
+  await expect(page.getByRole("complementary", { name: "Practice policy inspection" }))
+    .toContainText("manual replay remains available");
+});
+
+test("an unknown ranking failure does not claim manual replay is ready", async ({ page, request }) => {
+  const bundle = await (await request.get("/api/students/demo/workspace")).json();
+  await page.route("**/api/students/demo/workspace", (route) => route.fulfill({ json: {
+    ...bundle, ranking: null, ranking_error: "unrelated_failure",
+  } }));
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: "Workspace unavailable" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Simulate correct", exact: true })).toHaveCount(0);
+});

@@ -124,11 +124,16 @@ def _recommendations_for(observed: list[dict], policy):
 
 @app.get("/students/demo/workspace")
 def workspace():
-    policy = configured_policy()
     observed = storage.history()
-    return {"model": current_model(), "exercises": exercises(), "history": observed,
-            "profile": _profile_for(observed),
-            "ranking": _recommendations_for(observed, policy)}
+    view = {"model": current_model(), "exercises": exercises(), "history": observed,
+            "profile": _profile_for(observed)}
+    try:
+        policy = configured_policy()
+    except HTTPException as error:
+        if error.status_code != 503 or error.detail != "practice_policy_unavailable":
+            raise
+        return {**view, "ranking": None, "ranking_error": "practice_policy_unavailable"}
+    return {**view, "ranking": _recommendations_for(observed, policy)}
 
 
 @app.post("/predict")
