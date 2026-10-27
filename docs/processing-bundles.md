@@ -1,5 +1,16 @@
 # Atomic processing bundles
 
+October 27 strict research JSONL plan — Owner: data engineer. Purpose: a
+canonical source row or a hash-valid training row can repeat a JSON field such
+as `correct` or `label`, and the current parser silently uses the last value.
+Acceptance: reject duplicate keys at any object depth before publishing a
+canonical processing bundle or loading train/validation examples; keep the
+test artifact hash-checked but its rows unparsed; preserve ordinary synthetic
+processing and both split protocols. Dependencies: existing canonical CLI and
+training-bundle contracts. Integration should follow
+`fix/problem-metadata-consistency` because both changes touch the bundle loader.
+This is a synthetic input integrity check, not real-release provenance approval.
+
 October 27 CodeWorkout source consistency plan — Owner: data engineer. Purpose:
 prevent an imported label from being published with a source hash taken from
 different table bytes. Acceptance: hash the required MainTable/catalog and the

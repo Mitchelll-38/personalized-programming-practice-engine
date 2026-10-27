@@ -12,6 +12,7 @@ from .schema import Interaction
 from .manifest import ProcessingManifest, write_manifest
 from .codeworkout import import_codeworkout
 from .holdouts import family_holdout
+from .jsonl import parse_unique_json
 
 
 def _unique_mapping(pairs):
@@ -64,7 +65,8 @@ def main():
         if args.catalog is not None:
             parser.error("--catalog is only valid for --format codeworkout")
         source_bytes = args.input.read_bytes()
-        rows = [Interaction.model_validate_json(line) for line in source_bytes.decode("utf-8-sig").splitlines() if line.strip()]
+        rows = [Interaction.model_validate(parse_unique_json(line))
+                for line in source_bytes.decode("utf-8-sig").splitlines() if line.strip()]
     # Validate all artifacts before writing anything.
     report = audit(rows, source_bytes)
     if import_report is not None:

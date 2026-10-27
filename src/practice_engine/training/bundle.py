@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 
 from practice_engine.data.manifest import ProcessingManifest, verify_manifest
+from practice_engine.data.jsonl import parse_unique_json
 from practice_engine.data.schema import PredictionExample
 from practice_engine.models.artifacts import ArtifactProvenance
 from practice_engine.models.features import historical_features
@@ -107,7 +108,7 @@ def load_training_bundle(directory: Path) -> TrainingBundle:
     examples = {}
     seen_positions = set()
     for name in ("train", "validation"):
-        rows = [PredictionExample.model_validate_json(line) for line in
+        rows = [PredictionExample.model_validate(parse_unique_json(line)) for line in
                 _verified_artifact_bytes(directory, f"{name}.jsonl", manifest).splitlines() if line.strip()]
         if not rows or any((row.candidate.problem_id if family else row.student_id) not in groups[name] for row in rows):
             raise ValueError(f"Invalid or empty {name} {'family' if family else 'student'} partition")

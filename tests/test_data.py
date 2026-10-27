@@ -91,3 +91,17 @@ def test_blank_student_id_cannot_publish_processing_bundle(tmp_path):
     command[-1] = str(tmp_path / "valid")
     subprocess.run(command, capture_output=True, check=True)
     assert load_training_bundle(tmp_path / "valid").train
+
+
+def test_duplicate_canonical_grade_cannot_publish_processing_bundle(tmp_path):
+    lines = FIXTURE.read_text().splitlines()
+    assert '"correct":true' in lines[0]
+    lines[0] = lines[0].replace('"correct":true', '"correct":false,"correct":true', 1)
+    source = tmp_path / "duplicate-grade.jsonl"
+    source.write_text("\n".join(lines) + "\n")
+    output = tmp_path / "invalid"
+    result = subprocess.run([sys.executable, "-m", "practice_engine.data.cli", str(source),
+                             "--synthetic", "--output", str(output)], capture_output=True, text=True)
+    assert result.returncode != 0
+    assert "Duplicate JSON field in research input" in result.stderr
+    assert not output.exists()

@@ -85,6 +85,28 @@ def test_changed_bytes_after_manifest_verification_never_enter_training(bundle, 
     assert not output.exists()
 
 
+@pytest.mark.parametrize("field", ["label", "history_correct"])
+def test_hash_valid_duplicate_json_fields_fail_before_training(bundle, field):
+    path = bundle / "train.jsonl"
+    lines = path.read_text().splitlines()
+    index = next(i for i, line in enumerate(lines)
+                 if field == "label" or json.loads(line)["history"])
+    row = json.loads(lines[index])
+    original = row["label"] if field == "label" else row["history"][0]["correct"]
+    key = "label" if field == "label" else "correct"
+    accepted = f'"{key}":{str(original).lower()}'
+    contradictory = f'"{key}":{str(not original).lower()},' + accepted
+    assert accepted in lines[index]
+    lines[index] = lines[index].replace(accepted, contradictory, 1)
+    path.write_text("\n".join(lines) + "\n")
+    manifest_path = bundle / "manifest.json"
+    manifest = json.loads(manifest_path.read_text())
+    manifest["artifact_sha256"] = artifact_hashes(bundle)
+    manifest_path.write_text(json.dumps(manifest))
+    with pytest.raises(ValueError, match="Duplicate JSON field in research input"):
+        load_training_bundle(bundle)
+
+
 @pytest.mark.parametrize("change", [
     lambda split: split.update(seed=99), lambda split: split.update(version="future"),
     lambda split: split.update(source_sha256="0" * 64),
