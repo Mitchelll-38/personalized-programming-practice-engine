@@ -4,7 +4,7 @@ Owner: engineer C. Purpose: persist and reload a DKT model independently of the 
 
 `save_dkt_checkpoint(directory, model, vocabulary, provenance, training_total=..., training_correct=...)` writes `weights.pt` and `metadata.json`. The destination must not exist. Detached CPU float32 state copies are validated before serialization. A sibling staging directory and cooperating-writer lock publish both files together by same-filesystem rename; failures clean staging and release the lock. Abrupt process termination can leave a staging directory or lock requiring manual cleanup; it never exposes a partially written destination.
 
-`load_dkt_checkpoint(directory)` verifies the metadata checksum and weights SHA-256, reconstructs only the fixed single-layer DKT configuration, and loads a tensor state dictionary with `torch.load(weights_only=True, map_location="cpu")`. Keys, shapes, float32 dtypes and finite values must match exactly. These checks detect corruption and restrict deserialization; hashes do not authenticate the author or prove training provenance. Only load artifacts from a trusted research workflow.
+`load_dkt_checkpoint(directory)` verifies the metadata checksum and weights SHA-256, reconstructs only the fixed single-layer DKT configuration, and loads a tensor state dictionary with `torch.load(weights_only=True, map_location="cpu")`. Keys, shapes, float32 dtypes and finite values must match exactly. The loader checks those fields and adequate tensor storage before constructing the model, then retains the reconstructed-state validation. These checks detect corruption and restrict deserialization; hashes do not authenticate the author or prove training provenance. Only load artifacts from a trusted research workflow.
 
 The returned artifact's `predict(examples)` preserves causal-history validation and outputs uncalibrated correctness probabilities. Known candidate IDs use the saved neural head. **Unknown candidate IDs always use `(training_correct + 1) / (training_total + 2)`**, the fixed Beta(1,1) smoothed training-population rate, because the UNK head has no training targets. Strict integer counts must satisfy `training_total > 0` and `0 <= training_correct <= training_total`. Supplying the correct training-partition counts is the caller's responsibility; no labels are fitted or inspected by the checkpoint writer. Unknown historical IDs still map to UNK in recurrence.
 
@@ -48,3 +48,13 @@ without changing tensor bytes and disappear on reload. The acceptance boundary
 therefore includes module-local and process-wide forward/pre-forward hooks: reject
 them before saving and before the first loaded prediction, while preserving the
 ordinary hook-free round trip. Backward hooks do not run during inference.
+
+## Validate state dimensions before reconstruction
+
+Owner: model platform engineer. Purpose: reject a hash-valid checkpoint whose
+declared dimensions disagree with its saved tensors before allocating a model.
+Acceptance: oversized or otherwise mismatched metadata/state keys, shapes and
+dtypes fail before DKT construction; a valid checkpoint still reloads with exact
+known/unknown prediction parity. Dependencies: the fixed DKT state layout and
+existing metadata/weights hash checks. The guard does not limit a genuinely large
+matching checkpoint or make arbitrary hostile storage safe to load.

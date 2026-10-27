@@ -104,6 +104,36 @@ def test_malformed_metadata_rejected_even_with_valid_checksum(saved, mutation):
         load_dkt_checkpoint(path)
 
 
+@pytest.mark.parametrize("field", ["hidden_size", "embedding_size"])
+def test_mismatched_huge_metadata_rejected_before_model_allocation(saved, monkeypatch, field):
+    path, *_ = saved
+    rewrite_metadata(path, lambda payload: payload["config"].update({field: 100_000_000}))
+    monkeypatch.setattr("practice_engine.models.dkt_artifacts.DKT",
+                        lambda **kwargs: pytest.fail("Mismatched metadata reached model allocation"))
+    with pytest.raises(ValueError, match="Invalid checkpoint tensor"):
+        load_dkt_checkpoint(path)
+
+
+@pytest.mark.parametrize("mutation", [
+    lambda state: state.pop("head.bias"),
+    lambda state: state.update({"head.weight": torch.zeros(1)}),
+    lambda state: state.update({"head.weight": state["head.weight"].double()}),
+    lambda state: state["head.bias"].fill_(float("nan")),
+    lambda state: state.update({"head.weight": torch.ones(1).expand_as(state["head.weight"])}),
+])
+def test_invalid_state_rejected_before_model_allocation(saved, monkeypatch, mutation):
+    path, *_ = saved
+    weights = path / "weights.pt"
+    state = torch.load(weights, weights_only=True)
+    mutation(state)
+    torch.save(state, weights)
+    rewrite_metadata(path, lambda payload: payload.update(weights_sha256=sha256(weights.read_bytes()).hexdigest()))
+    monkeypatch.setattr("practice_engine.models.dkt_artifacts.DKT",
+                        lambda **kwargs: pytest.fail("Invalid state reached model allocation"))
+    with pytest.raises(ValueError, match="state keys|Invalid checkpoint tensor"):
+        load_dkt_checkpoint(path)
+
+
 @pytest.mark.parametrize("mutation", [
     lambda state: state.pop("head.bias"), lambda state: state.update(**{"head.bias": torch.zeros(2)}),
     lambda state: state.update(**{"head.bias": state["head.bias"].to(torch.int64)}),

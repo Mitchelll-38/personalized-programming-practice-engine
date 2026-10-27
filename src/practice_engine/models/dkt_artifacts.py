@@ -81,6 +81,24 @@ def _configuration(model: DKT) -> _Config:
 
 
 def _restore(metadata: DKTMetadata, state: dict) -> DKT:
+    # Reject mismatched metadata before allocating tensors of its declared size.
+    vocabulary, embedding, hidden = (metadata.config.vocabulary_size,
+                                     metadata.config.embedding_size, metadata.config.hidden_size)
+    shapes = {"embedding.weight": (2 * vocabulary, embedding),
+              "lstm.weight_ih_l0": (4 * hidden, embedding),
+              "lstm.weight_hh_l0": (4 * hidden, hidden),
+              "lstm.bias_ih_l0": (4 * hidden,), "lstm.bias_hh_l0": (4 * hidden,),
+              "head.weight": (vocabulary, hidden), "head.bias": (vocabulary,)}
+    if not isinstance(state, dict) or set(state) != set(shapes):
+        raise ValueError("Checkpoint state keys do not match DKT")
+    for key, shape in shapes.items():
+        tensor = state[key]
+        if (not isinstance(tensor, torch.Tensor) or tensor.device.type != "cpu"
+                or tensor.layout != torch.strided or tensor.shape != shape
+                or tensor.dtype != torch.float32
+                or tensor.untyped_storage().nbytes() < tensor.numel() * tensor.element_size()
+                or not torch.isfinite(tensor).all()):
+            raise ValueError(f"Invalid checkpoint tensor: {key}")
     # Rebuilding saved weights must not consume the caller's initialization RNG.
     with torch.device("cpu"), torch.random.fork_rng(devices=[]):
         model = DKT(**metadata.config.model_dump()).float().cpu()
