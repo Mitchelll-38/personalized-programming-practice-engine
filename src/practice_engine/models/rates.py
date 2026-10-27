@@ -6,6 +6,7 @@ import math
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, model_validator
 
 from practice_engine.data.schema import PredictionExample
+from .features import validate_training_examples
 
 
 class _Counts(BaseModel):
@@ -71,6 +72,7 @@ class RateBaseline:
         _validate_alpha(alpha)
         if not examples:
             raise ValueError("training examples must be nonempty")
+        validate_training_examples(examples)
         counts: dict[str, list[int]] = defaultdict(lambda: [0, 0])
         for example in examples:
             problem_id = example.candidate.problem_id

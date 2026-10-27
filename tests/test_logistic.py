@@ -63,6 +63,17 @@ def test_empty_one_class_and_nonconvergence_rejected():
         LogisticBaseline.fit(examples(), max_iter=1)
 
 
+@pytest.mark.parametrize("row", [None, {}, examples()[0].model_copy(update={"label": 1}),
+    examples()[0].model_copy(update={"label": 2}),
+    examples()[0].model_copy(update={"label": "yes"}),
+    examples()[0].model_copy(update={"label": None}),
+    examples()[0].model_copy(update={"student_id": " "}),
+    examples()[0].model_copy(update={"history": ("invalid",)})])
+def test_invalid_copied_training_row_cannot_fit_classifier(row):
+    with pytest.raises(ValueError):
+        LogisticBaseline.fit([row, examples()[1]])
+
+
 @pytest.mark.parametrize("change", [
     lambda p: p.update(extra="unknown"),
     lambda p: p.update(feature_version="future"),
