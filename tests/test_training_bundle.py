@@ -8,6 +8,7 @@ from practice_engine.data.holdouts import family_holdout
 from practice_engine.data.manifest import artifact_hashes
 from practice_engine.data.schema import Interaction
 from practice_engine.models.artifacts import load_rate_artifact
+from practice_engine.training import bundle as bundle_module
 from practice_engine.training.bundle import load_training_bundle
 from practice_engine.training.rates import train_rates
 
@@ -56,6 +57,32 @@ def test_both_protocols_run_without_parsing_test_examples(bundle, tmp_path):
     assert loaded.manifest.split_version == loaded.provenance.split_version
     assert load_rate_artifact(tmp_path / "before/model.json") == load_rate_artifact(tmp_path / "after/model.json")
     assert (tmp_path / "before/validation.json").read_bytes() == (tmp_path / "after/validation.json").read_bytes()
+
+
+@pytest.mark.parametrize("artifact", ["split.json", "train.jsonl", "validation.jsonl", "audit.json"])
+def test_changed_bytes_after_manifest_verification_never_enter_training(bundle, tmp_path,
+                                                                         monkeypatch, artifact):
+    if artifact == "audit.json" and "problem_ids" not in json.loads((bundle / "split.json").read_text()):
+        pytest.skip("family audit is parsed only for family holdouts")
+    original_verify = bundle_module.verify_manifest
+
+    def verify_then_change(path):
+        manifest = original_verify(path)
+        target = bundle / artifact
+        if artifact.endswith(".jsonl"):
+            rows = [json.loads(line) for line in target.read_text().splitlines()]
+            last = max(rows, key=lambda row: row["target_sequence_index"])
+            last["label"] = not last["label"]
+            target.write_text("".join(json.dumps(row) + "\n" for row in rows))
+        else:
+            target.write_text(target.read_text() + "\n")
+        return manifest
+
+    monkeypatch.setattr(bundle_module, "verify_manifest", verify_then_change)
+    output = tmp_path / "invalid-run"
+    with pytest.raises(ValueError, match=f"Processing artifact hash mismatch: {artifact}"):
+        train_rates(bundle, output)
+    assert not output.exists()
 
 
 @pytest.mark.parametrize("change", [

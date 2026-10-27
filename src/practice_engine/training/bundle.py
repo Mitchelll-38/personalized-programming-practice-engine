@@ -56,11 +56,19 @@ def _check_scored_history_consistency(examples: dict[str, list[PredictionExample
                 raise ValueError("History contradicts a scored target's problem position")
 
 
+def _verified_artifact_bytes(directory: Path, name: str, manifest: ProcessingManifest) -> bytes:
+    """Bind the exact bytes consumed after initial bundle verification."""
+    serialized = (directory / name).read_bytes()
+    if sha256(serialized).hexdigest() != manifest.artifact_sha256[name]:
+        raise ValueError(f"Processing artifact hash mismatch: {name}")
+    return serialized
+
+
 def load_training_bundle(directory: Path) -> TrainingBundle:
     manifest = verify_manifest(directory / "manifest.json")
     if manifest.source_kind != "synthetic":
         raise ValueError("This smoke workflow requires declared synthetic data; real-data provenance gate remains unmet")
-    serialized = (directory / "split.json").read_bytes()
+    serialized = _verified_artifact_bytes(directory, "split.json", manifest)
     split = json.loads(serialized)
     protocols = {"student-split-v1": "held-out-students", "family-holdout-v1": "held-out-exercise-families"}
     if (not isinstance(split, dict) or split.get("version") != manifest.split_version or
@@ -80,7 +88,7 @@ def load_training_bundle(directory: Path) -> TrainingBundle:
             raise ValueError("Family/problem groups disagree with the family mapping")
         if split.get("history_policy") != "prior-first-attempt-training-exercises-only":
             raise ValueError("Unsupported family history policy")
-        audit = json.loads((directory / "audit.json").read_bytes())
+        audit = json.loads(_verified_artifact_bytes(directory, "audit.json", manifest))
         digest = split.get("family_map_sha256")
         if (not isinstance(digest, str) or len(digest) != 64 or any(c not in "0123456789abcdef" for c in digest)
                 or not isinstance(audit, dict) or audit.get("family_map_sha256") != digest):
@@ -89,7 +97,7 @@ def load_training_bundle(directory: Path) -> TrainingBundle:
     seen_positions = set()
     for name in ("train", "validation"):
         rows = [PredictionExample.model_validate_json(line) for line in
-                (directory / f"{name}.jsonl").read_text(encoding="utf-8").splitlines() if line.strip()]
+                _verified_artifact_bytes(directory, f"{name}.jsonl", manifest).splitlines() if line.strip()]
         if not rows or any((row.candidate.problem_id if family else row.student_id) not in groups[name] for row in rows):
             raise ValueError(f"Invalid or empty {name} {'family' if family else 'student'} partition")
         positions = [(row.student_id, row.target_sequence_index) for row in rows]
