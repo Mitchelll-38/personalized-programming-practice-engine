@@ -719,3 +719,25 @@ semantics, reviewed provenance/order policy and empirical resource/selection gat
 still block real import/training and locked-test work. No private content,
 credentials, learned weights or student records were published, and no organizer
 contact occurred.
+
+## October 27, 2026 (UTC): integrity fixes
+
+Owner: coordinating engineer. Purpose: integrate three independently reviewed
+synthetic-data and model-input integrity fixes. Acceptance: small PRs, final-head
+review and CI, sequential squash merges and integrated checks. Dependencies:
+existing processing and model contracts; real-source interpretation remains a
+separate gate.
+
+- [#103 bundle read integrity](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/103) merged as `179ca69`: hash the exact split, train, validation and applicable audit bytes parsed after initial manifest verification. Independent review found no issue; focused bundle checks passed 36 tests with four skips.
+- [#104 direct model history validation](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/104) merged as `badecb6`: reject unchecked copied fields consumed by feature extraction and direct BKT/logistic prediction. Independent review passed 80 focused tests with no finding.
+- [#105 complete causal prefixes](https://github.com/Mitchelll-38/personalized-programming-practice-engine/pull/105) merged as `0e4c92e`: require every permitted earlier scored first attempt in synthetic training histories. The reconciled branch retained #103's hash check and #100's CodeWorkout documentation. Exact-head review passed 42 focused tests with four skips.
+
+Each PR stayed below 400 changed lines and passed its four applicable GitHub
+workflows on the exact final head: Python/web CI, browser smoke, CPU neural and
+encoder, and local containers.
+Main was fast-forwarded after each of these merges to `0e4c92e`. A focused
+aggregate on that exact integrated head passed 122 Python tests with four skips
+across bundle, causal-prefix, feature, BKT and logistic modules. These checks
+support synthetic software integrity only. Real CodeWorkout chronology, reviewed
+provenance, resource decisions, empirical comparisons and locked-test results
+remain open; no private dataset or organizer contact was used for these changes.
