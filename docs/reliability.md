@@ -28,3 +28,13 @@ counts. Bin edges/weighting should be fixed before comparing experiments.
 The implementation has only been checked on original synthetic observations.
 No real-data calibration result is claimed, and this PR does not change API model
 selection, the uncalibrated artifact flag or dashboard behavior.
+
+## Evaluation input validation fix
+
+Owner: data/ML engineer. Purpose: reject copied or otherwise malformed
+`PredictionExample` rows before probability metrics or calibration diagnostics
+can report impossible correctness rates. Acceptance: both `evaluate` and
+`reliability_summary` reject invalid row types, non-Boolean labels, blank student
+IDs and invalid nested history; valid synthetic reports retain their existing
+values. Dependency: the existing canonical schema only; no private data, source
+import or locked-test access is needed.

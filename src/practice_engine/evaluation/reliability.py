@@ -5,6 +5,7 @@ from bisect import bisect_right
 import math
 
 from practice_engine.data.schema import PredictionExample
+from .metrics import _validate_examples
 
 
 def reliability_summary(examples: list[PredictionExample], probabilities: list[float],
@@ -23,6 +24,7 @@ def reliability_summary(examples: list[PredictionExample], probabilities: list[f
         raise ValueError("n_bins must be an integer between 1 and 100")
     if weighting not in ("interaction", "student"):
         raise ValueError("weighting must be interaction or student")
+    _validate_examples(examples)
 
     student_counts = Counter(e.student_id for e in examples)
     internal_edges = [i / n_bins for i in range(1, n_bins)]

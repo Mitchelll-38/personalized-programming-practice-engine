@@ -10,6 +10,15 @@ from practice_engine.data.schema import PredictionExample
 LOG_LOSS_EPSILON = 1e-15
 
 
+def _validate_examples(examples: list[PredictionExample]) -> None:
+    """Check the canonical row boundary, including unchecked model_copy updates."""
+    for row in examples:
+        if (type(row) is not PredictionExample or type(row.label) is not bool
+                or type(row.student_id) is not str or not row.student_id.strip()):
+            raise ValueError("Valid prediction examples with student IDs are required")
+        PredictionExample.model_validate(row.model_dump(warnings=False))
+
+
 def _ranking_metrics(labels: list[bool], probabilities: list[float]) -> tuple[float, float]:
     correct_count = sum(labels)
     incorrect_count = len(labels) - correct_count
@@ -73,6 +82,7 @@ def evaluate(examples: list[PredictionExample], probabilities: list[float]) -> d
     if any(isinstance(p, bool) or not isinstance(p, (int, float)) or
            not 0 <= p <= 1 or not math.isfinite(p) for p in probabilities):
         raise ValueError("Probabilities must be finite numbers between 0 and 1, excluding bool")
+    _validate_examples(examples)
     by_student: dict[str, list[tuple[bool, float]]] = defaultdict(list)
     for example, probability in zip(examples, probabilities):
         by_student[example.student_id].append((example.label, probability))

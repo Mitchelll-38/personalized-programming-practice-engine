@@ -82,3 +82,12 @@ def test_empty_input_and_length_mismatch_rejected():
         evaluate([], [])
     with pytest.raises(ValueError, match="equal lengths"):
         evaluate([example(True)], [])
+
+
+@pytest.mark.parametrize("row", [None, {}, example(True).model_copy(update={"label": 1}),
+    example(True).model_copy(update={"label": 2}),
+    example(True).model_copy(update={"student_id": " "}),
+    example(True).model_copy(update={"history": ("invalid",)})])
+def test_malformed_rows_cannot_produce_metrics(row):
+    with pytest.raises(ValueError):
+        evaluate([row], [.5])
