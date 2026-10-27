@@ -52,6 +52,7 @@ class PredictionRequest(StrictRequest):
 
 class AttemptRequest(StrictRequest):
     choice_id: Annotated[str, Field(strict=True, pattern=r"^[a-f0-9]{32}$")] | None = None
+    request_id: Annotated[str, Field(strict=True, pattern=r"^[a-f0-9]{32}$")] | None = None
     student_id: Literal["demo"]
     problem_id: str
     correct: StrictBool
@@ -138,9 +139,14 @@ def predict(request: PredictionRequest):
 
 @app.post("/attempts", status_code=201)
 def attempts(request: AttemptRequest):
-    ensure_known([request.problem_id])
     try:
-        return storage.record(request.problem_id, request.correct, choice_id=request.choice_id)
+        return storage.record(request.problem_id, request.correct, choice_id=request.choice_id,
+                              request_id=request.request_id)
+    except storage.AttemptRequestConflictError:
+        raise HTTPException(status_code=409, detail="attempt_request_conflict") from None
+    except storage.UnknownExerciseError:
+        raise HTTPException(status_code=404, detail={"message": "Unknown exercise IDs",
+                                                     "problem_ids": [request.problem_id]}) from None
     except storage.ChoiceConflictError:
         raise HTTPException(status_code=409, detail="choice_outcome_conflict") from None
     except LookupError:
