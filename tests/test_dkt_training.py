@@ -68,6 +68,24 @@ def test_repeated_runs_selected_checkpoint_parity_and_restored_torch_state(bundl
     assert (tmp_path / "first/validation.json").read_bytes() == (tmp_path / "second/validation.json").read_bytes()
 
 
+def test_training_pins_cpu_under_alternate_default_device(bundle, tmp_path):
+    config = DKTTrainingConfig(max_epochs=1, embedding_size=4, hidden_size=5, batch_size=3)
+    expected = train_dkt(bundle, tmp_path / "cpu", config=config)
+    rng = torch.get_rng_state().clone()
+    prior_device = torch.empty(0).device
+    with torch.device("meta"):
+        assert torch.empty(0).device.type == "meta"
+        actual = train_dkt(bundle, tmp_path / "meta", config=config)
+        assert torch.empty(0).device.type == "meta"
+    assert torch.empty(0).device == prior_device
+    assert torch.equal(torch.get_rng_state(), rng)
+    assert actual == expected
+    verified = load_training_bundle(bundle)
+    cpu = load_dkt_checkpoint(tmp_path / "cpu/model")
+    alternate = load_dkt_checkpoint(tmp_path / "meta/model")
+    assert cpu.predict(verified.validation) == alternate.predict(verified.validation)
+
+
 def test_plateau_stops_after_patience_and_restores_first_best_state(bundle, tmp_path, monkeypatch):
     # Fixed validation predictions simulate no improvement while optimizer keeps changing weights.
     monkeypatch.setattr("practice_engine.training.dkt._probabilities", lambda *args: [.5, .5])

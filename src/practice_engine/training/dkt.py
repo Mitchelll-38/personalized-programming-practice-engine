@@ -148,7 +148,7 @@ def train_dkt(bundle: Path, output: Path, *, config: DKTTrainingConfig | None = 
     try:
         torch.set_num_threads(1)
         torch.use_deterministic_algorithms(True)
-        with torch.random.fork_rng(devices=[]):
+        with torch.device("cpu"), torch.random.fork_rng(devices=[]):
             torch.manual_seed(config.seed)
             return _run_training(bundle, output, config)
     finally:

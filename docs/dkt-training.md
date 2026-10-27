@@ -39,6 +39,8 @@ reload verification. The caller's CPU RNG, thread count and determinism settings
 are restored afterward; concurrent in-process training is unsupported because
 Torch settings are process-global. Reproducibility is scoped to the pinned software
 and compatible CPU environment, not arbitrary versions or hardware.
+Training also pins the CPU device while constructing the model and batches, so an
+outer Torch default-device context does not change the run or its checkpoint.
 
 Each new run directory contains `model/weights.pt`, `model/metadata.json`,
 `validation.json` and `run.json`. A staging directory and cooperating-writer lock
@@ -87,3 +89,13 @@ non-Boolean labels and invalid copied nested fields; direct training fails befor
 model construction, while valid synthetic training and label-free forward parity
 remain unchanged. Dependencies: the canonical schema and existing DKT path only.
 No private data, test-partition access or empirical claim is involved.
+
+## CPU construction under alternate default devices
+
+Owner: model engineer. Purpose: make the declared CPU DKT trainer independent of
+the caller's Torch default device. Acceptance: an original synthetic bundle
+trains under a `meta` default-device context with the same run and checkpoint
+predictions as a normal CPU call; the caller's default device and CPU RNG remain
+unchanged on return. Dependencies: the existing bounded DKT trainer and strict
+CPU checkpoint loader. Scope is training context only; checkpoint semantics and
+the published run format are unchanged.
