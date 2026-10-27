@@ -201,3 +201,18 @@ chronology, or catalog review. Problem text is compared exactly; concept IDs are
 compared as a set because numeric features, BKT and the content model use
 membership or an unordered mean. Test rows remain hash-checked but unparsed by
 the training loader, so this check cannot attest their metadata.
+
+## October 27 synthetic workspace response boundary
+
+Owner: product engineer. Purpose: a malformed HTTP 200 workspace response can
+reach React rendering as a trusted snapshot and crash the demo instead of showing
+its existing retry path. Acceptance: validate the response fields consumed by the
+workspace before installing a snapshot; malformed synthetic responses surface a
+recoverable error, while valid ranking and policy-unavailable responses keep their
+current replay behavior. Dependency: the merged coherent workspace endpoint; no
+recommendation-choice persistence or empirical-data change.
+
+Ranking learner identity is part of this workspace boundary: only a ranking for
+the synthetic `demo` learner may enable recommendation choices. Unrecognized or
+malformed policy configuration within a demo ranking remains an inspector-level
+disclosure failure and does not block manual replay.

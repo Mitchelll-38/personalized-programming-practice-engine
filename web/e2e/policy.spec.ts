@@ -35,9 +35,6 @@ for (const [name, update] of [
   ["missing legacy configuration", { policy_config: undefined, policy_sha256: undefined, policy_version: "demo-ranking-v1" }],
   ["unknown version", { policy_version: "future-policy", policy_config: { ...config, policy_version: "future-policy" } }],
   ["mismatched version", { policy_config: { ...config, policy_version: "demo-ranking-v1" } }],
-  ["non-demo response", { is_demo: false }],
-  ["string demo declaration", { is_demo: "true" }],
-  ["unknown student", { student_id: "different" }],
   ["invalid hash", { policy_sha256: "invalid" }],
   ["reversed band", { policy_config: { ...config, challenge_lower: .8, challenge_upper: .6 } }],
   ["zero-width band", { policy_config: { ...config, challenge_upper: .35 } }],
@@ -56,6 +53,41 @@ for (const [name, update] of [
     await expect(page.getByRole("region", { name: "Recommendation choice" }).getByRole("button", { name: "Choose this recommendation", exact: true })).toBeEnabled();
     await expect(page.getByRole("button", { name: "Inspect fitted baseline", exact: true })).toBeEnabled();
     await expect(page.getByRole("alert")).toHaveCount(0);
+  });
+}
+
+for (const [name, update] of [
+  ["non-demo ranking", { is_demo: false }],
+  ["string demo declaration", { is_demo: "true" }],
+  ["foreign ranking student", { student_id: "different" }],
+] as const) {
+  test(`${name} blocks choice until a valid workspace is loaded`, async ({ page, request }) => {
+    const bundle = await (await request.get("/api/students/demo/workspace")).json();
+    const errors: string[] = [];
+    let writes = 0;
+    page.on("pageerror", (error) => errors.push(error.message));
+    page.on("request", (call) => {
+      if (call.method() === "POST" && ["/api/attempts", "/api/recommendation-choices"].includes(new URL(call.url()).pathname))
+        writes += 1;
+    });
+    let invalid = true;
+    await page.route("**/api/students/demo/workspace", (route) => route.fulfill({ status: 200, json: invalid ? {
+      ...bundle, ranking: { ...bundle.ranking, ...update },
+    } : bundle }));
+    await page.goto("/");
+    await expect(page.getByRole("heading", { name: "Workspace unavailable" })).toBeVisible();
+    await expect(page.getByRole("alert")).toContainText("Unexpected workspace response");
+    await expect(page.getByRole("region", { name: "Recommendation choice" })).toHaveCount(0);
+    expect(errors).toEqual([]);
+    expect(writes).toBe(0);
+
+    invalid = false;
+    await page.getByRole("button", { name: "Retry connection" }).click();
+    await expect(page.getByRole("alert")).toHaveCount(0);
+    await expect(page.getByRole("region", { name: "Recommendation choice" })
+      .getByRole("button", { name: "Choose this recommendation", exact: true })).toBeEnabled();
+    expect(errors).toEqual([]);
+    expect(writes).toBe(0);
   });
 }
 
