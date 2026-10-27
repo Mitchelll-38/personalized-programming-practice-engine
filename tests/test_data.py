@@ -1,8 +1,17 @@
+import json
+from pathlib import Path
+import subprocess
+import sys
+
 import pytest
 from pydantic import ValidationError
 
 from practice_engine.data.pipeline import first_attempts, prediction_examples, student_split
 from practice_engine.data.schema import Candidate, Interaction
+from practice_engine.training.bundle import load_training_bundle
+
+
+FIXTURE = Path(__file__).resolve().parents[1] / "data/fixtures/synthetic.jsonl"
 
 
 def row(student="s1", problem="p1", index=0, correct=True, attempt=1):
@@ -60,3 +69,25 @@ def test_outcomes_and_sequence_numbers_are_strict():
         row(correct="false")
     with pytest.raises(ValidationError):
         row(index=True)
+
+
+def test_blank_student_id_cannot_publish_processing_bundle(tmp_path):
+    for student_id in ("", " \t\n"):
+        with pytest.raises(ValidationError):
+            row(student=student_id)
+    rows = [json.loads(line) for line in FIXTURE.read_text().splitlines() if line.strip()]
+    original = rows[0]["student_id"]
+    for record in rows:
+        if record["student_id"] == original:
+            record["student_id"] = " \t"
+    source = tmp_path / "blank-student.jsonl"
+    source.write_text("".join(json.dumps(record) + "\n" for record in rows))
+    command = [sys.executable, "-m", "practice_engine.data.cli", str(source),
+               "--synthetic", "--output", str(tmp_path / "invalid")]
+    result = subprocess.run(command, capture_output=True, text=True)
+    assert result.returncode != 0
+    assert not (tmp_path / "invalid").exists()
+    command[3] = str(FIXTURE)
+    command[-1] = str(tmp_path / "valid")
+    subprocess.run(command, capture_output=True, check=True)
+    assert load_training_bundle(tmp_path / "valid").train
