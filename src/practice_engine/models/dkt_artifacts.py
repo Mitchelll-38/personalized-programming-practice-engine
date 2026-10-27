@@ -12,6 +12,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, model_validator
 import torch
 from torch import nn
+from torch.nn.modules import module as torch_module
 
 from .artifacts import ArtifactProvenance, parse_unique_json, payload_hash
 from .dkt import DKT, UNK, ExerciseVocabulary, make_batch
@@ -56,7 +57,13 @@ class DKTMetadata(BaseModel):
 
 def _configuration(model: DKT) -> _Config:
     """Check live module behavior separately from the saved tensor fingerprint."""
-    if (type(model) is not DKT or type(model.embedding) is not nn.Embedding
+    if type(model) is not DKT:
+        raise ValueError("Unsupported DKT architecture semantics")
+    if (torch_module._global_forward_hooks or torch_module._global_forward_pre_hooks
+            or any(module._forward_hooks or module._forward_pre_hooks
+                   for module in model.modules())):
+        raise ValueError("Unsupported DKT forward hooks")
+    if (type(model.embedding) is not nn.Embedding
             or type(model.lstm) is not nn.LSTM or type(model.head) is not nn.Linear
             or model.embedding.padding_idx != 0 or model.embedding.max_norm is not None
             or model.embedding.norm_type != 2.0 or model.embedding.scale_grad_by_freq

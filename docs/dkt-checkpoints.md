@@ -42,3 +42,9 @@ first prediction; unchanged checkpoints retain known/unknown prediction parity.
 Keep architecture checks distinct from tensor-content fingerprinting. Dependencies:
 the existing DKT forward/checkpoint contracts and synthetic fixture only. This
 fix does not change training, input causality, provenance or empirical results.
+
+Independent review found that registered forward hooks also change live behavior
+without changing tensor bytes and disappear on reload. The acceptance boundary
+therefore includes module-local and process-wide forward/pre-forward hooks: reject
+them before saving and before the first loaded prediction, while preserving the
+ordinary hook-free round trip. Backward hooks do not run during inference.
