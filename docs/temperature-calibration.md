@@ -30,3 +30,12 @@ Fitting log loss and reliability on the same validation observations is descript
 and optimistic. Assess selected calibration on untouched evaluation data; never
 describe a fitted flag as proof that individual probabilities are reliable.
 Only original synthetic software tests have been run. No real-data result is claimed.
+
+## Validation input integrity fix
+
+Owner: data/ML engineer. Purpose: prevent temperature selection from treating
+unchecked copied labels as truth values. Acceptance: fitting rejects malformed
+`PredictionExample` rows, including non-Boolean labels, blank student IDs and
+invalid nested histories, before checking class balance; valid synthetic fitting
+and portable prediction remain unchanged. Dependencies: the canonical schema
+only. No private data, empirical result or partition policy changes are involved.

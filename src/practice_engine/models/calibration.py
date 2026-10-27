@@ -41,6 +41,12 @@ class TemperatureScaler:
         """
         if not examples or len(examples) != len(probabilities):
             raise ValueError("Validation examples must be nonempty and aligned")
+        for row in examples:
+            if (type(row) is not PredictionExample or type(row.label) is not bool
+                    or type(row.student_id) is not str or not row.student_id.strip()):
+                raise ValueError("Valid prediction examples with student IDs are required")
+            # Frozen models can still be copied with unvalidated nested updates.
+            PredictionExample.model_validate(row.model_dump(warnings=False))
         if len({e.label for e in examples}) != 2:
             raise ValueError("Temperature fitting requires both validation classes")
         grid = tuple(temperatures)
