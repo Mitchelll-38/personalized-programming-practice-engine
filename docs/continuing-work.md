@@ -187,3 +187,13 @@ The two reliability fixes merged separately as #86 (DKT caller context) and #87
 and successful final-head CI. The installed-wheel rehearsal uses only original
 synthetic examples. The coordinator records integrated verification separately in
 progress.md; these fixes do not clear any real-source or empirical dependency.
+
+## October 27 synthetic workspace response boundary
+
+Owner: product engineer. Purpose: a malformed HTTP 200 workspace response can
+reach React rendering as a trusted snapshot and crash the demo instead of showing
+its existing retry path. Acceptance: validate the response fields consumed by the
+workspace before installing a snapshot; malformed synthetic responses surface a
+recoverable error, while valid ranking and policy-unavailable responses keep their
+current replay behavior. Dependency: the merged coherent workspace endpoint; no
+recommendation-choice persistence or empirical-data change.

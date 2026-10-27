@@ -54,6 +54,42 @@ test("late initial failure cannot publish an error after a newer success", async
   await expect(page.locator("footer")).toContainText("synthetic-newer");
 });
 
+for (const [name, corrupt] of [
+  ["history", (payload: any) => ({ ...payload, history: null })],
+  ["model", (payload: any) => ({ ...payload, model: null })],
+  ["catalog", (payload: any) => ({ ...payload, exercises: [{ ...payload.exercises[0], concept_ids: null }] })],
+  ["profile", (payload: any) => ({ ...payload, profile: { ...payload.profile, concepts: null } })],
+  ["ranking", (payload: any) => ({ ...payload, ranking: { ...payload.ranking, recommendations: null } })],
+] as const) {
+  test(`malformed successful ${name} response shows a recoverable error`, async ({ page, request }) => {
+    const payload = await (await request.get("/api/students/demo/workspace")).json();
+    const errors: string[] = [];
+    let writes = 0;
+    page.on("pageerror", (error) => errors.push(error.message));
+    page.on("request", (call) => {
+      if (call.method() === "POST" && ["/api/attempts", "/api/recommendation-choices"].includes(new URL(call.url()).pathname))
+        writes += 1;
+    });
+    let malformed = true;
+    await page.route("**/api/students/demo/workspace", (route) => route.fulfill({
+      status: 200, json: malformed ? corrupt(payload) : payload,
+    }));
+    await page.goto("/");
+    await expect(page.getByRole("heading", { name: "Workspace unavailable" })).toBeVisible();
+    await expect(page.getByRole("alert")).toContainText("Unexpected workspace response");
+    await expect(page.getByRole("button", { name: "Simulate correct", exact: true })).toHaveCount(0);
+    expect(errors).toEqual([]);
+    expect(writes).toBe(0);
+
+    malformed = false;
+    await page.getByRole("button", { name: "Retry connection" }).click();
+    await expect(page.getByRole("alert")).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Simulate correct", exact: true })).toBeEnabled();
+    expect(errors).toEqual([]);
+    expect(writes).toBe(0);
+  });
+}
+
 for (const failOlder of [false, true]) {
   test(`stale ${failOlder ? "failure" : "success"} cannot finish loading while newest batch is pending`, async ({ page, request }) => {
     const finish = await delayedWorkspace(page, request);

@@ -86,9 +86,47 @@ async function request<T>(path: string, options?: RequestInit, errors?: Partial<
   return response.json() as Promise<T>;
 }
 
+const object = (value: unknown): value is Record<string, unknown> =>
+  value !== null && typeof value === "object" && !Array.isArray(value);
+const text = (value: unknown): value is string => typeof value === "string";
+const strings = (value: unknown): value is string[] => Array.isArray(value) && value.every(text);
+const count = (value: unknown): value is number => Number.isSafeInteger(value) && (value as number) >= 0;
+const probability = (value: unknown): value is number =>
+  typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 1;
+
+function validWorkspace(value: unknown): value is Snapshot {
+  if (!object(value) || !object(value.model) || !Array.isArray(value.exercises) ||
+      !Array.isArray(value.history) || !object(value.profile)) return false;
+  const { model, exercises, history, profile, ranking } = value;
+  if (!text(model.model_id) || !text(model.dataset_version) || model.is_demo !== true ||
+      typeof model.calibrated !== "boolean" ||
+      !exercises.every((item) => object(item) && text(item.problem_id) && text(item.title) &&
+        text(item.problem_text) && strings(item.concept_ids) && strings(item.prerequisites)) ||
+      !history.every((item) => object(item) && item.student_id === "demo" && text(item.problem_id) &&
+        count(item.sequence_index) && count(item.attempt_number) && item.attempt_number > 0 &&
+        typeof item.correct === "boolean") ||
+      profile.student_id !== "demo" || profile.is_demo !== true ||
+      !count(profile.total_interactions) || !count(profile.first_attempts) || !count(profile.retries) ||
+      !Array.isArray(profile.concepts) ||
+      !profile.concepts.every((item) => object(item) && text(item.concept_id) &&
+        probability(item.estimated_performance) && count(item.supporting_attempts) &&
+        strings(item.supporting_problem_ids) &&
+        ["no-history", "limited-history", "observed-first-attempt"].includes(item.evidence_status as string)))
+    return false;
+  if (ranking === null) return value.ranking_error === "practice_policy_unavailable";
+  return value.ranking_error === undefined && object(ranking) &&
+    text(ranking.policy_version) && typeof ranking.snapshot_id === "string" &&
+    /^[a-f0-9]{32}$/.test(ranking.snapshot_id) &&
+    Number.isSafeInteger(ranking.history_sequence_index) && (ranking.history_sequence_index as number) >= -1 &&
+    Array.isArray(ranking.recommendations) &&
+    ranking.recommendations.every((item) => object(item) && text(item.problem_id) &&
+      text(item.title) && strings(item.concept_ids) && probability(item.predicted_correctness) &&
+      typeof item.score === "number" && Number.isFinite(item.score) && strings(item.reasons));
+}
+
 export async function getSnapshot(): Promise<Snapshot> {
-  const view = await request<Snapshot>("/students/demo/workspace");
-  if (view.ranking == null && view.ranking_error !== "practice_policy_unavailable")
+  const view = await request<unknown>("/students/demo/workspace");
+  if (!validWorkspace(view))
     throw new Error("Unexpected workspace response. Refresh the workspace before replaying.");
   return view;
 }
