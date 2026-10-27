@@ -32,7 +32,7 @@ def calibrate_baseline(bundle: Path, base_model: Path, output: Path,
     scaler = TemperatureScaler.fit_validation(verified.validation, before, temperatures=grid)
     after = scaler.predict(before)
     record = ValidationCalibrationRecord(provenance=verified.provenance,
-        validation_sha256=sha256((bundle / "validation.jsonl").read_bytes()).hexdigest(),
+        validation_sha256=verified.manifest.artifact_sha256["validation.jsonl"],
         probabilities_sha256=payload_hash({"probabilities": before}),
         n_examples=len(verified.validation), temperature_grid=tuple(float(t) for t in grid))
     metrics = {"evaluation_role": "same-validation-observations-used-for-calibration",
