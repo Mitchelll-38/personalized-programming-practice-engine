@@ -1,5 +1,6 @@
 """Verified synthetic train/validation inputs; test bytes are hashed, never parsed."""
 
+from bisect import bisect_left
 from dataclasses import dataclass
 from hashlib import sha256
 import json
@@ -37,11 +38,17 @@ def _groups(value) -> dict[str, set[str]]:
     return groups
 
 
-def _check_scored_history_consistency(examples: dict[str, list[PredictionExample]]) -> None:
-    """Match observed prefixes to scored first attempts available outside test."""
+def _check_scored_history_consistency(examples: dict[str, list[PredictionExample]], *, family: bool) -> None:
+    """Match complete permitted prefixes to scored first attempts outside test."""
     scored = [row for partition in ("train", "validation") for row in examples[partition]]
     by_position = {(row.student_id, row.target_sequence_index): row for row in scored}
     by_problem = {(row.student_id, row.candidate.problem_id): row for row in scored}
+    permitted: dict[str, list[int]] = {}
+    for partition in (("train",) if family else ("train", "validation")):
+        for row in examples[partition]:
+            permitted.setdefault(row.student_id, []).append(row.target_sequence_index)
+    for positions in permitted.values():
+        positions.sort()
     for example in scored:
         for observed in example.history:
             position = by_position.get((observed.student_id, observed.sequence_index))
@@ -54,6 +61,10 @@ def _check_scored_history_consistency(examples: dict[str, list[PredictionExample
                 raise ValueError("History contradicts a scored target at its sequence position")
             if problem is not None and problem.target_sequence_index != observed.sequence_index:
                 raise ValueError("History contradicts a scored target's problem position")
+        positions = permitted.get(example.student_id, [])
+        expected = positions[:bisect_left(positions, example.target_sequence_index)]
+        if [row.sequence_index for row in example.history] != expected:
+            raise ValueError("History must contain the complete permitted first-attempt prefix")
 
 
 def _verified_artifact_bytes(directory: Path, name: str, manifest: ProcessingManifest) -> bytes:
@@ -111,7 +122,7 @@ def load_training_bundle(directory: Path) -> TrainingBundle:
         if family and any(h.problem_id not in groups["train"] for row in rows for h in row.history):
             raise ValueError("Family histories must contain only training exercises")
         examples[name] = rows
-    _check_scored_history_consistency(examples)
+    _check_scored_history_consistency(examples, family=family)
     provenance = ArtifactProvenance(dataset_version=manifest.dataset_version,
         source_kind=manifest.source_kind, source_sha256=manifest.source_sha256,
         split_version=manifest.split_version, split_sha256=sha256(serialized).hexdigest())
