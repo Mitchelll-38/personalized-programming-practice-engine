@@ -1,5 +1,27 @@
 # Atomic processing bundles
 
+October 27 causal-prefix completeness plan — Owner: platform/API engineer.
+Purpose: reject a hash-valid synthetic training bundle whose example silently
+omits an earlier scored first attempt from its observed history. Dependency:
+the existing student and family split processing contracts and training loader.
+Acceptance: each train/validation example contains exactly the earlier scored
+first-attempt positions permitted by its protocol. Student splits use all earlier
+targets for that student; family splits use earlier training-family targets only.
+Retry sequence gaps and earlier held-out family targets remain valid gaps.
+Existing history content/label consistency and test-partition exclusion remain
+enforced. Synthetic regressions cover missing earlier targets in train and
+validation for both protocols, plus valid retry and held-out gaps. No real data,
+empirical result, or protocol change is implied.
+
+The loader now compares each example's history sequence positions with the
+complete permitted prefix reconstructed from scored train/validation targets.
+Existing checks still verify the content and label of each observed row, and
+the locked test partition is never parsed for training. The synthetic regression
+passes for both protocols and catches omissions in both training and validation;
+the full pinned Python suite passed 974 tests with three expected skips. The
+content replay batch fixture now uses distinct validation students because its
+previous repeated same-student targets lacked their required earlier histories.
+
 October 27 canonical ID fix plan — Owner: data engineer. Purpose: prevent the
 processing CLI from publishing a hash-valid bundle that the training loader
 rejects because a student ID contains only whitespace. Acceptance: canonical
