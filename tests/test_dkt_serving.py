@@ -66,6 +66,18 @@ def test_live_weights_integrity_preserved(prepared):
         predict_dkt_inputs(object(), [query])
 
 
+def test_dkt_query_generator_rejected_before_consumption_and_tuple_preserves_order(prepared):
+    checkpoint, query, _ = prepared
+    unknown = query.model_copy(update={"candidate": query.candidate.model_copy(update={"problem_id": "new"})})
+    rows = (unknown, query)
+    assert [score.problem_id for score in predict_dkt_inputs(checkpoint, rows)] == ["new", "known"]
+    assert predict_dkt_inputs(checkpoint, ()) == []
+    one_shot = iter(rows)
+    with pytest.raises(ValueError, match="list or tuple"):
+        predict_dkt_inputs(checkpoint, one_shot)
+    assert next(one_shot) is rows[0]
+
+
 def test_generic_api_import_remains_lightweight():
     subprocess.run([sys.executable, "-c", "import sys; import api.main; "
         "assert not {'torch','transformers'}.intersection(sys.modules)"], check=True)
