@@ -1,5 +1,18 @@
 # Reproducible baseline smoke runs
 
+October 27 exact bundle read plan — Owner: data engineer. Purpose: prevent a
+training loader from using artifact bytes changed after initial manifest
+verification. Acceptance: recheck the hash of the exact split, train, validation
+and family audit bytes the loader parses; reject a synthetic post-verification
+label mutation before fitting, while continuing to hash but never parse test
+examples. Dependencies: processing manifest and existing bundle validation.
+This is an integrity check, not a claim about source permission or provenance.
+
+The loader now hashes the exact split, train, validation and family audit bytes it
+parses against the verified manifest. A changed artifact fails before fitting;
+the test partition remains hash-checked by manifest verification and unread as
+examples.
+
 October 26 bundle consistency fix plan — Owner: data engineer. Purpose: reject
 processed examples whose later observed histories contradict an earlier scored
 first attempt. Acceptance: check train/validation scored target identity, position,
