@@ -21,3 +21,15 @@ direct examples fail. Features represent available observed evidence, not proven
 mastery. Held-out-student and exercise-family protocols supply different allowed
 histories; this function does not choose a partition or certify dataset provenance.
 Train-only scaling and logistic fitting belong to the next independent model PR.
+
+## Direct prediction input integrity fix
+
+Owner: data/ML engineer. Purpose: reject unchecked copied historical outcomes
+before they change logistic features or BKT predictions. Acceptance: feature
+extraction and both direct model prediction paths reject malformed fields used by
+features or BKT, while valid synthetic features and predictions retain their
+existing values. The hot path checks identifiers, positions, first-attempt flags,
+Boolean outcomes and concept tuples directly without serializing full histories.
+Target labels and unused statement/code text remain outside this feature check;
+the serving adapter validates full requests. Dependency: the canonical schema
+only; no bundle, policy, private data or partition behavior changes are involved.

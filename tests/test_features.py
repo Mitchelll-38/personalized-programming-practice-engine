@@ -66,3 +66,38 @@ def test_changing_candidate_concepts_only_changes_overlap_features():
 def test_corrupt_direct_history_rejected(rows, message):
     with pytest.raises(ValueError, match=message):
         historical_features([example(rows)])
+
+
+@pytest.mark.parametrize("correct", [1, 2, "yes", None])
+def test_unchecked_nested_outcome_cannot_change_history_rates(correct):
+    row = example([history(0, False)])
+    copied = row.model_copy(update={"history": (row.history[0].model_copy(update={"correct": correct}),)})
+    with pytest.raises(ValueError):
+        historical_features([copied])
+
+
+@pytest.mark.parametrize("field,value", [
+    ("concept_ids", ("loops", "loops")), ("concept_ids", (" ",)),
+    ("concept_ids", (2,)), ("sequence_index", "0"),
+    ("attempt_number", True), ("problem_id", 42),
+])
+def test_unchecked_consumed_history_fields_rejected(field, value):
+    row = example([history(0)])
+    copied = row.model_copy(update={"history": (row.history[0].model_copy(update={field: value}),)})
+    with pytest.raises(ValueError):
+        historical_features([copied])
+
+
+def test_noncanonical_direct_examples_rejected():
+    with pytest.raises(ValueError):
+        historical_features([{}])
+    with pytest.raises(ValueError):
+        historical_features([example().model_copy(update={"student_id": " "})])
+    with pytest.raises(ValueError):
+        historical_features([example().model_copy(update={"candidate":
+            example().candidate.model_copy(update={"concept_ids": ("loops", 2)})})])
+
+
+def test_target_label_is_not_a_feature_validation_input():
+    row = example([history(0)])
+    assert historical_features([row.model_copy(update={"label": 2})]) == historical_features([row])

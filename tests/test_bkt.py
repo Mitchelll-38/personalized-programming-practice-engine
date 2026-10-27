@@ -125,3 +125,11 @@ def test_empty_training_grid_concepts_and_unknown_payload_rejected():
 def test_invalid_copied_training_row_cannot_fit_bkt(row):
     with pytest.raises(ValueError):
         BKTBaseline.fit([row, example(False)], [PARAMS])
+
+
+def test_direct_prediction_rejects_unchecked_prior_outcome():
+    row = example(history=[observation(False)])
+    copied = row.model_copy(update={"history": (row.history[0].model_copy(update={"correct": 2}),)})
+    with pytest.raises(ValueError):
+        model().predict([copied])
+    assert model().predict([row.model_copy(update={"label": 2})]) == model().predict([row])
