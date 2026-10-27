@@ -6,8 +6,10 @@ const metadata = { student_id: "demo", is_demo: true, policy_version: config.pol
   policy_config: config, policy_sha256: "a".repeat(64) };
 
 async function workspace(page: Page, request: APIRequestContext, update: object = {}) {
-  const ranking = await (await request.get("/api/students/demo/recommendations")).json();
-  await page.route("**/api/students/demo/recommendations", (route) => route.fulfill({ json: { ...ranking, ...metadata, ...update } }));
+  const bundle = await (await request.get("/api/students/demo/workspace")).json();
+  await page.route("**/api/students/demo/workspace", (route) => route.fulfill({ json: {
+    ...bundle, ranking: { ...bundle.ranking, ...metadata, ...update },
+  } }));
   await page.goto("/");
   await page.getByLabel("Exercise library").selectOption("java-count");
   return page.getByRole("complementary", { name: "Practice policy inspection" });
@@ -58,16 +60,16 @@ for (const [name, update] of [
 }
 
 test("live v2 policy disclosure matches the displayed generation metadata", async ({ page }) => {
-  const rankings: import("@playwright/test").Request[] = [];
+  const workspaces: import("@playwright/test").Request[] = [];
   page.on("request", (call) => {
-    if (new URL(call.url()).pathname === "/api/students/demo/recommendations") rankings.push(call);
+    if (new URL(call.url()).pathname === "/api/students/demo/workspace") workspaces.push(call);
   });
   await page.goto("/");
   const pane = page.getByRole("complementary", { name: "Practice policy inspection" });
   await expect(pane).toContainText("Heuristic challenge band");
   // Inspect the generation actually loaded by the latest workspace request.
   // A separate API fetch would create a different recommendation snapshot.
-  const displayed = await (await rankings.at(-1)!.response())!.json();
+  const displayed = (await (await workspaces.at(-1)!.response())!.json()).ranking;
   expect(displayed).toMatchObject({ is_demo: true, student_id: "demo", policy_version: "transparent-ranking-v2" });
   const policy = displayed.policy_config;
   await expect(pane).toContainText(`${(policy.challenge_lower * 100).toFixed(1)}\u2013${(policy.challenge_upper * 100).toFixed(1)}%`);

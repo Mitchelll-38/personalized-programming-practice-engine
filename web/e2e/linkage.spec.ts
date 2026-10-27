@@ -4,16 +4,16 @@ const choiceId = "c".repeat(32);
 type Attempt = { student_id: string; problem_id: string; correct: boolean; choice_id?: string };
 type Interaction = { student_id: string; problem_id: string; correct: boolean; sequence_index: number; attempt_number: number };
 async function workspace(page: Page, request: APIRequestContext) {
-  const ranking = await (await request.get("/api/students/demo/recommendations")).json();
+  const bundle = await (await request.get("/api/students/demo/workspace")).json();
   const history: Interaction[] = [];
   const attempts: Attempt[] = [];
   page.on("request", (call) => {
     if (new URL(call.url()).pathname === "/api/attempts" && call.method() === "POST") attempts.push(call.postDataJSON());
   });
-  await page.route("**/api/students/demo/recommendations", (route) => route.fulfill({ json: {
-    ...ranking, snapshot_id: (history.length ? "b" : "a").repeat(32), history_sequence_index: history.length - 1,
+  await page.route("**/api/students/demo/workspace", (route) => route.fulfill({ json: {
+    ...bundle, history, ranking: { ...bundle.ranking, snapshot_id: (history.length ? "b" : "a").repeat(32),
+      history_sequence_index: history.length - 1 },
   } }));
-  await page.route("**/api/students/demo/history", (route) => route.fulfill({ json: history }));
   await page.route("**/api/recommendation-choices", (route) => route.fulfill({ status: 201, json: {
     ...route.request().postDataJSON(), choice_id: choiceId, created_at: "2026-10-17T21:00:00Z",
   } }));

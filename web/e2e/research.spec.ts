@@ -27,7 +27,8 @@ async function workspace(page: Page) {
     { student_id: "demo", problem_id: "java-even", sequence_index: 1, attempt_number: 1, correct: false },
     { student_id: "demo", problem_id: "java-sum", sequence_index: 0, attempt_number: 1, correct: true },
   ];
-  await page.route("**/api/students/demo/history", (route) => json(route, history));
+  const bundle = await (await page.request.get("/api/students/demo/workspace")).json();
+  await page.route("**/api/students/demo/workspace", (route) => json(route, { ...bundle, history }));
   await page.route("**/api/attempts", async (route) => {
     const body = route.request().postDataJSON();
     const row = { ...body, sequence_index: Math.max(...history.map((item) => item.sequence_index)) + 1,
