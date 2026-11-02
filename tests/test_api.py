@@ -39,13 +39,26 @@ def test_replay_persists_and_retry_does_not_inflate_profile(client):
         assert another_client.get("/students/demo/history").json()[-1] == response.json()
 
 
-def test_predict_uses_only_supplied_history_and_preserves_candidate_order(client):
-    body = {"history": [], "candidate_ids": ["java-reverse", "java-sum"]}
+def test_predict_uses_only_prior_distinct_history_and_preserves_candidate_order(client):
+    body = {"history": [], "candidate_ids": ["java-reverse", "java-even"]}
     response = client.post("/predict", json=body)
     assert response.status_code == 200
-    assert response.json()["predictions"] == [{"problem_id": "java-reverse", "predicted_correctness": 0.5}, {"problem_id": "java-sum", "predicted_correctness": 0.5}]
+    assert response.json()["predictions"] == [{"problem_id": "java-reverse", "predicted_correctness": 0.5}, {"problem_id": "java-even", "predicted_correctness": 0.5}]
     body["history"] = [{"problem_id": "java-sum", "sequence_index": 0, "correct": True, "attempt_number": 1}]
-    assert client.post("/predict", json=body).json()["predictions"][1]["predicted_correctness"] == pytest.approx(2 / 3, abs=1e-6)
+    later = client.post("/predict", json=body)
+    assert later.status_code == 200
+    assert [row["problem_id"] for row in later.json()["predictions"]] == body["candidate_ids"]
+    assert later.json()["predictions"][0]["predicted_correctness"] == 0.5
+    assert later.json()["predictions"][1]["predicted_correctness"] == pytest.approx(7 / 12, abs=1e-6)
+
+
+@pytest.mark.parametrize("correct", [True, False])
+def test_predict_rejects_candidate_outcome_in_history(client, correct):
+    history = [{"problem_id": "java-sum", "sequence_index": 0,
+                "correct": correct, "attempt_number": 1}]
+    for candidates in (["java-sum"], ["java-even", "java-sum"]):
+        response = client.post("/predict", json={"history": history, "candidate_ids": candidates})
+        assert response.status_code == 422
 
 
 @pytest.mark.parametrize("extra", ["correct", "target_correct", "candidate_correctness"])
@@ -64,7 +77,7 @@ def test_unknown_ids_and_invalid_outcomes_rejected(client):
 def test_invalid_history_and_nested_target_fields_rejected(client):
     item = {"problem_id": "java-sum", "sequence_index": 0, "correct": True, "attempt_number": 1}
     for history in [[item, item], [{**item, "sequence_index": -1}], [{**item, "target_correct": True}], [{**item, "correct": 1}]]:
-        assert client.post("/predict", json={"history": history, "candidate_ids": ["java-sum"]}).status_code == 422
+        assert client.post("/predict", json={"history": history, "candidate_ids": ["java-even"]}).status_code == 422
 
 
 def test_ranking_is_stable_and_new_evidence_updates_profile(client):

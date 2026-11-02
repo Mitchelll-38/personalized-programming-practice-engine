@@ -14,6 +14,20 @@ API responses:
 
 Seed original Java exercise descriptions and demo interactions directly in API package; no external data. Learner can inspect exercises and record a simulated correct/incorrect outcome; frontend must prominently explain that outcomes are simulated and predictions are uncalibrated demo estimates. API authors own demo heuristics and API tests; data engineer owns canonical research schemas/prefix/split logic. Their modules need not depend on one another on day 1.
 
+November 2 demo prediction boundary — Owner: platform/API engineer. Purpose:
+prevent a candidate's observed correctness from entering its own `/predict`
+estimate. Dependency: the existing demo request schema and first-attempt
+heuristic; no model training or replay persistence change. Acceptance: any
+candidate ID that appears anywhere in supplied history returns HTTP 422 before
+prediction. Distinct earlier exercise outcomes may still inform shared-concept
+estimates, and multi-candidate order remains stable. Both true and false target
+outcomes are covered by regression tests. The recommendation ranking may still
+show previously attempted exercises for replay, under its separate policy.
+The request validator now rejects overlap before invoking the heuristic. Focused
+API/recommendation tests passed 73 cases, and the pinned full Python suite passed
+1049 cases with four expected skips. These are synthetic software checks, not
+measured predictive quality.
+
 Day 2 additive profile diagnostics: `total_interactions` counts all stored outcomes,
 `first_attempts` counts distinct exercises with an observed attempt numbered 1,
 and `retries` counts interactions numbered above 1. Each concept additionally

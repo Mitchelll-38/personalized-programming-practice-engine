@@ -47,6 +47,8 @@ class PredictionRequest(StrictRequest):
             attempts[row.problem_id] = row.attempt_number
         if len(self.candidate_ids) != len(set(self.candidate_ids)):
             raise ValueError("Candidate IDs must be unique")
+        if set(self.candidate_ids).intersection(attempts):
+            raise ValueError("Candidate exercises cannot appear in history")
         return self
 
 
