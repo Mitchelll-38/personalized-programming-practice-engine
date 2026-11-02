@@ -24,8 +24,8 @@ def calibrate_baseline(bundle: Path, base_model: Path, output: Path,
     if output.exists() or output.is_symlink():
         raise ValueError("Calibration output must be a new directory")
     manifest_path = bundle / "manifest.json"
-    manifest_bytes = manifest_path.read_bytes()
     verified = load_training_bundle(bundle)
+    manifest_bytes = verified.manifest_bytes
     if manifest_path.read_bytes() != manifest_bytes:
         raise ValueError("Processing manifest changed during verification")
     base = load_baseline_artifact(base_model)

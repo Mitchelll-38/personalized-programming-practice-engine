@@ -37,11 +37,12 @@ def write_manifest(directory: Path, manifest: ProcessingManifest) -> ProcessingM
     return complete
 
 
-def verify_manifest(path: Path) -> ProcessingManifest:
-    """Read only a fixed artifact set; reject corrupt or incomplete output bundles."""
-    manifest = ProcessingManifest.model_validate_json(path.read_bytes())
+def verify_manifest(path: Path, *, with_bytes: bool = False) -> ProcessingManifest | tuple[ProcessingManifest, bytes]:
+    """Read one manifest snapshot and verify its fixed artifact set."""
+    serialized = path.read_bytes()
+    manifest = ProcessingManifest.model_validate_json(serialized)
     if set(manifest.artifact_sha256) != set(ARTIFACT_NAMES):
         raise ValueError("Manifest must cover exactly the five processing artifacts")
     if manifest.artifact_sha256 != artifact_hashes(path.parent):
         raise ValueError("Processing artifact hash mismatch")
-    return manifest
+    return (manifest, serialized) if with_bytes else manifest

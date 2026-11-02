@@ -20,6 +20,7 @@ class TrainingBundle:
     train: list[PredictionExample]
     validation: list[PredictionExample]
     manifest: ProcessingManifest
+    manifest_bytes: bytes
     split: dict
     provenance: ArtifactProvenance
 
@@ -82,7 +83,7 @@ def _verified_artifact_bytes(directory: Path, name: str, manifest: ProcessingMan
 
 
 def load_training_bundle(directory: Path) -> TrainingBundle:
-    manifest = verify_manifest(directory / "manifest.json")
+    manifest, manifest_bytes = verify_manifest(directory / "manifest.json", with_bytes=True)
     if manifest.source_kind != "synthetic":
         raise ValueError("This smoke workflow requires declared synthetic data; real-data provenance gate remains unmet")
     serialized = _verified_artifact_bytes(directory, "split.json", manifest)
@@ -132,4 +133,4 @@ def load_training_bundle(directory: Path) -> TrainingBundle:
     provenance = ArtifactProvenance(dataset_version=manifest.dataset_version,
         source_kind=manifest.source_kind, source_sha256=manifest.source_sha256,
         split_version=manifest.split_version, split_sha256=sha256(serialized).hexdigest())
-    return TrainingBundle(examples["train"], examples["validation"], manifest, split, provenance)
+    return TrainingBundle(examples["train"], examples["validation"], manifest, manifest_bytes, split, provenance)

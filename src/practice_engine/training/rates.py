@@ -15,8 +15,8 @@ from .bundle import load_training_bundle
 
 def train_rates(bundle: Path, output: Path, *, variant: str = "problem", alpha: float = 1.0) -> dict:
     manifest_path = bundle / "manifest.json"
-    manifest_bytes = manifest_path.read_bytes()
     verified = load_training_bundle(bundle)
+    manifest_bytes = verified.manifest_bytes
     if manifest_path.read_bytes() != manifest_bytes:
         raise ValueError("Processing manifest changed during verification")
     manifest = verified.manifest

@@ -47,6 +47,31 @@ def test_manifest_change_during_bundle_load_prevents_publication(bundle, tmp_pat
     assert not output.exists()
 
 
+def test_manifest_restored_after_loader_cannot_mislabel_run(bundle, tmp_path, monkeypatch):
+    """The verifier must return B's bytes even when the file is A afterward."""
+    path = bundle / "manifest.json"
+    original_bytes = path.read_bytes()
+    changed = json.loads(original_bytes)
+    changed["dataset_version"] = "synthetic-temporary-version"
+    changed_bytes = json.dumps(changed).encode()
+    original_load = rates.load_training_bundle
+
+    def load_temporary_version(directory):
+        path.write_bytes(changed_bytes)
+        verified = original_load(directory)
+        assert verified.manifest_bytes == changed_bytes
+        assert verified.manifest.dataset_version == "synthetic-temporary-version"
+        path.write_bytes(original_bytes)
+        return verified
+
+    monkeypatch.setattr(rates, "load_training_bundle", load_temporary_version)
+    output = tmp_path / "rejected-run"
+    with pytest.raises(ValueError, match="Processing manifest changed during verification"):
+        rates.train_rates(bundle, output)
+    assert path.read_bytes() == original_bytes
+    assert not output.exists()
+
+
 @pytest.mark.parametrize("kind", ["rate", "bkt", "logistic", "dkt", "calibration"])
 def test_manifest_change_during_fit_prevents_publication(bundle, tmp_path, monkeypatch, kind):
     initial_hash = sha256((bundle / "manifest.json").read_bytes()).hexdigest()

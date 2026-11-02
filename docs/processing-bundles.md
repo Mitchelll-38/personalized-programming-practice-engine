@@ -3,7 +3,7 @@
 November 2 training-run manifest lineage plan — Owner: data engineer. Purpose:
 prevent a synthetic training run from publishing a manifest hash taken after the
 bundle identity changed during fitting. Acceptance: rate, logistic/BKT, DKT and
-baseline calibration runs capture the exact manifest bytes across bundle load,
+baseline calibration runs receive the exact manifest bytes parsed by the loader,
 use that snapshot in their run receipts, and refuse publication if those bytes
 change before the final rename. Existing outputs remain untouched on failure;
 test examples remain unread. Dependency: the verified training-bundle loader and

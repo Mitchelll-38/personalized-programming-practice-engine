@@ -99,8 +99,8 @@ def _run_training(bundle: Path, output: Path, config: DKTTrainingConfig) -> dict
     if output.exists() or output.is_symlink():
         raise ValueError("Run output must be a new directory")
     manifest_path = bundle / "manifest.json"
-    manifest_bytes = manifest_path.read_bytes()
     verified = load_training_bundle(bundle)
+    manifest_bytes = verified.manifest_bytes
     if manifest_path.read_bytes() != manifest_bytes:
         raise ValueError("Processing manifest changed during verification")
     model, vocabulary, correct, probabilities, epochs, best_epoch = _fit(

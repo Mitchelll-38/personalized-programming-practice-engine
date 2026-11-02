@@ -67,8 +67,8 @@ def test_changed_bytes_after_manifest_verification_never_enter_training(bundle, 
         pytest.skip("family audit is parsed only for family holdouts")
     original_verify = bundle_module.verify_manifest
 
-    def verify_then_change(path):
-        manifest = original_verify(path)
+    def verify_then_change(path, **kwargs):
+        manifest = original_verify(path, **kwargs)
         target = bundle / artifact
         if artifact.endswith(".jsonl"):
             rows = [json.loads(line) for line in target.read_text().splitlines()]
