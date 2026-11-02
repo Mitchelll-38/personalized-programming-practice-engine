@@ -14,7 +14,11 @@ from .bundle import load_training_bundle
 
 
 def train_rates(bundle: Path, output: Path, *, variant: str = "problem", alpha: float = 1.0) -> dict:
+    manifest_path = bundle / "manifest.json"
+    manifest_bytes = manifest_path.read_bytes()
     verified = load_training_bundle(bundle)
+    if manifest_path.read_bytes() != manifest_bytes:
+        raise ValueError("Processing manifest changed during verification")
     manifest = verified.manifest
     if output.exists():
         raise ValueError("Run output must be a new directory; existing runs are not overwritten")
@@ -28,13 +32,15 @@ def train_rates(bundle: Path, output: Path, *, variant: str = "problem", alpha: 
            "model": variant, "alpha": alpha, "seed": manifest.seed,
            "train_examples": len(train), "validation_examples": len(validation),
            "evaluated_partition": "validation", "test_evaluated": False,
-           "processing_manifest_sha256": sha256((bundle / "manifest.json").read_bytes()).hexdigest()}
+           "processing_manifest_sha256": sha256(manifest_bytes).hexdigest()}
     output.parent.mkdir(parents=True, exist_ok=True)
     with TemporaryDirectory(prefix="rate-run-", dir=output.parent) as temporary:
         directory = Path(temporary)
         save_rate_artifact(directory / "model.json", model, verified.provenance, variant)
         for name, data in (("validation.json", metrics), ("run.json", run)):
             (directory / name).write_text(json.dumps(data, indent=2, allow_nan=False) + "\n", encoding="utf-8")
+        if manifest_path.read_bytes() != manifest_bytes:
+            raise ValueError("Processing manifest changed during training")
         os.replace(directory, output)
     return run
 

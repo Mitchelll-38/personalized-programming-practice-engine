@@ -1,5 +1,15 @@
 # Atomic processing bundles
 
+November 2 training-run manifest lineage plan — Owner: data engineer. Purpose:
+prevent a synthetic training run from publishing a manifest hash taken after the
+bundle identity changed during fitting. Acceptance: rate, logistic/BKT, DKT and
+baseline calibration runs capture the exact manifest bytes across bundle load,
+use that snapshot in their run receipts, and refuse publication if those bytes
+change before the final rename. Existing outputs remain untouched on failure;
+test examples remain unread. Dependency: the verified training-bundle loader and
+existing atomic run publication. This does not approve real-source chronology or
+provenance.
+
 October 27 CodeWorkout source consistency plan — Owner: data engineer. Purpose:
 prevent an imported label from being published with a source hash taken from
 different table bytes. Acceptance: hash the required MainTable/catalog and the

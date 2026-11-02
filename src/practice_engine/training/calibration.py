@@ -23,7 +23,11 @@ def calibrate_baseline(bundle: Path, base_model: Path, output: Path,
     bundle, base_model, output = Path(bundle), Path(base_model), Path(output)
     if output.exists() or output.is_symlink():
         raise ValueError("Calibration output must be a new directory")
+    manifest_path = bundle / "manifest.json"
+    manifest_bytes = manifest_path.read_bytes()
     verified = load_training_bundle(bundle)
+    if manifest_path.read_bytes() != manifest_bytes:
+        raise ValueError("Processing manifest changed during verification")
     base = load_baseline_artifact(base_model)
     if base.provenance != verified.provenance:
         raise ValueError("Base model provenance differs from the calibration bundle")
@@ -48,7 +52,7 @@ def calibrate_baseline(bundle: Path, base_model: Path, output: Path,
            "evaluated_partition": "validation", "evaluation_role": metrics["evaluation_role"],
            "test_evaluated": False, "validation_examples": len(verified.validation),
            "provenance": verified.provenance.model_dump(), "validation_record": record.model_dump(mode="json"),
-           "processing_manifest_sha256": sha256((bundle / "manifest.json").read_bytes()).hexdigest()}
+           "processing_manifest_sha256": sha256(manifest_bytes).hexdigest()}
     output.parent.mkdir(parents=True, exist_ok=True)
     with TemporaryDirectory(prefix="calibration-run-", dir=output.parent) as temporary:
         staging = Path(temporary)
@@ -58,6 +62,8 @@ def calibrate_baseline(bundle: Path, base_model: Path, output: Path,
         run.update(artifact_sha256=artifact.artifact_sha256, reload_predictions_equal=True)
         for name, data in (("validation.json", metrics), ("reliability.json", reliability), ("run.json", run)):
             (staging / name).write_text(json.dumps(data, indent=2, allow_nan=False) + "\n", encoding="utf-8")
+        if manifest_path.read_bytes() != manifest_bytes:
+            raise ValueError("Processing manifest changed during calibration")
         os.replace(staging, output)
     return run
 

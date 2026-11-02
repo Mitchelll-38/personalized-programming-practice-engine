@@ -22,7 +22,11 @@ def train_baseline(bundle: Path, output: Path, *, model_kind: str,
         raise ValueError("C/max_iter are only valid for logistic runs")
     if output.exists():
         raise ValueError("Run output must be a new directory; existing runs are not overwritten")
+    manifest_path = bundle / "manifest.json"
+    manifest_bytes = manifest_path.read_bytes()
     verified = load_training_bundle(bundle)
+    if manifest_path.read_bytes() != manifest_bytes:
+        raise ValueError("Processing manifest changed during verification")
     manifest = verified.manifest
     if model_kind == "logistic":
         config = {"C": 1.0 if C is None else C, "max_iter": 1000 if max_iter is None else max_iter,
@@ -51,9 +55,11 @@ def train_baseline(bundle: Path, output: Path, *, model_kind: str,
                "evaluated_partition": "validation", "test_evaluated": False,
                "reload_predictions_equal": True, "provenance": verified.provenance.model_dump(),
                "model_sha256": artifact.model_sha256,
-               "processing_manifest_sha256": sha256((bundle / "manifest.json").read_bytes()).hexdigest()}
+               "processing_manifest_sha256": sha256(manifest_bytes).hexdigest()}
         for name, data in (("validation.json", metrics), ("run.json", run)):
             (directory / name).write_text(json.dumps(data, indent=2, allow_nan=False) + "\n", encoding="utf-8")
+        if manifest_path.read_bytes() != manifest_bytes:
+            raise ValueError("Processing manifest changed during training")
         os.replace(directory, output)
     return run
 

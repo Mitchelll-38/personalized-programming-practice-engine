@@ -98,7 +98,11 @@ def _run_training(bundle: Path, output: Path, config: DKTTrainingConfig) -> dict
     bundle, output = Path(bundle), Path(output)
     if output.exists() or output.is_symlink():
         raise ValueError("Run output must be a new directory")
+    manifest_path = bundle / "manifest.json"
+    manifest_bytes = manifest_path.read_bytes()
     verified = load_training_bundle(bundle)
+    if manifest_path.read_bytes() != manifest_bytes:
+        raise ValueError("Processing manifest changed during verification")
     model, vocabulary, correct, probabilities, epochs, best_epoch = _fit(
         verified.train, verified.validation, config)
     metrics = evaluate(verified.validation, probabilities)
@@ -110,7 +114,7 @@ def _run_training(bundle: Path, output: Path, config: DKTTrainingConfig) -> dict
            "best_epoch": best_epoch, "epochs": epochs, "epochs_completed": len(epochs),
            "stopped_early": len(epochs) < config.max_epochs,
            "provenance": verified.provenance.model_dump(),
-           "processing_manifest_sha256": sha256((bundle / "manifest.json").read_bytes()).hexdigest()}
+           "processing_manifest_sha256": sha256(manifest_bytes).hexdigest()}
     output.parent.mkdir(parents=True, exist_ok=True)
     lock = output.with_name(f".{output.name}.publish-lock")
     lock.mkdir()
@@ -131,6 +135,8 @@ def _run_training(bundle: Path, output: Path, config: DKTTrainingConfig) -> dict
                 (staging / name).write_text(json.dumps(value, indent=2, allow_nan=False) + "\n", encoding="utf-8")
             if output.exists() or output.is_symlink():
                 raise ValueError("Run output must be a new directory")
+            if manifest_path.read_bytes() != manifest_bytes:
+                raise ValueError("Processing manifest changed during training")
             os.rename(staging, output)
     finally:
         lock.rmdir()
